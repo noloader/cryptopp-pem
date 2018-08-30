@@ -91,8 +91,8 @@ static inline SecByteBlock::const_iterator Search(const SecByteBlock& source, co
 template <class EC>
 static void PEM_LoadParams(BufferedTransformation& bt, DL_GroupParameters_EC<EC>& params);
 
-static void PEM_LoadPublicKey(BufferedTransformation& bt, X509PublicKey& key);
-static void PEM_LoadPrivateKey(BufferedTransformation& bt, PKCS8PrivateKey& key);
+static void PEM_LoadPublicKey(BufferedTransformation& bt, X509PublicKey& key, bool subjectInfo = false);
+static void PEM_LoadPrivateKey(BufferedTransformation& bt, PKCS8PrivateKey& key, bool subjectInfo = false);
 
 // Crypto++ expects {version,x}; OpenSSL writes {version,x,y,p,q,g}
 static void PEM_LoadPrivateKey(BufferedTransformation& bt, DSA::PrivateKey& key);
@@ -106,7 +106,7 @@ void PEM_Load(BufferedTransformation& bt, RSA::PublicKey& rsa)
     PEM_NextObject(bt, obj);
 
     PEM_Type type = PEM_GetType(obj);
-    if(type == PEM_PUBLIC_KEY)
+    if (type == PEM_PUBLIC_KEY)
         PEM_StripEncapsulatedBoundary(obj, SBB_PUBLIC_BEGIN, SBB_PUBLIC_END);
     else if(type == PEM_RSA_PUBLIC_KEY)
         PEM_StripEncapsulatedBoundary(obj, SBB_RSA_PUBLIC_BEGIN, SBB_RSA_PUBLIC_END);
@@ -116,7 +116,7 @@ void PEM_Load(BufferedTransformation& bt, RSA::PublicKey& rsa)
     ByteQueue temp;
     PEM_Base64Decode(obj, temp);
 
-    PEM_LoadPublicKey(temp, rsa);
+    PEM_LoadPublicKey(temp, rsa, type == PEM_PUBLIC_KEY);
 }
 
 void PEM_Load(BufferedTransformation& bt, RSA::PrivateKey& rsa)
@@ -145,7 +145,7 @@ void PEM_Load(BufferedTransformation& bt, RSA::PrivateKey& rsa, const char* pass
     else
         PEM_Base64Decode(obj, temp);
 
-    PEM_LoadPrivateKey(temp, rsa);
+    PEM_LoadPrivateKey(temp, rsa, type == PEM_PRIVATE_KEY);
 }
 
 void PEM_Load(BufferedTransformation& bt, DSA::PublicKey& dsa)
@@ -164,7 +164,7 @@ void PEM_Load(BufferedTransformation& bt, DSA::PublicKey& dsa)
     ByteQueue temp;
     PEM_Base64Decode(obj, temp);
 
-    PEM_LoadPublicKey(temp, dsa);
+    PEM_LoadPublicKey(temp, dsa, type == PEM_PUBLIC_KEY);
 }
 
 void PEM_Load(BufferedTransformation& bt, DSA::PrivateKey& dsa)
@@ -193,7 +193,7 @@ void PEM_Load(BufferedTransformation& bt, DSA::PrivateKey& dsa, const char* pass
     else
         PEM_Base64Decode(obj, temp);
 
-    PEM_LoadPrivateKey(temp, dsa);
+    PEM_LoadPrivateKey(temp, dsa, type == PEM_PRIVATE_KEY);
 }
 
 void PEM_Load(BufferedTransformation& bt, DL_GroupParameters_EC<ECP>& params)
@@ -222,7 +222,7 @@ void PEM_Load(BufferedTransformation& bt, DL_PublicKey_EC<ECP>& ec)
     ByteQueue temp;
     PEM_Base64Decode(obj, temp);
 
-    PEM_LoadPublicKey(temp, ec);
+    PEM_LoadPublicKey(temp, ec, type == PEM_PUBLIC_KEY);
 }
 
 void PEM_Load(BufferedTransformation& bt, DL_PrivateKey_EC<ECP>& ec)
@@ -251,7 +251,7 @@ void PEM_Load(BufferedTransformation& bt, DL_PrivateKey_EC<ECP>& ec, const char*
     else
         PEM_Base64Decode(obj, temp);
 
-    PEM_LoadPrivateKey(temp, ec);
+    PEM_LoadPrivateKey(temp, ec, type == PEM_PRIVATE_KEY);
 }
 
 void PEM_Load(BufferedTransformation& bt, DL_PublicKey_EC<EC2N>& ec)
@@ -270,7 +270,7 @@ void PEM_Load(BufferedTransformation& bt, DL_PublicKey_EC<EC2N>& ec)
     ByteQueue temp;
     PEM_Base64Decode(obj, temp);
 
-    PEM_LoadPublicKey(temp, ec);
+    PEM_LoadPublicKey(temp, ec, type == PEM_PUBLIC_KEY);
 }
 
 void PEM_Load(BufferedTransformation& bt, DL_PrivateKey_EC<EC2N>& ec)
@@ -299,7 +299,7 @@ void PEM_Load(BufferedTransformation& bt, DL_PrivateKey_EC<EC2N>& ec, const char
     else
         PEM_Base64Decode(obj, temp);
 
-    PEM_LoadPrivateKey(temp, ec);
+    PEM_LoadPrivateKey(temp, ec, type == PEM_PRIVATE_KEY);
 }
 
 void PEM_Load(BufferedTransformation& bt, DL_Keys_ECDSA<ECP>::PrivateKey& ecdsa)
@@ -366,7 +366,7 @@ void PEM_DH_Load(BufferedTransformation& bt, Integer& p, Integer& g)
     if(type == PEM_DH_PARAMETERS)
         PEM_StripEncapsulatedBoundary(obj, SBB_DH_PARAMETERS_BEGIN, SBB_DH_PARAMETERS_END);
     else
-        throw InvalidDataFormat("PEM_DH_Read: invalid DH parameters");
+        throw InvalidDataFormat("PEM_DH_Load: invalid DH parameters");
 
     ByteQueue temp;
     PEM_Base64Decode(obj, temp);
@@ -379,12 +379,12 @@ void PEM_DH_Load(BufferedTransformation& bt, Integer& p, Integer& g)
 #if defined(PEM_KEY_OR_PARAMETER_VALIDATION) && !defined(NO_OS_DEPENDENCE)
     AutoSeededRandomPool prng;
     if(!VerifyPrime(prng, p, 3))
-        throw Exception(Exception::OTHER_ERROR, "PEM_DH_Read: p is not prime");
+        throw Exception(Exception::OTHER_ERROR, "PEM_DH_Load: p is not prime");
 
     // https://crypto.stackexchange.com/questions/12961/diffie-hellman-parameter-check-when-g-2-must-p-mod-24-11
-	long residue = static_cast<long>(p.Modulo(24));
+    long residue = static_cast<long>(p.Modulo(24));
     if(residue != 11 && residue != 23)
-        throw Exception(Exception::OTHER_ERROR, "PEM_DH_Read: g is not a suitable generator");
+        throw Exception(Exception::OTHER_ERROR, "PEM_DH_Load: g is not a suitable generator");
 #endif
 }
 
@@ -397,7 +397,7 @@ void PEM_DH_Load(BufferedTransformation& bt, Integer& p, Integer& q, Integer& g)
     if(type == PEM_DH_PARAMETERS)
         PEM_StripEncapsulatedBoundary(obj, SBB_DH_PARAMETERS_BEGIN, SBB_DH_PARAMETERS_END);
     else
-        throw InvalidDataFormat("PEM_DH_Read: invalid DH parameters");
+        throw InvalidDataFormat("PEM_DH_Load: invalid DH parameters");
 
     ByteQueue temp;
     PEM_Base64Decode(obj, temp);
@@ -411,19 +411,23 @@ void PEM_DH_Load(BufferedTransformation& bt, Integer& p, Integer& q, Integer& g)
 #if defined(PEM_KEY_OR_PARAMETER_VALIDATION) && !defined(NO_OS_DEPENDENCE)
     AutoSeededRandomPool prng;
     if(!VerifyPrime(prng, p, 3))
-        throw Exception(Exception::OTHER_ERROR, "PEM_DH_Read: p is not prime");
+        throw Exception(Exception::OTHER_ERROR, "PEM_DH_Load: p is not prime");
 
     // https://crypto.stackexchange.com/questions/12961/diffie-hellman-parameter-check-when-g-2-must-p-mod-24-11
-	long residue = static_cast<long>(p.Modulo(24));
+    long residue = static_cast<long>(p.Modulo(24));
     if(residue != 11 && residue != 23)
-        throw Exception(Exception::OTHER_ERROR, "PEM_DH_Read: g is not a suitable generator");
+        throw Exception(Exception::OTHER_ERROR, "PEM_DH_Load: g is not a suitable generator");
 #endif
 }
 
-void PEM_LoadPublicKey(BufferedTransformation& src, X509PublicKey& key)
+void PEM_LoadPublicKey(BufferedTransformation& src, X509PublicKey& key, bool subjectInfo)
 {
     X509PublicKey& pk = dynamic_cast<X509PublicKey&>(key);
-    pk.BERDecode(src);
+
+    if (subjectInfo)
+        pk.Load(src);
+    else
+        pk.BERDecode(src);
 
 #if defined(PEM_KEY_OR_PARAMETER_VALIDATION) && !defined(NO_OS_DEPENDENCE)
     AutoSeededRandomPool prng;
@@ -432,9 +436,12 @@ void PEM_LoadPublicKey(BufferedTransformation& src, X509PublicKey& key)
 #endif
 }
 
-void PEM_LoadPrivateKey(BufferedTransformation& src, PKCS8PrivateKey& key)
+void PEM_LoadPrivateKey(BufferedTransformation& src, PKCS8PrivateKey& key, bool subjectInfo)
 {
-    key.BERDecodePrivateKey(src, 0, src.MaxRetrievable());
+    if (subjectInfo)
+        key.Load(src);
+    else
+        key.BERDecodePrivateKey(src, 0, src.MaxRetrievable());
 
 #if defined(PEM_KEY_OR_PARAMETER_VALIDATION) && !defined(NO_OS_DEPENDENCE)
     AutoSeededRandomPool prng;
@@ -449,7 +456,7 @@ void PEM_LoadPrivateKey(BufferedTransformation& bt, DSA::PrivateKey& key)
     BERSequenceDecoder seq(bt);
 
     word32 v;
-    BERDecodeUnsigned<word32>(seq, v, INTEGER, 0, 0);	// check version
+    BERDecodeUnsigned<word32>(seq, v, INTEGER, 0, 0);    // check version
 
     Integer p,q,g,y,x;
 
@@ -648,15 +655,15 @@ PEM_Type PEM_GetType(const SecByteBlock& sb)
 {
     SecByteBlock::const_iterator it;
 
-	// Uses an OID to identify the public key type
-	it = Search(sb, SBB_PUBLIC_BEGIN);
-	if (it != sb.end())
-		return PEM_PUBLIC_KEY;
+    // Uses an OID to identify the public key type
+    it = Search(sb, SBB_PUBLIC_BEGIN);
+    if (it != sb.end())
+        return PEM_PUBLIC_KEY;
 
-	// Uses an OID to identify the private key type
-	it = Search(sb, SBB_PRIVATE_BEGIN);
-	if (it != sb.end())
-		return PEM_PRIVATE_KEY;
+    // Uses an OID to identify the private key type
+    it = Search(sb, SBB_PRIVATE_BEGIN);
+    if (it != sb.end())
+        return PEM_PRIVATE_KEY;
 
     // RSA key types
     it = Search(sb, SBB_RSA_PUBLIC_BEGIN);
