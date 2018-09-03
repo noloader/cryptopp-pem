@@ -80,9 +80,9 @@ void PEM_WriteLine(BufferedTransformation& bt, const SecByteBlock& line);
 // Signature changed a bit to match Crypto++. Salt must be PKCS5_SALT_LEN in length.
 //  Salt, Data and Count are IN; Key and IV are OUT.
 int OPENSSL_EVP_BytesToKey(HashTransformation& hash,
-                           const unsigned char *salt, const unsigned char* data, int dlen,
-                           unsigned int count, unsigned char *key, unsigned int ksize,
-                           unsigned char *iv, unsigned int vsize);
+                           const unsigned char *salt, const unsigned char* data, size_t dlen,
+                           size_t count, unsigned char *key, size_t ksize,
+                           unsigned char *iv, size_t vsize);
 
 // From OpenSSL, crypto/evp/evp.h.
 static const unsigned int OPENSSL_PKCS5_SALT_LEN = 8;

@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /usr/bin/env bash
 
 # Script to create the test keys used pem-test.cpp
 
@@ -41,5 +41,5 @@ cat rsa-pub.pem >> rsa-concat.pem
 # Download cacert.pem. Its got 150 or so we can parse
 
 if [ ! -e "cacert.pem" ]; then
-  wget http://curl.haxx.se/ca/cacert.pem
+  wget http://curl.haxx.se/ca/cacert.pem -O cacert.pem
 fi

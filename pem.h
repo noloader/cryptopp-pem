@@ -319,7 +319,7 @@ void PEM_Save(RandomNumberGenerator& rng,  BufferedTransformation& bt, const DL_
 //! \brief Save a PEM encoded ECDSA private key
 //! \param bt the destination BufferedTransformation
 //! \param key the ECDSA private key
-//! \throws Exception on failure			  
+//! \throws Exception on failure              
 void PEM_Save(BufferedTransformation& bt, const DL_Keys_ECDSA<ECP>::PrivateKey& key);
 
 //! \brief Save a PEM encoded ECDSA private key

@@ -424,6 +424,10 @@ void PEM_LoadPublicKey(BufferedTransformation& src, X509PublicKey& key, bool sub
 {
     X509PublicKey& pk = dynamic_cast<X509PublicKey&>(key);
 
+    std::string x;
+    src.CopyTo(StringSink(x).Ref());
+    std::cout << x << std::endl;
+
     if (subjectInfo)
         pk.Load(src);
     else
@@ -456,7 +460,7 @@ void PEM_LoadPrivateKey(BufferedTransformation& bt, DSA::PrivateKey& key)
     BERSequenceDecoder seq(bt);
 
     word32 v;
-    BERDecodeUnsigned<word32>(seq, v, INTEGER, 0, 0);    // check version
+    BERDecodeUnsigned<word32>(seq, v, INTEGER, 0, 0);  // check version
 
     Integer p,q,g,y,x;
 
@@ -570,9 +574,6 @@ void PEM_CipherForAlgorithm(const EncapsulatedHeader& header, const char* passwo
         throw NotImplemented("PEM_CipherForAlgorithm: '" + header.m_algorithm + "' is not implemented");
     }
 
-    const unsigned char* _pword = reinterpret_cast<const unsigned char*>(password);
-    const size_t _plen = length;
-
     // Decode the IV. It used as the Salt in EVP_BytesToKey,
     //   and its used as the IV in the cipher.
     HexDecoder hex;
@@ -598,13 +599,11 @@ void PEM_CipherForAlgorithm(const EncapsulatedHeader& header, const char* passwo
     //   {NULL,0} parameters are the OUT IV. However, the original IV in the PEM
     //   header is used; and not the derived IV.
     Weak::MD5 md5;
-    int ret = OPENSSL_EVP_BytesToKey(md5, _iv.data(), _pword, _plen, 1, _key.data(), _key.size(), NULL, 0);
+    int ret = OPENSSL_EVP_BytesToKey(md5, _iv.data(), (const byte*)password, length, 1, _key.data(), _key.size(), NULL, 0);
     if(ret != static_cast<int>(ksize))
         throw Exception(Exception::OTHER_ERROR, "PEM_CipherForAlgorithm: EVP_BytesToKey failed");
 
     SymmetricCipher* cipher = dynamic_cast<SymmetricCipher*>(stream.get());
-    // assert(cipher != NULL);
-
     cipher->SetKeyWithIV(_key.data(), _key.size(), _iv.data(), _iv.size());
 }
 

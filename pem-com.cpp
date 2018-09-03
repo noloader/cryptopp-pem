@@ -74,6 +74,12 @@ SecByteBlock GetControlFieldData(const SecByteBlock& line)
     return SecByteBlock();
 }
 
+struct ByteToLower : public std::unary_function<byte, byte> {
+    byte operator() (byte val) {
+        return (byte)std::tolower((int)(word32)val);
+    }
+};
+
 // Returns 0 if a match, non-0 otherwise
 int CompareNoCase(const SecByteBlock& first, const SecByteBlock& second)
 {
@@ -83,25 +89,31 @@ int CompareNoCase(const SecByteBlock& first, const SecByteBlock& second)
         return 1;
 
     // Same size... compare them....
+#if (_MSC_VER >= 1500)
     SecByteBlock t1(first), t2(second);
-    std::transform(t1.begin(), t1.end(), t1.begin(), (int(*)(int))std::tolower);
-    std::transform(t2.begin(), t2.end(), t2.begin(), (int(*)(int))std::tolower);
+    std::transform(t1.begin(), t1.end(), stdext::make_checked_array_iterator(t1.begin(), t1.size()), ByteToLower());
+    std::transform(t2.begin(), t2.end(), stdext::make_checked_array_iterator(t1.begin(), t1.size()), ByteToLower());
+#else
+    SecByteBlock t1(first), t2(second);
+    std::transform(t1.begin(), t1.end(), t1.begin(), ByteToLower());
+    std::transform(t2.begin(), t2.end(), t2.begin(), ByteToLower());
+#endif
 
     return std::memcmp(t1.begin(), t2.begin(), t2.size());
 }
 
 // From crypto/evp/evp_key.h. Signature changed a bit to match Crypto++.
 int OPENSSL_EVP_BytesToKey(HashTransformation& hash,
-                           const unsigned char *salt, const unsigned char* data, int dlen,
-                           unsigned int count, unsigned char *key, unsigned int ksize,
-                           unsigned char *iv, unsigned int vsize)
+    const unsigned char *salt, const unsigned char* data, size_t dlen,
+    size_t count, unsigned char *key, size_t ksize,
+    unsigned char *iv, size_t vsize)
 {
     unsigned int niv,nkey,nhash;
     unsigned int addmd=0,i;
 
-    nkey=ksize;
-    niv=vsize;
-    nhash=hash.DigestSize();
+    nkey=static_cast<unsigned int>(ksize);
+    niv = static_cast<unsigned int>(vsize);
+    nhash = static_cast<unsigned int>(hash.DigestSize());
 
     SecByteBlock digest(hash.DigestSize());
 
@@ -156,7 +168,7 @@ int OPENSSL_EVP_BytesToKey(HashTransformation& hash,
         if ((nkey == 0) && (niv == 0)) break;
     }
 
-    return ksize;
+    return static_cast<int>(ksize);
 }
 
 NAMESPACE_END
