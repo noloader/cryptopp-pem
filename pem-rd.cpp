@@ -424,10 +424,6 @@ void PEM_LoadPublicKey(BufferedTransformation& src, X509PublicKey& key, bool sub
 {
     X509PublicKey& pk = dynamic_cast<X509PublicKey&>(key);
 
-    std::string x;
-    src.CopyTo(StringSink(x).Ref());
-    std::cout << x << std::endl;
-
     if (subjectInfo)
         pk.Load(src);
     else
