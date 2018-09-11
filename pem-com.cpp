@@ -92,7 +92,7 @@ int CompareNoCase(const SecByteBlock& first, const SecByteBlock& second)
 #if (_MSC_VER >= 1500)
     SecByteBlock t1(first), t2(second);
     std::transform(t1.begin(), t1.end(), stdext::make_checked_array_iterator(t1.begin(), t1.size()), ByteToLower());
-    std::transform(t2.begin(), t2.end(), stdext::make_checked_array_iterator(t1.begin(), t1.size()), ByteToLower());
+    std::transform(t2.begin(), t2.end(), stdext::make_checked_array_iterator(t2.begin(), t1.size()), ByteToLower());
 #else
     SecByteBlock t1(first), t2(second);
     std::transform(t1.begin(), t1.end(), t1.begin(), ByteToLower());
