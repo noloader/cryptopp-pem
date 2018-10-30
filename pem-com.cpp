@@ -74,7 +74,7 @@ SecByteBlock GetControlFieldData(const SecByteBlock& line)
     return SecByteBlock();
 }
 
-struct ByteToLower : public std::unary_function<byte, byte> {
+struct ByteToLower {
     byte operator() (byte val) {
         return (byte)std::tolower((int)(word32)val);
     }
