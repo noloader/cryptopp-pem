@@ -193,7 +193,7 @@ void PEM_Load(BufferedTransformation& bt, DSA::PrivateKey& dsa, const char* pass
     else
         PEM_Base64Decode(obj, temp);
 
-    PEM_LoadPrivateKey(temp, dsa, type == PEM_PRIVATE_KEY);
+    PEM_LoadPrivateKey(temp, dsa);
 }
 
 void PEM_Load(BufferedTransformation& bt, DL_GroupParameters_EC<ECP>& params)
