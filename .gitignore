@@ -1,0 +1,11 @@
+# Ignore build directory
+binary_nosave
+
+# Compiled Object files
+*.o
+
+# Executables
+*.exe
+
+# Ignore PEM Key files
+*.pem
