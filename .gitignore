@@ -4,6 +4,9 @@ binary_nosave
 # Compiled Object files
 *.o
 
+# Compiled Library files
+*.a
+
 # Executables
 *.exe
 

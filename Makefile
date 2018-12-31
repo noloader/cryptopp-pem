@@ -2,27 +2,31 @@
 CRYPTOPPDIR	= ../cryptopp
 
 INCFLAGS		= -I$(CRYPTOPPDIR)
-EXECUTABLE	= pem-test.exe
 BUILDDIR		= binary_nosave
-CC					= g++
-CFLAGS			= -g -c
-OBJECTS			= $(BUILDDIR)/pem-com.o		\
+CXX					= g++
+CXXFLAGS		= -g
+AR					= ar
+ARFLAGS			= rcs
+LIBOBJS			= $(BUILDDIR)/pem-com.o		\
 							$(BUILDDIR)/pem-rd.o		\
 							$(BUILDDIR)/pem-wr.o
 
-all: $(EXECUTABLE)
+all: pem-test.exe
 
-$(EXECUTABLE): $(BUILDDIR) $(BUILDDIR)/pem-test.o $(OBJECTS) $(CRYPTOPPDIR)/libcryptopp.a
-	$(CC) -o $@ $(BUILDDIR)/pem-test.o $(OBJECTS) $(CRYPTOPPDIR)/libcryptopp.a
+pem-test.exe: $(BUILDDIR)/pem-test.o cryptopppem.a $(CRYPTOPPDIR)/libcryptopp.a
+	$(CXX) $(CXXFLAGS) -o $@ $^
 
 $(BUILDDIR):
 	mkdir -p $@
 
-$(BUILDDIR)/pem-test.o: $(BUILDDIR)
-	$(CC) $(CFLAGS) pem-test.cxx -o $@ $(INCFLAGS)
+$(BUILDDIR)/pem-test.o: pem-test.cxx $(BUILDDIR)
+	$(CXX) $(CXXFLAGS) -c $< -o $@ $(INCFLAGS)
 
-$(BUILDDIR)/%.o: %.cpp
-	$(CC) $(CFLAGS) $< -o $@ $(INCFLAGS)
+cryptopppem.a: $(LIBOBJS)
+	$(AR) $(ARFLAGS) $@ $^
+
+$(BUILDDIR)/%.o: %.cpp $(BUILDDIR)
+	$(CXX) $(CXXFLAGS) -c $< -o $@ $(INCFLAGS)
 
 clean:
-	rm -fr $(BUILDDIR) $(EXECUTABLE)
+	rm -fr $(BUILDDIR) pem-test.exe cryptopppem.a
