@@ -89,7 +89,7 @@ static const unsigned int OPENSSL_PKCS5_SALT_LEN = 8;
 
 // 64-character line length is required by RFC 1421.
 static const unsigned int RFC1421_LINE_BREAK = 64;
-// static const unsigned int OPENSSL_B64_LINE_BREAK = 76;
+static const std::string RFC1421_EOL = "\r\n";
 
 
 // Signals failure
@@ -148,7 +148,6 @@ static const std::string LBL_CONTENT_DOMAIN("Content-Domain");
 static const std::string LBL_COMMA(",");
 static const std::string LBL_SPACE(" ");
 static const std::string LBL_COLON(":");
-
 
 static const SecByteBlock CR(BYTE_PTR("\r"), 1);
 static const SecByteBlock LF(BYTE_PTR("\n"), 1);

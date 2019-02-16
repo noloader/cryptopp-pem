@@ -27,13 +27,13 @@ NAMESPACE_BEGIN(CryptoPP)
 void PEM_WriteLine(BufferedTransformation& bt, const SecByteBlock& line)
 {
     bt.Put(line.data(), line.size());
-    bt.Put('\n');
+    bt.Put(reinterpret_cast<const byte*>(RFC1421_EOL.data()), RFC1421_EOL.size());
 }
 
 void PEM_WriteLine(BufferedTransformation& bt, const std::string& line)
 {
     bt.Put(reinterpret_cast<const byte*>(line.data()), line.size());
-    bt.Put('\n');
+    bt.Put(reinterpret_cast<const byte*>(RFC1421_EOL.data()), RFC1421_EOL.size());
 }
 
 void PEM_Base64Decode(BufferedTransformation& source, BufferedTransformation& dest)
