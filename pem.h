@@ -228,8 +228,9 @@ void PEM_Save(BufferedTransformation& bt, const RSA::PrivateKey& key);
 /// \param algorithm the encryption algorithm
 /// \param password pointer to the password buffer
 /// \param length the size of the password buffer
-/// \details The algorithm should be a value like <tt>AES-128-CBC</tt>. See <tt>pem-rd.cpp</tt> and
-///   <tt>pem-wr.cpp</tt> for the values that are recognized.
+/// \details The algorithm should be a value like <tt>AES-128-CBC</tt>. See
+///  <tt>pem_read.cpp</tt> and <tt>pem_write.cpp</tt> for the values that are
+///  recognized.
 /// \throws Exception on failure
 void PEM_Save(BufferedTransformation& bt, RandomNumberGenerator& rng, const RSA::PrivateKey& key,
               const std::string& algorithm, const char* password, size_t length);
@@ -253,8 +254,9 @@ void PEM_Save(BufferedTransformation& bt, const DSA::PrivateKey& key);
 /// \param algorithm the encryption algorithm
 /// \param password pointer to the password buffer
 /// \param length the size of the password buffer
-/// \details The algorithm should be a value like <tt>AES-128-CBC</tt>. See <tt>pem-rd.cpp</tt> and
-///   <tt>pem-wr.cpp</tt> for the values that are recognized.
+/// \details The algorithm should be a value like <tt>AES-128-CBC</tt>. See
+//   <tt>pem_read.cpp</tt> and <tt>pem_write.cpp</tt> for the values that are
+///  recognized.
 /// \throws Exception on failure
 void PEM_Save(BufferedTransformation& bt, RandomNumberGenerator& rng, const DSA::PrivateKey& key,
               const std::string& algorithm, const char* password, size_t length);
@@ -278,11 +280,13 @@ void PEM_Save(BufferedTransformation& bt, const DL_PrivateKey_EC<ECP>& key);
 /// \param algorithm the encryption algorithm
 /// \param password pointer to the password buffer
 /// \param length the size of the password buffer
-/// \details The algorithm should be a value like <tt>AES-128-CBC</tt>. See <tt>pem-rd.cpp</tt> and
-///   <tt>pem-wr.cpp</tt> for the values that are recognized.
-/// \details The "named curve" (i.e., the OID of secp256k1) is used rather than the domain parameters.
-///   This is because RFC 5915 specifies the format. In addition, OpenSSL cannot load and utilize an
-///   EC key with a non-named curve into a server.
+/// \details The algorithm should be a value like <tt>AES-128-CBC</tt>. See
+///  <tt>pem_read.cpp</tt> and <tt>pem_write.cpp</tt> for the values that are
+///  recognized.
+/// \details The "named curve" (i.e., the OID of secp256k1) is used rather
+//   than the domain parameters. This is because RFC 5915 specifies the format.
+///  In addition, OpenSSL cannot load and utilize an EC key with a non-named
+///  curve into a server.
 /// \throws Exception on failure
 void PEM_Save(BufferedTransformation& bt, RandomNumberGenerator& rng, const DL_PrivateKey_EC<ECP>& key,
               const std::string& algorithm, const char* password, size_t length);
@@ -306,11 +310,13 @@ void PEM_Save(BufferedTransformation& bt, const DL_PrivateKey_EC<EC2N>& key);
 /// \param algorithm the encryption algorithm
 /// \param password pointer to the password buffer
 /// \param length the size of the password buffer
-/// \details The algorithm should be a value like <tt>AES-128-CBC</tt>. See <tt>pem-rd.cpp</tt> and
-///   <tt>pem-wr.cpp</tt> for the values that are recognized.
-/// \details The "named curve" (i.e., the OID of secp256k1) is used rather than the domain parameters.
-///   This is because RFC 5915 specifies the format. In addition, OpenSSL cannot load and utilize an
-///   EC key with a non-named curve into a server.
+/// \details The algorithm should be a value like <tt>AES-128-CBC</tt>. See
+///  <tt>pem_read.cpp</tt> and <tt>pem_write.cpp</tt> for the values that are
+///  recognized.
+/// \details The "named curve" (i.e., the OID of secp256k1) is used rather than
+///  the domain parameters. This is because RFC 5915 specifies the format. In
+///  addition, OpenSSL cannot load and utilize an EC key with a non-named curve
+///  into a server.
 /// \throws Exception on failure
 void PEM_Save(RandomNumberGenerator& rng,  BufferedTransformation& bt, const DL_PrivateKey_EC<EC2N>& key,
               const std::string& algorithm, const char* password, size_t length);
@@ -328,11 +334,13 @@ void PEM_Save(BufferedTransformation& bt, const DL_Keys_ECDSA<ECP>::PrivateKey& 
 /// \param algorithm the encryption algorithm
 /// \param password pointer to the password buffer
 /// \param length the size of the password buffer
-/// \details The algorithm should be a value like <tt>AES-128-CBC</tt>. See <tt>pem-rd.cpp</tt> and
-///   <tt>pem-wr.cpp</tt> for the values that are recognized.
-/// \details The "named curve" (i.e., the OID of secp256k1) is used rather than the domain parameters.
-///   This is because RFC 5915 specifies the format. In addition, OpenSSL cannot load and utilize an
-///   EC key with a non-named curve into a server.
+/// \details The algorithm should be a value like <tt>AES-128-CBC</tt>. See
+///  <tt>pem_read.cpp</tt> and <tt>pem_write.cpp</tt> for the values that
+///  are recognized.
+/// \details The "named curve" (i.e., the OID of secp256k1) is used rather
+///  than the domain parameters. This is because RFC 5915 specifies the format.
+///  In addition, OpenSSL cannot load and utilize an EC key with a non-named
+///  curve into a server.
 /// \throws Exception on failure
 void PEM_Save(BufferedTransformation& bt, RandomNumberGenerator& rng, const DL_Keys_ECDSA<ECP>::PrivateKey& key,
               const std::string& algorithm, const char* password, size_t length);
