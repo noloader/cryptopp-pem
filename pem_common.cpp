@@ -20,7 +20,7 @@
 #include <cstring>
 
 #include "pem.h"
-#include "pem-com.h"
+#include "pem_common.h"
 
 NAMESPACE_BEGIN(CryptoPP)
 

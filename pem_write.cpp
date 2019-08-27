@@ -35,7 +35,7 @@ using std::transform;
 #include "hex.h"
 
 #include "pem.h"
-#include "pem-com.h"
+#include "pem_common.h"
 
 #define CRYPTOPP_ENABLE_NAMESPACE_WEAK 1
 #include "md5.h"

@@ -24,30 +24,87 @@
 
 NAMESPACE_BEGIN(CryptoPP)
 
-// Attempts to read a PEM encoded key or parameter. If there are multiple
-// keys or parameters, then only the first is read. If `trimTrailing` is true,
-// then trailing whitespace is trimmed from the source BufferedTransformation.
-// The destination BufferedTransformation will have one line ending if it was
-// present in source.
-//
-// PEM_NextObject will parse an invalid object. For example, it will parse a
-// key or parameter with `-----BEGIN FOO-----` and `-----END BAR-----`. The
-// parser only looks for BEGIN and END (and the dashes). The malformed input
-// will be caught later when a particular key or parameter is parsed.
-// On failure, InvalidDataFormat is thrown.
+/// \brief Get the next PEM object
+/// \param src the source BufferedTransformation
+/// \param dest the destination BufferedTransformation
+/// \details PEM_NextObject attempts to retrieve the next PEM encoded key or
+///  parameter from <tt>src</tt> and transfers it to <tt>dest</tt>. If there
+///  are multiple keys or parameters, then only the first is transferred.
+/// \details If <tt>trimTrailing</tt> is true, then trailing whitespace is
+///  trimmed from the source BufferedTransformation. The destination
+///  BufferedTransformation will have one line ending if it was present in
+///  source.
+/// \details PEM_NextObject will parse an invalid object. For example, it
+///  will parse a key or parameter with <tt>-----BEGIN FOO-----</tt> and
+///  <tt>-----END BAR-----</tt>. The parser only looks for BEGIN and END
+///  (and the dashes). The malformed input will be caught later when a
+///  particular key or parameter is parsed.
+/// \throws InvalidDataFormat
 void PEM_NextObject(BufferedTransformation& src, BufferedTransformation& dest, bool trimTrailing=true);
 
-// PEM types we understand. We can read and write many of them, but not all of them.
-//   http://stackoverflow.com/questions/5355046/where-is-the-pem-file-format-specified
-enum PEM_Type { PEM_PUBLIC_KEY = 1, PEM_PRIVATE_KEY,
-    PEM_RSA_PUBLIC_KEY, PEM_RSA_PRIVATE_KEY, PEM_RSA_ENC_PRIVATE_KEY,
-    PEM_DSA_PUBLIC_KEY, PEM_DSA_PRIVATE_KEY, PEM_DSA_ENC_PRIVATE_KEY,
-    PEM_EC_PUBLIC_KEY, PEM_ECDSA_PUBLIC_KEY, PEM_EC_PRIVATE_KEY, PEM_EC_ENC_PRIVATE_KEY,
-    PEM_EC_PARAMETERS, PEM_DH_PARAMETERS, PEM_DSA_PARAMETERS,
-    PEM_X509_CERTIFICATE, PEM_REQ_CERTIFICATE, PEM_CERTIFICATE,
-    PEM_UNSUPPORTED = 0xFFFFFFFF };
+/// \brief Recognized PEM types.
+/// \details Many PEM types can be read and write, but not all of them.
+/// \sa <A HREF="https://stackoverflow.com/questions/5355046">Where is the
+///  PEM file format specified?</A>
+enum PEM_Type {
+    /// \brief Public key
+    /// \details non-specific public key
+    PEM_PUBLIC_KEY = 1,
+    /// \brief Private key
+    /// \details non-specific private key
+    PEM_PRIVATE_KEY,
+    /// \brief RSA public key
+    PEM_RSA_PUBLIC_KEY,
+    /// \brief RSA private key
+    PEM_RSA_PRIVATE_KEY,
+    /// \brief Encrypted RSA private key
+    PEM_RSA_ENC_PRIVATE_KEY,
+    /// \brief DSA public key
+    PEM_DSA_PUBLIC_KEY,
+    /// \brief DSA private key
+    PEM_DSA_PRIVATE_KEY,
+    /// \brief Encrypted DSA private key
+    PEM_DSA_ENC_PRIVATE_KEY,
+    /// \brief Elliptic curve public key
+    /// \details non-specific elliptic curve public key
+    PEM_EC_PUBLIC_KEY,
+    /// \brief Elliptic curve private key
+    /// \details non-specific elliptic curve private key
+    PEM_EC_PRIVATE_KEY,
+    /// \brief Encrypted elliptic curve private key
+    /// \details non-specific encrypted elliptic curve private key
+    PEM_EC_ENC_PRIVATE_KEY,
+    /// \brief ECDSA public key
+    PEM_ECDSA_PUBLIC_KEY,
+    /// \brief ECDSA private key
+    PEM_ECDSA_PRIVATE_KEY,
+    /// \brief Encrypted ECDSA private key
+    PEM_ENC_ECDSA_PRIVATE_KEY,
+    /// \brief X25519 public key
+    PEM_X25519_PUBLIC_KEY,
+    /// \brief X25519 private key
+    PEM_X25519_PRIVATE_KEY,
+    /// \brief Encrypted X25519 private key
+    PEM_X25519_ENC_PRIVATE_KEY,
+    /// \brief Elliptic curve parameters
+    PEM_EC_PARAMETERS,
+    /// \brief Diffie-Hellman curve parameters
+    PEM_DH_PARAMETERS,
+    /// \brief DSA parameters
+    PEM_DSA_PARAMETERS,
+    /// \brief X.509 certificate
+    PEM_X509_CERTIFICATE,
+    /// \brief Certificate request
+    PEM_REQ_CERTIFICATE,
+    /// \brief Certificate
+    PEM_CERTIFICATE,
+    /// \brief Unsupported type
+    PEM_UNSUPPORTED = 0xFFFFFFFF
+};
 
-// Attempts to determine the type of key or parameter
+/// \brief Determine the type of key or parameter
+/// \param bt the source BufferedTransformation
+/// \returns PEM_Type or PEM_UNSUPPORTED
 PEM_Type PEM_GetType(const BufferedTransformation& bt);
 
 /////////////////////////////////////////////////////////////////////////////
