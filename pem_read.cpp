@@ -107,9 +107,9 @@ void PEM_Load(BufferedTransformation& bt, RSA::PublicKey& rsa)
 
     PEM_Type type = PEM_GetType(obj);
     if (type == PEM_PUBLIC_KEY)
-        PEM_StripEncapsulatedBoundary(obj, SBB_PUBLIC_BEGIN, SBB_PUBLIC_END);
+        PEM_StripEncapsulatedBoundary(obj, PUBLIC_BEGIN, PUBLIC_END);
     else if(type == PEM_RSA_PUBLIC_KEY)
-        PEM_StripEncapsulatedBoundary(obj, SBB_RSA_PUBLIC_BEGIN, SBB_RSA_PUBLIC_END);
+        PEM_StripEncapsulatedBoundary(obj, RSA_PUBLIC_BEGIN, RSA_PUBLIC_END);
     else
         throw InvalidDataFormat("PEM_Load: not a RSA public key");
 
@@ -131,9 +131,9 @@ void PEM_Load(BufferedTransformation& bt, RSA::PrivateKey& rsa, const char* pass
 
     PEM_Type type = PEM_GetType(obj);
     if(type == PEM_PRIVATE_KEY)
-        PEM_StripEncapsulatedBoundary(obj, SBB_PRIVATE_BEGIN, SBB_PRIVATE_END);
+        PEM_StripEncapsulatedBoundary(obj, PRIVATE_BEGIN, PRIVATE_END);
     else if(type == PEM_RSA_PRIVATE_KEY || (type == PEM_RSA_ENC_PRIVATE_KEY && password != NULL))
-        PEM_StripEncapsulatedBoundary(obj, SBB_RSA_PRIVATE_BEGIN, SBB_RSA_PRIVATE_END);
+        PEM_StripEncapsulatedBoundary(obj, RSA_PRIVATE_BEGIN, RSA_PRIVATE_END);
     else if(type == PEM_RSA_ENC_PRIVATE_KEY && password == NULL)
         throw InvalidArgument("PEM_Load: RSA private key is encrypted");
     else
@@ -155,9 +155,9 @@ void PEM_Load(BufferedTransformation& bt, DSA::PublicKey& dsa)
 
     PEM_Type type = PEM_GetType(obj);
     if(type == PEM_PUBLIC_KEY)
-        PEM_StripEncapsulatedBoundary(obj, SBB_PUBLIC_BEGIN, SBB_PUBLIC_END);
+        PEM_StripEncapsulatedBoundary(obj, PUBLIC_BEGIN, PUBLIC_END);
     else if(type == PEM_DSA_PUBLIC_KEY)
-        PEM_StripEncapsulatedBoundary(obj, SBB_DSA_PUBLIC_BEGIN, SBB_DSA_PUBLIC_END);
+        PEM_StripEncapsulatedBoundary(obj, DSA_PUBLIC_BEGIN, DSA_PUBLIC_END);
     else
         throw InvalidDataFormat("PEM_Load: not a DSA public key");
 
@@ -179,9 +179,9 @@ void PEM_Load(BufferedTransformation& bt, DSA::PrivateKey& dsa, const char* pass
 
     PEM_Type type = PEM_GetType(obj);
     if(type == PEM_PRIVATE_KEY)
-        PEM_StripEncapsulatedBoundary(obj, SBB_PRIVATE_BEGIN, SBB_PRIVATE_END);
+        PEM_StripEncapsulatedBoundary(obj, PRIVATE_BEGIN, PRIVATE_END);
     else if(type == PEM_DSA_PRIVATE_KEY || (type == PEM_DSA_ENC_PRIVATE_KEY && password != NULL))
-        PEM_StripEncapsulatedBoundary(obj, SBB_DSA_PRIVATE_BEGIN, SBB_DSA_PRIVATE_END);
+        PEM_StripEncapsulatedBoundary(obj, DSA_PRIVATE_BEGIN, DSA_PRIVATE_END);
     else if(type == PEM_DSA_ENC_PRIVATE_KEY && password == NULL)
         throw InvalidArgument("PEM_Load: DSA private key is encrypted");
     else
@@ -203,9 +203,9 @@ void PEM_Load(BufferedTransformation& bt, ElGamal::PublicKey& key)
 
     PEM_Type type = PEM_GetType(obj);
     if (type == PEM_PUBLIC_KEY)
-        PEM_StripEncapsulatedBoundary(obj, SBB_PUBLIC_BEGIN, SBB_PUBLIC_END);
+        PEM_StripEncapsulatedBoundary(obj, PUBLIC_BEGIN, PUBLIC_END);
     else if(type == PEM_ELGAMAL_PUBLIC_KEY)
-        PEM_StripEncapsulatedBoundary(obj, SBB_ELGAMAL_PUBLIC_BEGIN, SBB_ELGAMAL_PUBLIC_END);
+        PEM_StripEncapsulatedBoundary(obj, ELGAMAL_PUBLIC_BEGIN, ELGAMAL_PUBLIC_END);
     else
         throw InvalidDataFormat("PEM_Load: not a ElGamal public key");
 
@@ -227,9 +227,9 @@ void PEM_Load(BufferedTransformation& bt, ElGamal::PrivateKey& key, const char* 
 
     PEM_Type type = PEM_GetType(obj);
     if(type == PEM_PRIVATE_KEY)
-        PEM_StripEncapsulatedBoundary(obj, SBB_PRIVATE_BEGIN, SBB_PRIVATE_END);
+        PEM_StripEncapsulatedBoundary(obj, PRIVATE_BEGIN, PRIVATE_END);
     else if(type == PEM_ELGAMAL_PRIVATE_KEY || (type == PEM_ELGAMAL_ENC_PRIVATE_KEY && password != NULL))
-        PEM_StripEncapsulatedBoundary(obj, SBB_ELGAMAL_PRIVATE_BEGIN, SBB_ELGAMAL_PRIVATE_END);
+        PEM_StripEncapsulatedBoundary(obj, ELGAMAL_PRIVATE_BEGIN, ELGAMAL_PRIVATE_END);
     else if(type == PEM_ELGAMAL_ENC_PRIVATE_KEY && password == NULL)
         throw InvalidArgument("PEM_Load: ElGamal private key is encrypted");
     else
@@ -261,9 +261,9 @@ void PEM_Load(BufferedTransformation& bt, DL_PublicKey_EC<ECP>& ec)
 
     PEM_Type type = PEM_GetType(obj);
     if(type == PEM_PUBLIC_KEY)
-        PEM_StripEncapsulatedBoundary(obj, SBB_PUBLIC_BEGIN, SBB_PUBLIC_END);
+        PEM_StripEncapsulatedBoundary(obj, PUBLIC_BEGIN, PUBLIC_END);
     else if(type == PEM_EC_PUBLIC_KEY)
-        PEM_StripEncapsulatedBoundary(obj, SBB_EC_PUBLIC_BEGIN, SBB_EC_PUBLIC_END);
+        PEM_StripEncapsulatedBoundary(obj, EC_PUBLIC_BEGIN, EC_PUBLIC_END);
     else
         throw InvalidDataFormat("PEM_Load: not a public EC key");
 
@@ -285,9 +285,9 @@ void PEM_Load(BufferedTransformation& bt, DL_PrivateKey_EC<ECP>& ec, const char*
 
     PEM_Type type = PEM_GetType(obj);
     if(type == PEM_PRIVATE_KEY)
-        PEM_StripEncapsulatedBoundary(obj, SBB_PRIVATE_BEGIN, SBB_PRIVATE_END);
+        PEM_StripEncapsulatedBoundary(obj, PRIVATE_BEGIN, PRIVATE_END);
     else if(type == PEM_EC_PRIVATE_KEY || (type == PEM_EC_ENC_PRIVATE_KEY && password != NULL))
-        PEM_StripEncapsulatedBoundary(obj, SBB_EC_PRIVATE_BEGIN, SBB_EC_PRIVATE_END);
+        PEM_StripEncapsulatedBoundary(obj, EC_PRIVATE_BEGIN, EC_PRIVATE_END);
     else if(type == PEM_EC_ENC_PRIVATE_KEY && password == NULL)
         throw InvalidArgument("PEM_Load: EC private key is encrypted");
     else
@@ -309,9 +309,9 @@ void PEM_Load(BufferedTransformation& bt, DL_PublicKey_EC<EC2N>& ec)
 
     PEM_Type type = PEM_GetType(obj);
     if(type == PEM_PUBLIC_KEY)
-        PEM_StripEncapsulatedBoundary(obj, SBB_PUBLIC_BEGIN, SBB_PUBLIC_END);
+        PEM_StripEncapsulatedBoundary(obj, PUBLIC_BEGIN, PUBLIC_END);
     else if(type == PEM_EC_PUBLIC_KEY)
-        PEM_StripEncapsulatedBoundary(obj, SBB_EC_PUBLIC_BEGIN, SBB_EC_PUBLIC_END);
+        PEM_StripEncapsulatedBoundary(obj, EC_PUBLIC_BEGIN, EC_PUBLIC_END);
     else
         throw InvalidDataFormat("PEM_Load: not a public EC key");
 
@@ -333,9 +333,9 @@ void PEM_Load(BufferedTransformation& bt, DL_PrivateKey_EC<EC2N>& ec, const char
 
     PEM_Type type = PEM_GetType(obj);
     if(type == PEM_PRIVATE_KEY)
-        PEM_StripEncapsulatedBoundary(obj, SBB_PRIVATE_BEGIN, SBB_PRIVATE_END);
+        PEM_StripEncapsulatedBoundary(obj, PRIVATE_BEGIN, PRIVATE_END);
     else if(type == PEM_EC_PRIVATE_KEY || (type == PEM_EC_ENC_PRIVATE_KEY && password != NULL))
-        PEM_StripEncapsulatedBoundary(obj, SBB_EC_PRIVATE_BEGIN, SBB_EC_PRIVATE_END);
+        PEM_StripEncapsulatedBoundary(obj, EC_PRIVATE_BEGIN, EC_PRIVATE_END);
     else if(type == PEM_EC_ENC_PRIVATE_KEY && password == NULL)
         throw InvalidArgument("PEM_Load: EC private key is encrypted");
     else
@@ -377,7 +377,7 @@ void PEM_Load(BufferedTransformation& bt, DL_GroupParameters_DSA& params)
 
     PEM_Type type = PEM_GetType(obj);
     if(type == PEM_DSA_PARAMETERS)
-        PEM_StripEncapsulatedBoundary(obj, SBB_DSA_PARAMETERS_BEGIN, SBB_DSA_PARAMETERS_END);
+        PEM_StripEncapsulatedBoundary(obj, DSA_PARAMETERS_BEGIN, DSA_PARAMETERS_END);
     else
         throw InvalidDataFormat("PEM_Read: invalid DSA parameters");
 
@@ -395,7 +395,7 @@ void PEM_LoadParams(BufferedTransformation& bt, DL_GroupParameters_EC<EC>& param
 
     PEM_Type type = PEM_GetType(obj);
     if(type == PEM_EC_PARAMETERS)
-        PEM_StripEncapsulatedBoundary(obj, SBB_EC_PARAMETERS_BEGIN, SBB_EC_PARAMETERS_END);
+        PEM_StripEncapsulatedBoundary(obj, EC_PARAMETERS_BEGIN, EC_PARAMETERS_END);
     else
         throw InvalidDataFormat("PEM_Read: invalid EC parameters");
 
@@ -412,7 +412,7 @@ void PEM_DH_Load(BufferedTransformation& bt, Integer& p, Integer& g)
 
     PEM_Type type = PEM_GetType(obj);
     if(type == PEM_DH_PARAMETERS)
-        PEM_StripEncapsulatedBoundary(obj, SBB_DH_PARAMETERS_BEGIN, SBB_DH_PARAMETERS_END);
+        PEM_StripEncapsulatedBoundary(obj, DH_PARAMETERS_BEGIN, DH_PARAMETERS_END);
     else
         throw InvalidDataFormat("PEM_DH_Load: invalid DH parameters");
 
@@ -443,7 +443,7 @@ void PEM_DH_Load(BufferedTransformation& bt, Integer& p, Integer& q, Integer& g)
 
     PEM_Type type = PEM_GetType(obj);
     if(type == PEM_DH_PARAMETERS)
-        PEM_StripEncapsulatedBoundary(obj, SBB_DH_PARAMETERS_BEGIN, SBB_DH_PARAMETERS_END);
+        PEM_StripEncapsulatedBoundary(obj, DH_PARAMETERS_BEGIN, DH_PARAMETERS_END);
     else
         throw InvalidDataFormat("PEM_DH_Load: invalid DH parameters");
 
@@ -536,10 +536,10 @@ bool PEM_IsEncrypted(BufferedTransformation& bt)
 
 bool PEM_IsEncrypted(SecByteBlock& sb)
 {
-    SecByteBlock::iterator it = search(sb.begin(), sb.end(), SBB_PROC_TYPE.begin(), SBB_PROC_TYPE.end());
+    SecByteBlock::iterator it = search(sb.begin(), sb.end(), PROC_TYPE.begin(), PROC_TYPE.end());
     if (it == sb.end()) return false;
 
-    it = search(it + SBB_PROC_TYPE.size(), sb.end(), SBB_ENCRYPTED.begin(), SBB_ENCRYPTED.end());
+    it = search(it + PROC_TYPE.size(), sb.end(), ENCRYPTED.begin(), ENCRYPTED.end());
     return it != sb.end();
 }
 
@@ -706,24 +706,24 @@ PEM_Type PEM_GetType(const SecByteBlock& sb)
     SecByteBlock::const_iterator it;
 
     // Uses an OID to identify the public key type
-    it = Search(sb, SBB_PUBLIC_BEGIN);
+    it = Search(sb, PUBLIC_BEGIN);
     if (it != sb.end())
         return PEM_PUBLIC_KEY;
 
     // Uses an OID to identify the private key type
-    it = Search(sb, SBB_PRIVATE_BEGIN);
+    it = Search(sb, PRIVATE_BEGIN);
     if (it != sb.end())
         return PEM_PRIVATE_KEY;
 
     // RSA key types
-    it = Search(sb, SBB_RSA_PUBLIC_BEGIN);
+    it = Search(sb, RSA_PUBLIC_BEGIN);
     if(it != sb.end())
         return PEM_RSA_PUBLIC_KEY;
 
-    it = Search(sb, SBB_RSA_PRIVATE_BEGIN);
+    it = Search(sb, RSA_PRIVATE_BEGIN);
     if(it != sb.end())
     {
-        it = Search(sb, SBB_PROC_TYPE_ENC);
+        it = Search(sb, PROC_TYPE_ENC);
         if(it != sb.end())
             return PEM_RSA_ENC_PRIVATE_KEY;
 
@@ -731,14 +731,14 @@ PEM_Type PEM_GetType(const SecByteBlock& sb)
     }
 
     // DSA key types
-    it = Search(sb, SBB_DSA_PUBLIC_BEGIN);
+    it = Search(sb, DSA_PUBLIC_BEGIN);
     if(it != sb.end())
         return PEM_DSA_PUBLIC_KEY;
 
-    it = Search(sb, SBB_DSA_PRIVATE_BEGIN);
+    it = Search(sb, DSA_PRIVATE_BEGIN);
     if(it != sb.end())
     {
-        it = Search(sb, SBB_PROC_TYPE_ENC);
+        it = Search(sb, PROC_TYPE_ENC);
         if(it != sb.end())
             return PEM_DSA_ENC_PRIVATE_KEY;
 
@@ -746,14 +746,14 @@ PEM_Type PEM_GetType(const SecByteBlock& sb)
     }
 
     // ElGamal key types
-    it = Search(sb, SBB_ELGAMAL_PUBLIC_BEGIN);
+    it = Search(sb, ELGAMAL_PUBLIC_BEGIN);
     if(it != sb.end())
         return PEM_ELGAMAL_PUBLIC_KEY;
 
-    it = Search(sb, SBB_ELGAMAL_PRIVATE_BEGIN);
+    it = Search(sb, ELGAMAL_PRIVATE_BEGIN);
     if(it != sb.end())
     {
-        it = Search(sb, SBB_PROC_TYPE_ENC);
+        it = Search(sb, PROC_TYPE_ENC);
         if(it != sb.end())
             return PEM_ELGAMAL_ENC_PRIVATE_KEY;
 
@@ -761,18 +761,18 @@ PEM_Type PEM_GetType(const SecByteBlock& sb)
     }
 
     // EC key types
-    it = Search(sb, SBB_EC_PUBLIC_BEGIN);
+    it = Search(sb, EC_PUBLIC_BEGIN);
     if(it != sb.end())
         return PEM_EC_PUBLIC_KEY;
 
-    it = Search(sb, SBB_ECDSA_PUBLIC_BEGIN);
+    it = Search(sb, ECDSA_PUBLIC_BEGIN);
     if(it != sb.end())
         return PEM_ECDSA_PUBLIC_KEY;
 
-    it = Search(sb, SBB_EC_PRIVATE_BEGIN);
+    it = Search(sb, EC_PRIVATE_BEGIN);
     if(it != sb.end())
     {
-        it = Search(sb, SBB_PROC_TYPE_ENC);
+        it = Search(sb, PROC_TYPE_ENC);
         if(it != sb.end())
             return PEM_EC_ENC_PRIVATE_KEY;
 
@@ -780,30 +780,30 @@ PEM_Type PEM_GetType(const SecByteBlock& sb)
     }
 
     // EC Parameters
-    it = Search(sb, SBB_EC_PARAMETERS_BEGIN);
+    it = Search(sb, EC_PARAMETERS_BEGIN);
     if(it != sb.end())
         return PEM_EC_PARAMETERS;
 
     // DH Parameters
-    it = Search(sb, SBB_DH_PARAMETERS_BEGIN);
+    it = Search(sb, DH_PARAMETERS_BEGIN);
     if(it != sb.end())
         return PEM_DH_PARAMETERS;
 
     // DSA Parameters
-    it = Search(sb, SBB_DSA_PARAMETERS_BEGIN);
+    it = Search(sb, DSA_PARAMETERS_BEGIN);
     if(it != sb.end())
         return PEM_DSA_PARAMETERS;
 
     // Certificate
-    it = Search(sb, SBB_CERTIFICATE_BEGIN);
+    it = Search(sb, CERTIFICATE_BEGIN);
     if(it != sb.end())
         return PEM_CERTIFICATE;
 
-    it = Search(sb, SBB_X509_CERTIFICATE_BEGIN);
+    it = Search(sb, X509_CERTIFICATE_BEGIN);
     if(it != sb.end())
         return PEM_X509_CERTIFICATE;
 
-    it = Search(sb, SBB_REQ_CERTIFICATE_BEGIN);
+    it = Search(sb, REQ_CERTIFICATE_BEGIN);
     if(it != sb.end())
         return PEM_REQ_CERTIFICATE;
 
@@ -879,7 +879,7 @@ void PEM_StripEncapsulatedHeader(BufferedTransformation& src, BufferedTransforma
     if(field.empty())
         throw InvalidDataFormat("PEM_StripEncapsulatedHeader: failed to locate Proc-Type");
 
-    if(0 != CompareNoCase(field, SBB_PROC_TYPE))
+    if(0 != CompareNoCase(field, PROC_TYPE))
         throw InvalidDataFormat("PEM_StripEncapsulatedHeader: failed to locate Proc-Type");
 
     line = GetControlFieldData(line);
@@ -903,7 +903,7 @@ void PEM_StripEncapsulatedHeader(BufferedTransformation& src, BufferedTransforma
         if(line.size() == 0) break; // size is non-zero; empty line
 
         field = GetControlField(line);
-        if(0 == CompareNoCase(field, SBB_DEK_INFO))
+        if(0 == CompareNoCase(field, DEK_INFO))
         {
             line = GetControlFieldData(line);
             tline = string(reinterpret_cast<const char*>(line.data()),line.size());
@@ -914,7 +914,7 @@ void PEM_StripEncapsulatedHeader(BufferedTransformation& src, BufferedTransforma
             continue;
         }
 
-        if(0 == CompareNoCase(field, SBB_CONTENT_DOMAIN))
+        if(0 == CompareNoCase(field, CONTENT_DOMAIN))
         {
             // Silently ignore
             // Content-Domain: RFC822
@@ -1038,7 +1038,7 @@ void PEM_NextObject(BufferedTransformation& src, BufferedTransformation& dest, b
     // +2 to allow for CR + LF line endings. There's no guarantee a line
     //   will be present, or it will be RFC1421_LINE_BREAK in size.
     static const size_t READ_SIZE = (RFC1421_LINE_BREAK + 1) * 10;
-    static const size_t REWIND = max(SBB_PEM_BEGIN.size(), SBB_PEM_END.size()) + 2;
+    static const size_t REWIND = max(PEM_BEGIN.size(), PEM_END.size()) + 2;
 
     SecByteBlock accum;
     size_t idx = 0, next = 0;
@@ -1082,45 +1082,45 @@ void PEM_NextObject(BufferedTransformation& src, BufferedTransformation& dest, b
         // Locate '-----BEGIN'
         if(idx1 == BAD_IDX)
         {
-            it = search(accum.begin() + next, accum.end(), SBB_PEM_BEGIN.begin(), SBB_PEM_BEGIN.end());
+            it = search(accum.begin() + next, accum.end(), PEM_BEGIN.begin(), PEM_BEGIN.end());
             if(it == accum.end())
                 continue;
 
             idx1 = it - accum.begin();
-            next = idx1 + SBB_PEM_BEGIN.size();
+            next = idx1 + PEM_BEGIN.size();
         }
 
         // Locate '-----'
         if(idx2 == BAD_IDX && idx1 != BAD_IDX)
         {
-            it = search(accum.begin() + next, accum.end(), SBB_PEM_TAIL.begin(), SBB_PEM_TAIL.end());
+            it = search(accum.begin() + next, accum.end(), PEM_TAIL.begin(), PEM_TAIL.end());
             if(it == accum.end())
                 continue;
 
             idx2 = it - accum.begin();
-            next = idx2 + SBB_PEM_TAIL.size();
+            next = idx2 + PEM_TAIL.size();
         }
 
         // Locate '-----END'
         if(idx3 == BAD_IDX && idx2 != BAD_IDX)
         {
-            it = search(accum.begin() + next, accum.end(), SBB_PEM_END.begin(), SBB_PEM_END.end());
+            it = search(accum.begin() + next, accum.end(), PEM_END.begin(), PEM_END.end());
             if(it == accum.end())
                 continue;
 
             idx3 = it - accum.begin();
-            next = idx3 + SBB_PEM_END.size();
+            next = idx3 + PEM_END.size();
         }
 
         // Locate '-----'
         if(idx4 == BAD_IDX && idx3 != BAD_IDX)
         {
-            it = search(accum.begin() + next, accum.end(), SBB_PEM_TAIL.begin(), SBB_PEM_TAIL.end());
+            it = search(accum.begin() + next, accum.end(), PEM_TAIL.begin(), PEM_TAIL.end());
             if(it == accum.end())
                 continue;
 
             idx4 = it - accum.begin();
-            next = idx4 + SBB_PEM_TAIL.size();
+            next = idx4 + PEM_TAIL.size();
         }
     }
 
@@ -1155,7 +1155,7 @@ void PEM_NextObject(BufferedTransformation& src, BufferedTransformation& dest, b
 
     // Final book keeping
     const byte* ptr = accum.begin() + idx1;
-    const size_t used = idx4 + SBB_PEM_TAIL.size();
+    const size_t used = idx4 + PEM_TAIL.size();
     const size_t len = used - idx1;
 
     // Include one CR/LF if its available in the accumulator

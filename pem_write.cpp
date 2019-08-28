@@ -110,32 +110,32 @@ static void PEM_SetNamedCurve(const DL_GroupParameters_EC<EC>& params, bool flag
 
 void PEM_Save(BufferedTransformation& bt, const RSA::PublicKey& rsa)
 {
-    PEM_SavePublicKey(bt, rsa, SBB_PUBLIC_BEGIN, SBB_PUBLIC_END);
+    PEM_SavePublicKey(bt, rsa, PUBLIC_BEGIN, PUBLIC_END);
 }
 
 void PEM_Save(BufferedTransformation& bt, const RSA::PrivateKey& rsa)
 {
-    PEM_SavePrivateKey(bt, rsa, SBB_RSA_PRIVATE_BEGIN, SBB_RSA_PRIVATE_END);
+    PEM_SavePrivateKey(bt, rsa, RSA_PRIVATE_BEGIN, RSA_PRIVATE_END);
 }
 
 void PEM_Save(BufferedTransformation& bt, RandomNumberGenerator& rng, const RSA::PrivateKey& rsa, const string& algorithm, const char* password, size_t length)
 {
-    PEM_SavePrivateKey(bt, rng, rsa, SBB_RSA_PRIVATE_BEGIN, SBB_RSA_PRIVATE_END, algorithm, password, length);
+    PEM_SavePrivateKey(bt, rng, rsa, RSA_PRIVATE_BEGIN, RSA_PRIVATE_END, algorithm, password, length);
 }
 
 void PEM_Save(BufferedTransformation& bt, const DSA::PublicKey& dsa)
 {
-    PEM_SavePublicKey(bt, dsa, SBB_PUBLIC_BEGIN, SBB_PUBLIC_END);
+    PEM_SavePublicKey(bt, dsa, PUBLIC_BEGIN, PUBLIC_END);
 }
 
 void PEM_Save(BufferedTransformation& bt, const DSA::PrivateKey& dsa)
 {
-    PEM_SavePrivateKey(bt, dsa, SBB_DSA_PRIVATE_BEGIN, SBB_DSA_PRIVATE_END);
+    PEM_SavePrivateKey(bt, dsa, DSA_PRIVATE_BEGIN, DSA_PRIVATE_END);
 }
 
 void PEM_Save(BufferedTransformation& bt, RandomNumberGenerator& rng, const DSA::PrivateKey& dsa, const string& algorithm, const char* password, size_t length)
 {
-    PEM_SavePrivateKey(bt, rng, dsa, SBB_DSA_PRIVATE_BEGIN, SBB_DSA_PRIVATE_END, algorithm, password, length);
+    PEM_SavePrivateKey(bt, rng, dsa, DSA_PRIVATE_BEGIN, DSA_PRIVATE_END, algorithm, password, length);
 }
 
 void PEM_Save(BufferedTransformation& bt, const DL_GroupParameters_EC<ECP>& params)
@@ -143,7 +143,7 @@ void PEM_Save(BufferedTransformation& bt, const DL_GroupParameters_EC<ECP>& para
     bool old = PEM_GetNamedCurve(params);
     PEM_SetNamedCurve(params, true);
 
-    PEM_SaveParams(bt, params, SBB_EC_PARAMETERS_BEGIN, SBB_EC_PARAMETERS_END);
+    PEM_SaveParams(bt, params, EC_PARAMETERS_BEGIN, EC_PARAMETERS_END);
     PEM_SetNamedCurve(params, old);
 }
 
@@ -152,7 +152,7 @@ void PEM_Save(BufferedTransformation& bt, const DL_GroupParameters_EC<EC2N>& par
     bool old = PEM_GetNamedCurve(params);
     PEM_SetNamedCurve(params, true);
 
-    PEM_SaveParams(bt, params, SBB_EC_PARAMETERS_BEGIN, SBB_EC_PARAMETERS_END);
+    PEM_SaveParams(bt, params, EC_PARAMETERS_BEGIN, EC_PARAMETERS_END);
     PEM_SetNamedCurve(params, old);
 }
 
@@ -161,7 +161,7 @@ void PEM_Save(BufferedTransformation& bt, const DL_PublicKey_EC<ECP>& ec)
     bool old = PEM_GetNamedCurve(ec.GetGroupParameters());
     PEM_SetNamedCurve(ec.GetGroupParameters(), true);
 
-    PEM_SavePublicKey(bt, ec, SBB_PUBLIC_BEGIN, SBB_PUBLIC_END);
+    PEM_SavePublicKey(bt, ec, PUBLIC_BEGIN, PUBLIC_END);
     PEM_SetNamedCurve(ec.GetGroupParameters(), old);
 }
 
@@ -170,7 +170,7 @@ void PEM_Save(BufferedTransformation& bt, const DL_PrivateKey_EC<ECP>& ec)
     bool old = PEM_GetNamedCurve(ec.GetGroupParameters());
     PEM_SetNamedCurve(ec.GetGroupParameters(), true);
 
-    PEM_SavePrivateKey(bt, ec, SBB_EC_PRIVATE_BEGIN, SBB_EC_PRIVATE_END);
+    PEM_SavePrivateKey(bt, ec, EC_PRIVATE_BEGIN, EC_PRIVATE_END);
     PEM_SetNamedCurve(ec.GetGroupParameters(), old);
 }
 
@@ -179,7 +179,7 @@ void PEM_Save(BufferedTransformation& bt, RandomNumberGenerator& rng, const DL_P
     bool old = PEM_GetNamedCurve(ec.GetGroupParameters());
     PEM_SetNamedCurve(ec.GetGroupParameters(), true);
 
-    PEM_SavePrivateKey(bt, rng, ec, SBB_EC_PRIVATE_BEGIN, SBB_EC_PRIVATE_END, algorithm, password, length);
+    PEM_SavePrivateKey(bt, rng, ec, EC_PRIVATE_BEGIN, EC_PRIVATE_END, algorithm, password, length);
     PEM_SetNamedCurve(ec.GetGroupParameters(), old);
 }
 
@@ -188,7 +188,7 @@ void PEM_Save(BufferedTransformation& bt, const DL_PublicKey_EC<EC2N>& ec)
     bool old = PEM_GetNamedCurve(ec.GetGroupParameters());
     PEM_SetNamedCurve(ec.GetGroupParameters(), true);
 
-    PEM_SavePublicKey(bt, ec, SBB_PUBLIC_BEGIN, SBB_PUBLIC_END);
+    PEM_SavePublicKey(bt, ec, PUBLIC_BEGIN, PUBLIC_END);
     PEM_SetNamedCurve(ec.GetGroupParameters(), old);
 }
 
@@ -197,7 +197,7 @@ void PEM_Save(BufferedTransformation& bt, const DL_PrivateKey_EC<EC2N>& ec)
     bool old = PEM_GetNamedCurve(ec.GetGroupParameters());
     PEM_SetNamedCurve(ec.GetGroupParameters(), true);
 
-    PEM_SavePrivateKey(bt, ec, SBB_EC_PRIVATE_BEGIN, SBB_EC_PRIVATE_END);
+    PEM_SavePrivateKey(bt, ec, EC_PRIVATE_BEGIN, EC_PRIVATE_END);
     PEM_SetNamedCurve(ec.GetGroupParameters(), old);
 }
 
@@ -206,7 +206,7 @@ void PEM_Save(BufferedTransformation& bt, RandomNumberGenerator& rng, const DL_P
     bool old = PEM_GetNamedCurve(ec.GetGroupParameters());
     PEM_SetNamedCurve(ec.GetGroupParameters(), true);
 
-    PEM_SavePrivateKey(bt, rng, ec, SBB_EC_PRIVATE_BEGIN, SBB_EC_PRIVATE_END, algorithm, password, length);
+    PEM_SavePrivateKey(bt, rng, ec, EC_PRIVATE_BEGIN, EC_PRIVATE_END, algorithm, password, length);
     PEM_SetNamedCurve(ec.GetGroupParameters(), old);
 }
 
@@ -224,13 +224,13 @@ void PEM_Save(BufferedTransformation& bt, const DL_GroupParameters_DSA& params)
 {
     ByteQueue queue;
 
-    PEM_WriteLine(queue, SBB_DSA_PARAMETERS_BEGIN);
+    PEM_WriteLine(queue, DSA_PARAMETERS_BEGIN);
 
     Base64Encoder encoder(new Redirector(queue), true /*lineBreak*/, RFC1421_LINE_BREAK);
     params.Save(encoder);
     encoder.MessageEnd();
 
-    PEM_WriteLine(queue, SBB_DSA_PARAMETERS_END);
+    PEM_WriteLine(queue, DSA_PARAMETERS_END);
 
     queue.TransferTo(bt);
     bt.MessageEnd();
@@ -240,7 +240,7 @@ void PEM_DH_Save(BufferedTransformation& bt, const Integer& p, const Integer& g)
 {
     ByteQueue queue;
 
-    PEM_WriteLine(queue, SBB_DH_PARAMETERS_BEGIN);
+    PEM_WriteLine(queue, DH_PARAMETERS_BEGIN);
 
     Base64Encoder encoder(new Redirector(queue), true /*lineBreak*/, RFC1421_LINE_BREAK);
 
@@ -251,7 +251,7 @@ void PEM_DH_Save(BufferedTransformation& bt, const Integer& p, const Integer& g)
 
     encoder.MessageEnd();
 
-    PEM_WriteLine(queue, SBB_DH_PARAMETERS_END);
+    PEM_WriteLine(queue, DH_PARAMETERS_END);
 
     queue.TransferTo(bt);
     bt.MessageEnd();
@@ -261,7 +261,7 @@ void PEM_DH_Save(BufferedTransformation& bt, const Integer& p, const Integer& q,
 {
     ByteQueue queue;
 
-    PEM_WriteLine(queue, SBB_DH_PARAMETERS_BEGIN);
+    PEM_WriteLine(queue, DH_PARAMETERS_BEGIN);
 
     Base64Encoder encoder(new Redirector(queue), true /*lineBreak*/, RFC1421_LINE_BREAK);
 
@@ -273,7 +273,7 @@ void PEM_DH_Save(BufferedTransformation& bt, const Integer& p, const Integer& q,
 
     encoder.MessageEnd();
 
-    PEM_WriteLine(queue, SBB_DH_PARAMETERS_END);
+    PEM_WriteLine(queue, DH_PARAMETERS_END);
 
     queue.TransferTo(bt);
     bt.MessageEnd();
@@ -447,7 +447,7 @@ void PEM_SavePrivateKey(BufferedTransformation& bt, RandomNumberGenerator& rng,
     PEM_WriteLine(queue, pre);
 
     // Proc-Type: 4,ENCRYPTED
-    PEM_WriteLine(queue, SBB_PROC_TYPE_ENC);
+    PEM_WriteLine(queue, PROC_TYPE_ENC);
 
     SecByteBlock _key, _iv;
     member_ptr<StreamTransformation> stream;

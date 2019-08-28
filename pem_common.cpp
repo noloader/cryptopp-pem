@@ -52,7 +52,7 @@ void PEM_Base64Encode(BufferedTransformation& source, BufferedTransformation& de
 
 SecByteBlock GetControlField(const SecByteBlock& line)
 {
-    SecByteBlock::const_iterator it = std::search(line.begin(), line.end(), SBB_COLON.begin(), SBB_COLON.end());
+    SecByteBlock::const_iterator it = std::search(line.begin(), line.end(), COLON.begin(), COLON.end());
     if(it != line.end())
     {
         size_t len = it - line.begin();
@@ -64,7 +64,7 @@ SecByteBlock GetControlField(const SecByteBlock& line)
 
 SecByteBlock GetControlFieldData(const SecByteBlock& line)
 {
-    SecByteBlock::const_iterator it = std::search(line.begin(), line.end(), SBB_COLON.begin(), SBB_COLON.end());
+    SecByteBlock::const_iterator it = std::search(line.begin(), line.end(), COLON.begin(), COLON.end());
     if(it != line.end() && ++it != line.end())
     {
         size_t len = line.end() - it;
