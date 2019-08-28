@@ -12,7 +12,7 @@ if [[ -f rsa-pub.new.pem ]]; then
 	if openssl rsa -in rsa-pub.new.pem -pubin -text -noout 1>/dev/null; then
 		echo "  - OK"
 	else
-		echo "  - Failed to read rsa-pub.new.pem"
+		echo "  - Failed to load rsa-pub.new.pem"
 	fi
 fi
 
@@ -21,7 +21,7 @@ if [[ -f rsa-pub.new.pem ]]; then
 	if openssl rsa -in rsa-priv.new.pem -text -noout 1>/dev/null; then
 		echo "  - OK"
 	else
-		echo "  - Failed to read rsa-priv.new.pem"
+		echo "  - Failed to load rsa-priv.new.pem"
 	fi
 fi
 
@@ -30,7 +30,7 @@ if [[ -f rsa-enc-priv.new.pem ]]; then
 	if openssl rsa -in rsa-enc-priv.new.pem -passin pass:test -text -noout 1>/dev/null; then
 		echo "  - OK"
 	else
-		echo "  - Failed to read rsa-enc-priv.new.pem"
+		echo "  - Failed to load rsa-enc-priv.new.pem"
 	fi
 fi
 
@@ -45,7 +45,7 @@ if [[ -f dsa-params.new.pem ]]; then
 	if openssl dsaparam -in dsa-params.new.pem -text -noout 1>/dev/null; then
 		echo "  - OK"
 	else
-		echo "  - Failed to read dsa-params.new.pem (maybe false)"
+		echo "  - Failed to load dsa-params.new.pem (maybe false)"
 	fi
 fi
 
@@ -54,7 +54,7 @@ if [[ -f dsa-pub.new.pem ]]; then
 	if openssl dsa -in dsa-pub.new.pem -pubin -text -noout 1>/dev/null; then
 		echo "  - OK"
 	else
-		echo "  - Failed to read dsa-pub.new.pem (maybe false)"
+		echo "  - Failed to load dsa-pub.new.pem (maybe false)"
 	fi
 fi
 
@@ -63,7 +63,7 @@ if [[ -f dsa-priv.new.pem ]]; then
 	if openssl dsa -in dsa-priv.new.pem -text -noout 1>/dev/null; then
 		echo "  - OK"
 	else
-		echo "  - Failed to read dsa-priv.new.pem (maybe false)"
+		echo "  - Failed to load dsa-priv.new.pem (maybe false)"
 	fi
 fi
 
@@ -72,7 +72,7 @@ if [[ -f dsa-enc-priv.new.pem ]]; then
 	if openssl dsa -in dsa-enc-priv.new.pem -passin pass:test -text -noout 1>/dev/null; then
 		echo "  - OK"
 	else
-		echo "  - Failed to read dsa-enc-priv.new.pem (maybe false)"
+		echo "  - Failed to load dsa-enc-priv.new.pem (maybe false)"
 	fi
 fi
 
@@ -86,7 +86,7 @@ if [[ -f ec-params.new.pem ]]; then
 	if openssl ecparam -in ec-params.new.pem -text -noout 1>/dev/null; then
 		echo "  - OK"
 	else
-		echo "  - Failed to read ec-params.new.pem"
+		echo "  - Failed to load ec-params.new.pem"
 	fi
 fi
 
@@ -95,7 +95,7 @@ if [[ -f ec-pub.new.pem ]]; then
 	if openssl ec -in ec-pub.new.pem -pubin -text -noout 1>/dev/null; then
 		echo "  - OK"
 	else
-		echo "  - Failed to read ec-pub.new.pem"
+		echo "  - Failed to load ec-pub.new.pem"
 	fi
 fi
 
@@ -104,7 +104,7 @@ if [[ -f ec-priv.new.pem ]]; then
 	if openssl ec -in ec-priv.new.pem -text -noout 1>/dev/null; then
 		echo "  - OK"
 	else
-		echo "  - Failed to read ec-priv.new.pem"
+		echo "  - Failed to load ec-priv.new.pem"
 	fi
 fi
 
@@ -113,7 +113,7 @@ if [[ -f ec-enc-priv.new.pem ]]; then
 	if openssl ec -in ec-enc-priv.new.pem -passin pass:test -text -noout 1>/dev/null; then
 		echo "  - OK"
 	else
-		echo "  - Failed to read ec-enc-priv.new.pem"
+		echo "  - Failed to load ec-enc-priv.new.pem"
 	fi
 fi
 

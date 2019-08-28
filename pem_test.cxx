@@ -33,7 +33,7 @@ int main(int argc, char* argv[])
 
 		std::cout << "Load encrypted RSA private key" << std::endl;
 		FileSource fs3("rsa-enc-priv.pem", true);
-		PEM_Load(fs3, k3, "test", 3);
+		PEM_Load(fs3, k3, "test", 4);
 
 		std::cout << "Load DSA public key" << std::endl;
 		FileSource fs4("dsa-pub.pem", true);
@@ -45,7 +45,7 @@ int main(int argc, char* argv[])
 
 		std::cout << "Load encrypted DSA private key" << std::endl;
 		FileSource fs6("dsa-enc-priv.pem", true);
-		PEM_Load(fs6, k6, "test", 3);
+		PEM_Load(fs6, k6, "test", 4);
 	}
 
 	// Write for OpenSSL to verify
@@ -62,7 +62,7 @@ int main(int argc, char* argv[])
 
 		std::cout << "Save encrypted RSA private key" << std::endl;
 		FileSink fs3("rsa-enc-priv.new.pem");
-		PEM_Save(fs3, prng, k3, std::string("AES-256-CBC"), "test", 3);
+		PEM_Save(fs3, prng, k3, "AES-128-CBC", "test", 4);
 
 		std::cout << "Save DSA public key" << std::endl;
 		FileSink fs4("dsa-pub.new.pem");
@@ -74,7 +74,7 @@ int main(int argc, char* argv[])
 
 		std::cout << "Save encrypted DSA private key" << std::endl;
 		FileSink fs6("dsa-enc-priv.new.pem");
-		PEM_Save(fs6, prng, k6, std::string("AES-256-CBC"), "test", 3);
+		PEM_Save(fs6, prng, k6, "AES-128-CBC", "test", 4);
 	}
 
         // Save an EC public key
