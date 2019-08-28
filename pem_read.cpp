@@ -118,14 +118,14 @@ PEM_Type PEM_GetTypeFromBlock(const SecByteBlock& sb)
 
     // RSA key types
     it = Search(sb, RSA_PUBLIC_BEGIN);
-    if(it != sb.end())
+    if (it != sb.end())
         return PEM_RSA_PUBLIC_KEY;
 
     it = Search(sb, RSA_PRIVATE_BEGIN);
-    if(it != sb.end())
+    if (it != sb.end())
     {
         it = Search(sb, PROC_TYPE_ENC);
-        if(it != sb.end())
+        if (it != sb.end())
             return PEM_RSA_ENC_PRIVATE_KEY;
 
         return PEM_RSA_PRIVATE_KEY;
@@ -133,14 +133,14 @@ PEM_Type PEM_GetTypeFromBlock(const SecByteBlock& sb)
 
     // DSA key types
     it = Search(sb, DSA_PUBLIC_BEGIN);
-    if(it != sb.end())
+    if (it != sb.end())
         return PEM_DSA_PUBLIC_KEY;
 
     it = Search(sb, DSA_PRIVATE_BEGIN);
-    if(it != sb.end())
+    if (it != sb.end())
     {
         it = Search(sb, PROC_TYPE_ENC);
-        if(it != sb.end())
+        if (it != sb.end())
             return PEM_DSA_ENC_PRIVATE_KEY;
 
         return PEM_DSA_PRIVATE_KEY;
@@ -148,14 +148,14 @@ PEM_Type PEM_GetTypeFromBlock(const SecByteBlock& sb)
 
     // ElGamal key types
     it = Search(sb, ELGAMAL_PUBLIC_BEGIN);
-    if(it != sb.end())
+    if (it != sb.end())
         return PEM_ELGAMAL_PUBLIC_KEY;
 
     it = Search(sb, ELGAMAL_PRIVATE_BEGIN);
-    if(it != sb.end())
+    if (it != sb.end())
     {
         it = Search(sb, PROC_TYPE_ENC);
-        if(it != sb.end())
+        if (it != sb.end())
             return PEM_ELGAMAL_ENC_PRIVATE_KEY;
 
         return PEM_ELGAMAL_PRIVATE_KEY;
@@ -163,18 +163,18 @@ PEM_Type PEM_GetTypeFromBlock(const SecByteBlock& sb)
 
     // EC key types
     it = Search(sb, EC_PUBLIC_BEGIN);
-    if(it != sb.end())
+    if (it != sb.end())
         return PEM_EC_PUBLIC_KEY;
 
     it = Search(sb, ECDSA_PUBLIC_BEGIN);
-    if(it != sb.end())
+    if (it != sb.end())
         return PEM_ECDSA_PUBLIC_KEY;
 
     it = Search(sb, EC_PRIVATE_BEGIN);
-    if(it != sb.end())
+    if (it != sb.end())
     {
         it = Search(sb, PROC_TYPE_ENC);
-        if(it != sb.end())
+        if (it != sb.end())
             return PEM_EC_ENC_PRIVATE_KEY;
 
         return PEM_EC_PRIVATE_KEY;
@@ -182,30 +182,30 @@ PEM_Type PEM_GetTypeFromBlock(const SecByteBlock& sb)
 
     // EC Parameters
     it = Search(sb, EC_PARAMETERS_BEGIN);
-    if(it != sb.end())
+    if (it != sb.end())
         return PEM_EC_PARAMETERS;
 
     // DH Parameters
     it = Search(sb, DH_PARAMETERS_BEGIN);
-    if(it != sb.end())
+    if (it != sb.end())
         return PEM_DH_PARAMETERS;
 
     // DSA Parameters
     it = Search(sb, DSA_PARAMETERS_BEGIN);
-    if(it != sb.end())
+    if (it != sb.end())
         return PEM_DSA_PARAMETERS;
 
     // Certificate
     it = Search(sb, CERTIFICATE_BEGIN);
-    if(it != sb.end())
+    if (it != sb.end())
         return PEM_CERTIFICATE;
 
     it = Search(sb, X509_CERTIFICATE_BEGIN);
-    if(it != sb.end())
+    if (it != sb.end())
         return PEM_X509_CERTIFICATE;
 
     it = Search(sb, REQ_CERTIFICATE_BEGIN);
-    if(it != sb.end())
+    if (it != sb.end())
         return PEM_REQ_CERTIFICATE;
 
     return PEM_UNSUPPORTED;
@@ -222,7 +222,7 @@ void PEM_LoadPublicKey(BufferedTransformation& src, X509PublicKey& key, bool sub
 
 #if defined(PEM_KEY_OR_PARAMETER_VALIDATION) && !defined(NO_OS_DEPENDENCE)
     AutoSeededRandomPool prng;
-    if(!pk.Validate(prng, 2))
+    if (!pk.Validate(prng, 2))
         throw Exception(Exception::OTHER_ERROR, "PEM_LoadPublicKey: key validation failed");
 #endif
 }
@@ -236,7 +236,7 @@ void PEM_LoadPrivateKey(BufferedTransformation& src, PKCS8PrivateKey& key, bool 
 
 #if defined(PEM_KEY_OR_PARAMETER_VALIDATION) && !defined(NO_OS_DEPENDENCE)
     AutoSeededRandomPool prng;
-    if(!key.Validate(prng, 2))
+    if (!key.Validate(prng, 2))
         throw Exception(Exception::OTHER_ERROR, "PEM_LoadPrivateKey: key validation failed");
 #endif
 }
@@ -263,7 +263,7 @@ void PEM_LoadPrivateKey(BufferedTransformation& bt, DSA::PrivateKey& key)
 
 #if defined(PEM_KEY_OR_PARAMETER_VALIDATION) && !defined(NO_OS_DEPENDENCE)
     AutoSeededRandomPool prng;
-    if(!key.Validate(prng, 2))
+    if (!key.Validate(prng, 2))
         throw Exception(Exception::OTHER_ERROR, "PEM_LoadPrivateKey: key validation failed");
 #endif
 }
@@ -275,7 +275,7 @@ void PEM_LoadParams(BufferedTransformation& bt, DL_GroupParameters_EC<EC>& param
     PEM_NextObject(bt, obj);
 
     PEM_Type type = PEM_GetType(obj);
-    if(type == PEM_EC_PARAMETERS)
+    if (type == PEM_EC_PARAMETERS)
         PEM_StripEncapsulatedBoundary(obj, EC_PARAMETERS_BEGIN, EC_PARAMETERS_END);
     else
         throw InvalidDataFormat("PEM_Read: invalid EC parameters");
@@ -311,70 +311,70 @@ void PEM_CipherForAlgorithm(const EncapsulatedHeader& header, const char* passwo
     string algorithm(header.m_algorithm);
     std::transform(algorithm.begin(), algorithm.end(), algorithm.begin(),  (int(*)(int))std::toupper);
 
-    if(algorithm == "AES-256-CBC")
+    if (algorithm == "AES-256-CBC")
     {
         ksize = 32;
         vsize = 16;
 
         stream.reset(new CBC_Mode<AES>::Decryption);
     }
-    else if(algorithm == "AES-192-CBC")
+    else if (algorithm == "AES-192-CBC")
     {
         ksize = 24;
         vsize = 16;
 
         stream.reset(new CBC_Mode<AES>::Decryption);
     }
-    else if(algorithm == "AES-128-CBC")
+    else if (algorithm == "AES-128-CBC")
     {
         ksize = 16;
         vsize = 16;
 
         stream.reset(new CBC_Mode<AES>::Decryption);
     }
-    else if(algorithm == "CAMELLIA-256-CBC")
+    else if (algorithm == "CAMELLIA-256-CBC")
     {
         ksize = 32;
         vsize = 16;
 
         stream.reset(new CBC_Mode<Camellia>::Decryption);
     }
-    else if(algorithm == "CAMELLIA-192-CBC")
+    else if (algorithm == "CAMELLIA-192-CBC")
     {
         ksize = 24;
         vsize = 16;
 
         stream.reset(new CBC_Mode<Camellia>::Decryption);
     }
-    else if(algorithm == "CAMELLIA-128-CBC")
+    else if (algorithm == "CAMELLIA-128-CBC")
     {
         ksize = 16;
         vsize = 16;
 
         stream.reset(new CBC_Mode<Camellia>::Decryption);
     }
-    else if(algorithm == "DES-EDE3-CBC")
+    else if (algorithm == "DES-EDE3-CBC")
     {
         ksize = 24;
         vsize = 8;
 
         stream.reset(new CBC_Mode<DES_EDE3>::Decryption);
     }
-    else if(algorithm == "DES-EDE2-CBC")
+    else if (algorithm == "DES-EDE2-CBC")
     {
         ksize = 16;
         vsize = 8;
 
         stream.reset(new CBC_Mode<DES_EDE2>::Decryption);
     }
-    else if(algorithm == "DES-CBC")
+    else if (algorithm == "DES-CBC")
     {
         ksize = 8;
         vsize = 8;
 
         stream.reset(new CBC_Mode<DES>::Decryption);
     }
-    else if(algorithm == "IDEA-CBC")
+    else if (algorithm == "IDEA-CBC")
     {
         ksize = 16;
         vsize = 8;
@@ -411,7 +411,7 @@ void PEM_CipherForAlgorithm(const EncapsulatedHeader& header, const char* passwo
     //   header is used; and not the derived IV.
     Weak::MD5 md5;
     int ret = OPENSSL_EVP_BytesToKey(md5, _iv.data(), (const byte*)password, length, 1, _key.data(), _key.size(), NULL, 0);
-    if(ret != static_cast<int>(ksize))
+    if (ret != static_cast<int>(ksize))
         throw Exception(Exception::OTHER_ERROR, "PEM_CipherForAlgorithm: EVP_BytesToKey failed");
 
     SymmetricCipher* cipher = dynamic_cast<SymmetricCipher*>(stream.get());
@@ -445,7 +445,7 @@ void PEM_Decrypt(BufferedTransformation& src, BufferedTransformation& dest, memb
     {
         string message(ex.what());
         size_t pos = message.find(":");
-        if(pos != string::npos && pos+2 < message.size())
+        if (pos != string::npos && pos+2 < message.size())
             message = message.substr(pos+2);
 
         throw Exception(Exception::OTHER_ERROR, string("PEM_Decrypt: ") + message);
@@ -458,24 +458,24 @@ void PEM_StripEncapsulatedBoundary(BufferedTransformation& bt, const SecByteBloc
     SecByteBlock::const_iterator it;
     int n = 1, prePos = -1, postPos = -1;
 
-    while(bt.AnyRetrievable() && n++)
+    while (bt.AnyRetrievable() && n++)
     {
         SecByteBlock line, unused;
         PEM_ReadLine(bt, line, unused);
 
         // The write associated with an empty line must occur. Otherwise, we loose the CR or LF
         //    in an ecrypted private key between the control fields and the encapsulated text.
-        //if(line.empty())
+        //if (line.empty())
         //    continue;
 
         it = Search(line, pre);
-        if(it != line.end())
+        if (it != line.end())
         {
             prePos = n;
             continue;
         }
         it = Search(line, post);
-        if(it != line.end())
+        if (it != line.end())
         {
             postPos = n;
             continue;
@@ -484,21 +484,21 @@ void PEM_StripEncapsulatedBoundary(BufferedTransformation& bt, const SecByteBloc
         PEM_WriteLine(temp, line);
     }
 
-    if(prePos == -1)
+    if (prePos == -1)
     {
         string msg = "PEM_StripEncapsulatedBoundary: '";
         msg += string((char*)pre.data(), pre.size()) + "' not found";
         throw InvalidDataFormat(msg);
     }
 
-    if(postPos == -1)
+    if (postPos == -1)
     {
         string msg = "PEM_StripEncapsulatedBoundary: '";
         msg += string((char*)post.data(), post.size()) + "' not found";
         throw InvalidDataFormat(msg);
     }
 
-    if(prePos > postPos)
+    if (prePos > postPos)
         throw InvalidDataFormat("PEM_StripEncapsulatedBoundary: header boundary follows footer boundary");
 
     temp.TransferTo(bt);
@@ -506,7 +506,7 @@ void PEM_StripEncapsulatedBoundary(BufferedTransformation& bt, const SecByteBloc
 
 void PEM_StripEncapsulatedHeader(BufferedTransformation& src, BufferedTransformation& dest, EncapsulatedHeader& header)
 {
-    if(!src.AnyRetrievable())
+    if (!src.AnyRetrievable())
         return;
 
     SecByteBlock line, ending;
@@ -514,38 +514,38 @@ void PEM_StripEncapsulatedHeader(BufferedTransformation& src, BufferedTransforma
 
     // The first line *must* be Proc-Type. Ensure we read it before dropping into the loop.
     size = PEM_ReadLine(src, line, ending);
-    if(size == 0 || line.empty())
+    if (size == 0 || line.empty())
         throw InvalidDataFormat("PEM_StripEncapsulatedHeader: failed to locate Proc-Type");
 
     SecByteBlock field = GetControlField(line);
-    if(field.empty())
+    if (field.empty())
         throw InvalidDataFormat("PEM_StripEncapsulatedHeader: failed to locate Proc-Type");
 
-    if(0 != CompareNoCase(field, PROC_TYPE))
+    if (0 != CompareNoCase(field, PROC_TYPE))
         throw InvalidDataFormat("PEM_StripEncapsulatedHeader: failed to locate Proc-Type");
 
     line = GetControlFieldData(line);
     string tline(reinterpret_cast<const char*>(line.data()),line.size());
 
     PEM_ParseVersion(tline, header.m_version);
-    if(header.m_version != "4")
+    if (header.m_version != "4")
         throw NotImplemented("PEM_StripEncapsulatedHeader: encryption version " + header.m_version + " not supported");
 
     PEM_ParseOperation(tline, header.m_operation);
-    if(header.m_operation != "ENCRYPTED")
+    if (header.m_operation != "ENCRYPTED")
         throw NotImplemented("PEM_StripEncapsulatedHeader: operation " + header.m_operation + " not supported");
 
     // Next, we have to read until the first empty line
-    while(true)
+    while (true)
     {
-        if(!src.AnyRetrievable()) break; // End Of Buffer
+        if (!src.AnyRetrievable()) break; // End Of Buffer
 
         size = PEM_ReadLine(src, line, ending);
-        if(size == 0) break;        // End Of Buffer
-        if(line.size() == 0) break; // size is non-zero; empty line
+        if (size == 0) break;        // End Of Buffer
+        if (line.size() == 0) break; // size is non-zero; empty line
 
         field = GetControlField(line);
-        if(0 == CompareNoCase(field, DEK_INFO))
+        if (0 == CompareNoCase(field, DEK_INFO))
         {
             line = GetControlFieldData(line);
             tline = string(reinterpret_cast<const char*>(line.data()),line.size());
@@ -556,14 +556,14 @@ void PEM_StripEncapsulatedHeader(BufferedTransformation& src, BufferedTransforma
             continue;
         }
 
-        if(0 == CompareNoCase(field, CONTENT_DOMAIN))
+        if (0 == CompareNoCase(field, CONTENT_DOMAIN))
         {
             // Silently ignore
             // Content-Domain: RFC822
             continue;
         }
 
-        if(!field.empty())
+        if (!field.empty())
         {
             const char* ptr = (char*)field.begin();
             size_t len = field.size();
@@ -573,10 +573,10 @@ void PEM_StripEncapsulatedHeader(BufferedTransformation& src, BufferedTransforma
         }
     }
 
-    if(header.m_algorithm.empty())
+    if (header.m_algorithm.empty())
         throw InvalidArgument("PEM_StripEncapsulatedHeader: no encryption algorithm");
 
-    if(header.m_iv.empty())
+    if (header.m_iv.empty())
         throw InvalidArgument("PEM_StripEncapsulatedHeader: no IV present");
 
     // After the empty line is the encapsulated text. Transfer it to the destination.
@@ -587,13 +587,13 @@ void PEM_StripEncapsulatedHeader(BufferedTransformation& src, BufferedTransforma
 void PEM_ParseVersion(const string& proctype, string& version)
 {
     size_t pos1 = 0;
-    while(pos1 < proctype.size() && isspace(proctype[pos1])) pos1++;
+    while (pos1 < proctype.size() && isspace(proctype[pos1])) pos1++;
 
     size_t pos2 = proctype.find(",");
-    if(pos2 == string::npos)
+    if (pos2 == string::npos)
         throw InvalidDataFormat("PEM_ParseVersion: failed to locate version");
 
-    while(pos2 > pos1 && isspace(proctype[pos2])) pos2--;
+    while (pos2 > pos1 && isspace(proctype[pos2])) pos2--;
     version = proctype.substr(pos1, pos2 - pos1);
 }
 
@@ -601,11 +601,11 @@ void PEM_ParseVersion(const string& proctype, string& version)
 void PEM_ParseOperation(const string& proctype, string& operation)
 {
     size_t pos1 = proctype.find(",");
-    if(pos1 == string::npos)
+    if (pos1 == string::npos)
         throw InvalidDataFormat("PEM_ParseOperation: failed to locate operation");
 
     pos1++;
-    while(pos1 < proctype.size() && isspace(proctype[pos1])) pos1++;
+    while (pos1 < proctype.size() && isspace(proctype[pos1])) pos1++;
 
     operation = proctype.substr(pos1, string::npos);
     std::transform(operation.begin(), operation.end(), operation.begin(), (int(*)(int))std::toupper);
@@ -615,13 +615,13 @@ void PEM_ParseOperation(const string& proctype, string& operation)
 void PEM_ParseAlgorithm(const string& dekinfo, string& algorithm)
 {
     size_t pos1 = 0;
-    while(pos1 < dekinfo.size() && isspace(dekinfo[pos1])) pos1++;
+    while (pos1 < dekinfo.size() && isspace(dekinfo[pos1])) pos1++;
 
     size_t pos2 = dekinfo.find(",");
-    if(pos2 == string::npos)
+    if (pos2 == string::npos)
         throw InvalidDataFormat("PEM_ParseVersion: failed to locate algorithm");
 
-    while(pos2 > pos1 && isspace(dekinfo[pos2])) pos2--;
+    while (pos2 > pos1 && isspace(dekinfo[pos2])) pos2--;
 
     algorithm = dekinfo.substr(pos1, pos2 - pos1);
     std::transform(algorithm.begin(), algorithm.end(), algorithm.begin(),  (int(*)(int))std::toupper);
@@ -631,11 +631,11 @@ void PEM_ParseAlgorithm(const string& dekinfo, string& algorithm)
 void PEM_ParseIV(const string& dekinfo, string& iv)
 {
     size_t pos1 = dekinfo.find(",");
-    if(pos1 == string::npos)
+    if (pos1 == string::npos)
         throw InvalidDataFormat("PEM_ParseIV: failed to locate initialization vector");
 
     pos1++;
-    while(pos1 < dekinfo.size() && isspace(dekinfo[pos1])) pos1++;
+    while (pos1 < dekinfo.size() && isspace(dekinfo[pos1])) pos1++;
 
     iv = dekinfo.substr(pos1, string::npos);
     std::transform(iv.begin(), iv.end(), iv.begin(), (int(*)(int))std::toupper);
@@ -643,7 +643,7 @@ void PEM_ParseIV(const string& dekinfo, string& iv)
 
 size_t PEM_ReadLine(BufferedTransformation& source, SecByteBlock& line, SecByteBlock& ending)
 {
-    if(!source.AnyRetrievable())
+    if (!source.AnyRetrievable())
     {
         line.New(0);
         ending.New(0);
@@ -652,26 +652,26 @@ size_t PEM_ReadLine(BufferedTransformation& source, SecByteBlock& line, SecByteB
     }
 
     ByteQueue temp;
-    while(source.AnyRetrievable())
+    while (source.AnyRetrievable())
     {
         byte b;
-        if(!source.Get(b))
+        if (!source.Get(b))
             throw Exception(Exception::OTHER_ERROR, "PEM_ReadLine: failed to read byte");
 
         // LF ?
-        if(b == '\n')
+        if (b == '\n')
         {
             ending = LF;
             break;
         }
 
         // CR ?
-        if(b == '\r')
+        if (b == '\r')
         {
             // CRLF ?
-            if(source.AnyRetrievable() && source.Peek(b))
+            if (source.AnyRetrievable() && source.Peek(b))
             {
-                if(b == '\n')
+                if (b == '\n')
                 {
                     source.Skip(1);
 
@@ -688,7 +688,7 @@ size_t PEM_ReadLine(BufferedTransformation& source, SecByteBlock& line, SecByteB
         temp.Put(b);
     }
 
-    if(temp.AnyRetrievable())
+    if (temp.AnyRetrievable())
     {
         line.Grow(temp.MaxRetrievable());
         temp.Get(line.data(), line.size());
@@ -721,10 +721,10 @@ PEM_Type PEM_GetType(const BufferedTransformation& bt)
     return PEM_GetTypeFromBlock(sb);
 }
 
-void PEM_NextObject(BufferedTransformation& src, BufferedTransformation& dest, bool trimTrailing)
+bool PEM_NextObject(BufferedTransformation& src, BufferedTransformation& dest, bool trimTrailing)
 {
-    if(!src.AnyRetrievable())
-        return;
+    if (!src.AnyRetrievable())
+        return false;
 
     // We have four things to find:
     //   1. -----BEGIN (the leading begin)
@@ -766,7 +766,7 @@ void PEM_NextObject(BufferedTransformation& src, BufferedTransformation& dest, b
     size_t idx = 0, next = 0;
 
     size_t available = src.MaxRetrievable();
-    while(available)
+    while (available)
     {
         // How much can we read?
         const size_t size = (std::min)(available, READ_SIZE);
@@ -776,7 +776,7 @@ void PEM_NextObject(BufferedTransformation& src, BufferedTransformation& dest, b
         //   block and the block we are reading. But we can't rewind
         //   into a previous index. Once we find an index, the variable
         //   next is set to it. Hence the reason for the max()
-        if(idx > REWIND)
+        if (idx > REWIND)
         {
             const size_t x = idx - REWIND;
             next = max(next, x);
@@ -802,10 +802,10 @@ void PEM_NextObject(BufferedTransformation& src, BufferedTransformation& dest, b
         available -= size;
 
         // Locate '-----BEGIN'
-        if(idx1 == BAD_IDX)
+        if (idx1 == BAD_IDX)
         {
             it = search(accum.begin() + next, accum.end(), PEM_BEGIN.begin(), PEM_BEGIN.end());
-            if(it == accum.end())
+            if (it == accum.end())
                 continue;
 
             idx1 = it - accum.begin();
@@ -813,10 +813,10 @@ void PEM_NextObject(BufferedTransformation& src, BufferedTransformation& dest, b
         }
 
         // Locate '-----'
-        if(idx2 == BAD_IDX && idx1 != BAD_IDX)
+        if (idx2 == BAD_IDX && idx1 != BAD_IDX)
         {
             it = search(accum.begin() + next, accum.end(), PEM_TAIL.begin(), PEM_TAIL.end());
-            if(it == accum.end())
+            if (it == accum.end())
                 continue;
 
             idx2 = it - accum.begin();
@@ -824,10 +824,10 @@ void PEM_NextObject(BufferedTransformation& src, BufferedTransformation& dest, b
         }
 
         // Locate '-----END'
-        if(idx3 == BAD_IDX && idx2 != BAD_IDX)
+        if (idx3 == BAD_IDX && idx2 != BAD_IDX)
         {
             it = search(accum.begin() + next, accum.end(), PEM_END.begin(), PEM_END.end());
-            if(it == accum.end())
+            if (it == accum.end())
                 continue;
 
             idx3 = it - accum.begin();
@@ -835,10 +835,10 @@ void PEM_NextObject(BufferedTransformation& src, BufferedTransformation& dest, b
         }
 
         // Locate '-----'
-        if(idx4 == BAD_IDX && idx3 != BAD_IDX)
+        if (idx4 == BAD_IDX && idx3 != BAD_IDX)
         {
             it = search(accum.begin() + next, accum.end(), PEM_TAIL.begin(), PEM_TAIL.end());
-            if(it == accum.end())
+            if (it == accum.end())
                 continue;
 
             idx4 = it - accum.begin();
@@ -847,16 +847,16 @@ void PEM_NextObject(BufferedTransformation& src, BufferedTransformation& dest, b
     }
 
     // Did we find `-----BEGIN XXX-----` (RFC 1421 calls this pre-encapsulated boundary)?
-    if(idx1 == BAD_IDX || idx2 == BAD_IDX)
+    if (idx1 == BAD_IDX || idx2 == BAD_IDX)
         throw InvalidDataFormat("PEM_NextObject: could not locate boundary header");
 
     // Did we find `-----END XXX-----` (RFC 1421 calls this post-encapsulated boundary)?
-    if(idx3 == BAD_IDX || idx4 == BAD_IDX)
+    if (idx3 == BAD_IDX || idx4 == BAD_IDX)
         throw InvalidDataFormat("PEM_NextObject: could not locate boundary footer");
 
     // *IF* the trailing '-----' occurred in the last 5 bytes in accum, then we might miss the
     // End of Line. We need to peek 2 more bytes if available and append them to accum.
-    if(available >= 2)
+    if (available >= 2)
     {
         ByteQueue tq;
         src.CopyRangeTo(tq, static_cast<lword>(idx), static_cast<lword>(2));
@@ -865,7 +865,7 @@ void PEM_NextObject(BufferedTransformation& src, BufferedTransformation& dest, b
         accum.Grow(offset + 2);
         tq.Get(accum.data() + offset, 2);
     }
-    else if(available == 1)
+    else if (available == 1)
     {
         ByteQueue tq;
         src.CopyRangeTo(tq, static_cast<lword>(idx), static_cast<lword>(1));
@@ -883,18 +883,18 @@ void PEM_NextObject(BufferedTransformation& src, BufferedTransformation& dest, b
     // Include one CR/LF if its available in the accumulator
     next = idx1 + len;
     size_t adjust = 0;
-    if(next < accum.size())
+    if (next < accum.size())
     {
         byte c1 = accum[next];
         byte c2 = 0;
 
-        if(next + 1 < accum.size())
+        if (next + 1 < accum.size())
             c2 = accum[next + 1];
 
         // Longest match first
-        if(c1 == '\r' && c2 == '\n')
+        if (c1 == '\r' && c2 == '\n')
             adjust = 2;
-        else if(c1 == '\r' || c1 == '\n')
+        else if (c1 == '\r' || c1 == '\n')
             adjust = 1;
     }
 
@@ -903,17 +903,19 @@ void PEM_NextObject(BufferedTransformation& src, BufferedTransformation& dest, b
 
     src.Skip(used + adjust);
 
-    if(trimTrailing)
+    if (trimTrailing)
     {
         while (src.AnyRetrievable())
         {
             byte b;
             src.Peek(b);
 
-            if(!isspace(b)) break;
+            if (!isspace(b)) break;
             src.Skip(1);
         }
     }
+
+    return true;
 }
 
 
@@ -925,7 +927,7 @@ void PEM_Load(BufferedTransformation& bt, RSA::PublicKey& rsa)
     PEM_Type type = PEM_GetType(obj);
     if (type == PEM_PUBLIC_KEY)
         PEM_StripEncapsulatedBoundary(obj, PUBLIC_BEGIN, PUBLIC_END);
-    else if(type == PEM_RSA_PUBLIC_KEY)
+    else if (type == PEM_RSA_PUBLIC_KEY)
         PEM_StripEncapsulatedBoundary(obj, RSA_PUBLIC_BEGIN, RSA_PUBLIC_END);
     else
         throw InvalidDataFormat("PEM_Load: not a RSA public key");
@@ -947,17 +949,17 @@ void PEM_Load(BufferedTransformation& bt, RSA::PrivateKey& rsa, const char* pass
     PEM_NextObject(bt, obj);
 
     PEM_Type type = PEM_GetType(obj);
-    if(type == PEM_PRIVATE_KEY)
+    if (type == PEM_PRIVATE_KEY)
         PEM_StripEncapsulatedBoundary(obj, PRIVATE_BEGIN, PRIVATE_END);
-    else if(type == PEM_RSA_PRIVATE_KEY || (type == PEM_RSA_ENC_PRIVATE_KEY && password != NULL))
+    else if (type == PEM_RSA_PRIVATE_KEY || (type == PEM_RSA_ENC_PRIVATE_KEY && password != NULL))
         PEM_StripEncapsulatedBoundary(obj, RSA_PRIVATE_BEGIN, RSA_PRIVATE_END);
-    else if(type == PEM_RSA_ENC_PRIVATE_KEY && password == NULL)
+    else if (type == PEM_RSA_ENC_PRIVATE_KEY && password == NULL)
         throw InvalidArgument("PEM_Load: RSA private key is encrypted");
     else
         throw InvalidDataFormat("PEM_Load: not a RSA private key");
 
     ByteQueue temp;
-    if(type == PEM_RSA_ENC_PRIVATE_KEY)
+    if (type == PEM_RSA_ENC_PRIVATE_KEY)
         PEM_DecodeAndDecrypt(obj, temp, password, length);
     else
         PEM_Base64Decode(obj, temp);
@@ -971,9 +973,9 @@ void PEM_Load(BufferedTransformation& bt, DSA::PublicKey& dsa)
     PEM_NextObject(bt, obj);
 
     PEM_Type type = PEM_GetType(obj);
-    if(type == PEM_PUBLIC_KEY)
+    if (type == PEM_PUBLIC_KEY)
         PEM_StripEncapsulatedBoundary(obj, PUBLIC_BEGIN, PUBLIC_END);
-    else if(type == PEM_DSA_PUBLIC_KEY)
+    else if (type == PEM_DSA_PUBLIC_KEY)
         PEM_StripEncapsulatedBoundary(obj, DSA_PUBLIC_BEGIN, DSA_PUBLIC_END);
     else
         throw InvalidDataFormat("PEM_Load: not a DSA public key");
@@ -995,17 +997,17 @@ void PEM_Load(BufferedTransformation& bt, DSA::PrivateKey& dsa, const char* pass
     PEM_NextObject(bt, obj);
 
     PEM_Type type = PEM_GetType(obj);
-    if(type == PEM_PRIVATE_KEY)
+    if (type == PEM_PRIVATE_KEY)
         PEM_StripEncapsulatedBoundary(obj, PRIVATE_BEGIN, PRIVATE_END);
-    else if(type == PEM_DSA_PRIVATE_KEY || (type == PEM_DSA_ENC_PRIVATE_KEY && password != NULL))
+    else if (type == PEM_DSA_PRIVATE_KEY || (type == PEM_DSA_ENC_PRIVATE_KEY && password != NULL))
         PEM_StripEncapsulatedBoundary(obj, DSA_PRIVATE_BEGIN, DSA_PRIVATE_END);
-    else if(type == PEM_DSA_ENC_PRIVATE_KEY && password == NULL)
+    else if (type == PEM_DSA_ENC_PRIVATE_KEY && password == NULL)
         throw InvalidArgument("PEM_Load: DSA private key is encrypted");
     else
         throw InvalidDataFormat("PEM_Load: not a DSA private key");
 
     ByteQueue temp;
-    if(type == PEM_DSA_ENC_PRIVATE_KEY)
+    if (type == PEM_DSA_ENC_PRIVATE_KEY)
         PEM_DecodeAndDecrypt(obj, temp, password, length);
     else
         PEM_Base64Decode(obj, temp);
@@ -1021,7 +1023,7 @@ void PEM_Load(BufferedTransformation& bt, ElGamal::PublicKey& key)
     PEM_Type type = PEM_GetType(obj);
     if (type == PEM_PUBLIC_KEY)
         PEM_StripEncapsulatedBoundary(obj, PUBLIC_BEGIN, PUBLIC_END);
-    else if(type == PEM_ELGAMAL_PUBLIC_KEY)
+    else if (type == PEM_ELGAMAL_PUBLIC_KEY)
         PEM_StripEncapsulatedBoundary(obj, ELGAMAL_PUBLIC_BEGIN, ELGAMAL_PUBLIC_END);
     else
         throw InvalidDataFormat("PEM_Load: not a ElGamal public key");
@@ -1043,17 +1045,17 @@ void PEM_Load(BufferedTransformation& bt, ElGamal::PrivateKey& key, const char* 
     PEM_NextObject(bt, obj);
 
     PEM_Type type = PEM_GetType(obj);
-    if(type == PEM_PRIVATE_KEY)
+    if (type == PEM_PRIVATE_KEY)
         PEM_StripEncapsulatedBoundary(obj, PRIVATE_BEGIN, PRIVATE_END);
-    else if(type == PEM_ELGAMAL_PRIVATE_KEY || (type == PEM_ELGAMAL_ENC_PRIVATE_KEY && password != NULL))
+    else if (type == PEM_ELGAMAL_PRIVATE_KEY || (type == PEM_ELGAMAL_ENC_PRIVATE_KEY && password != NULL))
         PEM_StripEncapsulatedBoundary(obj, ELGAMAL_PRIVATE_BEGIN, ELGAMAL_PRIVATE_END);
-    else if(type == PEM_ELGAMAL_ENC_PRIVATE_KEY && password == NULL)
+    else if (type == PEM_ELGAMAL_ENC_PRIVATE_KEY && password == NULL)
         throw InvalidArgument("PEM_Load: ElGamal private key is encrypted");
     else
         throw InvalidDataFormat("PEM_Load: not a ElGamal private key");
 
     ByteQueue temp;
-    if(type == PEM_ELGAMAL_ENC_PRIVATE_KEY)
+    if (type == PEM_ELGAMAL_ENC_PRIVATE_KEY)
         PEM_DecodeAndDecrypt(obj, temp, password, length);
     else
         PEM_Base64Decode(obj, temp);
@@ -1077,9 +1079,9 @@ void PEM_Load(BufferedTransformation& bt, DL_PublicKey_EC<ECP>& ec)
     PEM_NextObject(bt, obj);
 
     PEM_Type type = PEM_GetType(obj);
-    if(type == PEM_PUBLIC_KEY)
+    if (type == PEM_PUBLIC_KEY)
         PEM_StripEncapsulatedBoundary(obj, PUBLIC_BEGIN, PUBLIC_END);
-    else if(type == PEM_EC_PUBLIC_KEY)
+    else if (type == PEM_EC_PUBLIC_KEY)
         PEM_StripEncapsulatedBoundary(obj, EC_PUBLIC_BEGIN, EC_PUBLIC_END);
     else
         throw InvalidDataFormat("PEM_Load: not a public EC key");
@@ -1101,17 +1103,17 @@ void PEM_Load(BufferedTransformation& bt, DL_PrivateKey_EC<ECP>& ec, const char*
     PEM_NextObject(bt, obj);
 
     PEM_Type type = PEM_GetType(obj);
-    if(type == PEM_PRIVATE_KEY)
+    if (type == PEM_PRIVATE_KEY)
         PEM_StripEncapsulatedBoundary(obj, PRIVATE_BEGIN, PRIVATE_END);
-    else if(type == PEM_EC_PRIVATE_KEY || (type == PEM_EC_ENC_PRIVATE_KEY && password != NULL))
+    else if (type == PEM_EC_PRIVATE_KEY || (type == PEM_EC_ENC_PRIVATE_KEY && password != NULL))
         PEM_StripEncapsulatedBoundary(obj, EC_PRIVATE_BEGIN, EC_PRIVATE_END);
-    else if(type == PEM_EC_ENC_PRIVATE_KEY && password == NULL)
+    else if (type == PEM_EC_ENC_PRIVATE_KEY && password == NULL)
         throw InvalidArgument("PEM_Load: EC private key is encrypted");
     else
         throw InvalidDataFormat("PEM_Load: not a private EC key");
 
     ByteQueue temp;
-    if(type == PEM_EC_ENC_PRIVATE_KEY)
+    if (type == PEM_EC_ENC_PRIVATE_KEY)
         PEM_DecodeAndDecrypt(obj, temp, password, length);
     else
         PEM_Base64Decode(obj, temp);
@@ -1125,9 +1127,9 @@ void PEM_Load(BufferedTransformation& bt, DL_PublicKey_EC<EC2N>& ec)
     PEM_NextObject(bt, obj);
 
     PEM_Type type = PEM_GetType(obj);
-    if(type == PEM_PUBLIC_KEY)
+    if (type == PEM_PUBLIC_KEY)
         PEM_StripEncapsulatedBoundary(obj, PUBLIC_BEGIN, PUBLIC_END);
-    else if(type == PEM_EC_PUBLIC_KEY)
+    else if (type == PEM_EC_PUBLIC_KEY)
         PEM_StripEncapsulatedBoundary(obj, EC_PUBLIC_BEGIN, EC_PUBLIC_END);
     else
         throw InvalidDataFormat("PEM_Load: not a public EC key");
@@ -1149,17 +1151,17 @@ void PEM_Load(BufferedTransformation& bt, DL_PrivateKey_EC<EC2N>& ec, const char
     PEM_NextObject(bt, obj);
 
     PEM_Type type = PEM_GetType(obj);
-    if(type == PEM_PRIVATE_KEY)
+    if (type == PEM_PRIVATE_KEY)
         PEM_StripEncapsulatedBoundary(obj, PRIVATE_BEGIN, PRIVATE_END);
-    else if(type == PEM_EC_PRIVATE_KEY || (type == PEM_EC_ENC_PRIVATE_KEY && password != NULL))
+    else if (type == PEM_EC_PRIVATE_KEY || (type == PEM_EC_ENC_PRIVATE_KEY && password != NULL))
         PEM_StripEncapsulatedBoundary(obj, EC_PRIVATE_BEGIN, EC_PRIVATE_END);
-    else if(type == PEM_EC_ENC_PRIVATE_KEY && password == NULL)
+    else if (type == PEM_EC_ENC_PRIVATE_KEY && password == NULL)
         throw InvalidArgument("PEM_Load: EC private key is encrypted");
     else
         throw InvalidDataFormat("PEM_Load: not a private EC key");
 
     ByteQueue temp;
-    if(type == PEM_EC_ENC_PRIVATE_KEY)
+    if (type == PEM_EC_ENC_PRIVATE_KEY)
         PEM_DecodeAndDecrypt(obj, temp, password, length);
     else
         PEM_Base64Decode(obj, temp);
@@ -1193,7 +1195,7 @@ void PEM_Load(BufferedTransformation& bt, DL_GroupParameters_DSA& params)
     PEM_NextObject(bt, obj);
 
     PEM_Type type = PEM_GetType(obj);
-    if(type == PEM_DSA_PARAMETERS)
+    if (type == PEM_DSA_PARAMETERS)
         PEM_StripEncapsulatedBoundary(obj, DSA_PARAMETERS_BEGIN, DSA_PARAMETERS_END);
     else
         throw InvalidDataFormat("PEM_Read: invalid DSA parameters");
@@ -1210,7 +1212,7 @@ void PEM_DH_Load(BufferedTransformation& bt, Integer& p, Integer& g)
     PEM_NextObject(bt, obj);
 
     PEM_Type type = PEM_GetType(obj);
-    if(type == PEM_DH_PARAMETERS)
+    if (type == PEM_DH_PARAMETERS)
         PEM_StripEncapsulatedBoundary(obj, DH_PARAMETERS_BEGIN, DH_PARAMETERS_END);
     else
         throw InvalidDataFormat("PEM_DH_Load: invalid DH parameters");
@@ -1225,12 +1227,12 @@ void PEM_DH_Load(BufferedTransformation& bt, Integer& p, Integer& g)
 
 #if defined(PEM_KEY_OR_PARAMETER_VALIDATION) && !defined(NO_OS_DEPENDENCE)
     AutoSeededRandomPool prng;
-    if(!VerifyPrime(prng, p, 3))
+    if (!VerifyPrime(prng, p, 3))
         throw Exception(Exception::OTHER_ERROR, "PEM_DH_Load: p is not prime");
 
     // https://crypto.stackexchange.com/questions/12961/diffie-hellman-parameter-check-when-g-2-must-p-mod-24-11
     long residue = static_cast<long>(p.Modulo(24));
-    if(residue != 11 && residue != 23)
+    if (residue != 11 && residue != 23)
         throw Exception(Exception::OTHER_ERROR, "PEM_DH_Load: g is not a suitable generator");
 #endif
 }
@@ -1241,7 +1243,7 @@ void PEM_DH_Load(BufferedTransformation& bt, Integer& p, Integer& q, Integer& g)
     PEM_NextObject(bt, obj);
 
     PEM_Type type = PEM_GetType(obj);
-    if(type == PEM_DH_PARAMETERS)
+    if (type == PEM_DH_PARAMETERS)
         PEM_StripEncapsulatedBoundary(obj, DH_PARAMETERS_BEGIN, DH_PARAMETERS_END);
     else
         throw InvalidDataFormat("PEM_DH_Load: invalid DH parameters");
@@ -1257,12 +1259,12 @@ void PEM_DH_Load(BufferedTransformation& bt, Integer& p, Integer& q, Integer& g)
 
 #if defined(PEM_KEY_OR_PARAMETER_VALIDATION) && !defined(NO_OS_DEPENDENCE)
     AutoSeededRandomPool prng;
-    if(!VerifyPrime(prng, p, 3))
+    if (!VerifyPrime(prng, p, 3))
         throw Exception(Exception::OTHER_ERROR, "PEM_DH_Load: p is not prime");
 
     // https://crypto.stackexchange.com/questions/12961/diffie-hellman-parameter-check-when-g-2-must-p-mod-24-11
     long residue = static_cast<long>(p.Modulo(24));
-    if(residue != 11 && residue != 23)
+    if (residue != 11 && residue != 23)
         throw Exception(Exception::OTHER_ERROR, "PEM_DH_Load: g is not a suitable generator");
 #endif
 }

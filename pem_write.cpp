@@ -186,7 +186,7 @@ void PEM_DEREncode(BufferedTransformation& bt, const DL_PrivateKey_EC<EC>& key)
 
     // Named curve
     OID oid;
-    if(!key.GetVoidValue(Name::GroupOID(), typeid(oid), &oid))
+    if (!key.GetVoidValue(Name::GroupOID(), typeid(oid), &oid))
         throw Exception(Exception::OTHER_ERROR, "PEM_DEREncode: failed to retrieve curve OID");
 
     DERSequenceEncoder seq(bt);
@@ -304,70 +304,70 @@ void PEM_CipherForAlgorithm(RandomNumberGenerator& rng, string algorithm, member
     unsigned int ksize, vsize;
     std::transform(algorithm.begin(), algorithm.end(), algorithm.begin(), (int(*)(int))std::toupper);
 
-    if(algorithm == "AES-256-CBC")
+    if (algorithm == "AES-256-CBC")
     {
         ksize = 32;
         vsize = 16;
 
         stream.reset(new CBC_Mode<AES>::Encryption);
     }
-    else if(algorithm == "AES-192-CBC")
+    else if (algorithm == "AES-192-CBC")
     {
         ksize = 24;
         vsize = 16;
 
         stream.reset(new CBC_Mode<AES>::Encryption);
     }
-    else if(algorithm == "AES-128-CBC")
+    else if (algorithm == "AES-128-CBC")
     {
         ksize = 16;
         vsize = 16;
 
         stream.reset(new CBC_Mode<AES>::Encryption);
     }
-    else if(algorithm == "CAMELLIA-256-CBC")
+    else if (algorithm == "CAMELLIA-256-CBC")
     {
         ksize = 32;
         vsize = 16;
 
         stream.reset(new CBC_Mode<Camellia>::Encryption);
     }
-    else if(algorithm == "CAMELLIA-192-CBC")
+    else if (algorithm == "CAMELLIA-192-CBC")
     {
         ksize = 24;
         vsize = 16;
 
         stream.reset(new CBC_Mode<Camellia>::Encryption);
     }
-    else if(algorithm == "CAMELLIA-128-CBC")
+    else if (algorithm == "CAMELLIA-128-CBC")
     {
         ksize = 16;
         vsize = 16;
 
         stream.reset(new CBC_Mode<Camellia>::Encryption);
     }
-    else if(algorithm == "DES-EDE3-CBC")
+    else if (algorithm == "DES-EDE3-CBC")
     {
         ksize = 24;
         vsize = 8;
 
         stream.reset(new CBC_Mode<DES_EDE3>::Encryption);
     }
-    else if(algorithm == "DES-EDE2-CBC")
+    else if (algorithm == "DES-EDE2-CBC")
     {
         ksize = 16;
         vsize = 8;
 
         stream.reset(new CBC_Mode<DES_EDE2>::Encryption);
     }
-    else if(algorithm == "DES-CBC")
+    else if (algorithm == "DES-CBC")
     {
         ksize = 8;
         vsize = 8;
 
         stream.reset(new CBC_Mode<DES>::Encryption);
     }
-    else if(algorithm == "IDEA-CBC")
+    else if (algorithm == "IDEA-CBC")
     {
         ksize = 16;
         vsize = 8;
@@ -395,7 +395,7 @@ void PEM_CipherForAlgorithm(RandomNumberGenerator& rng, string algorithm, member
     //   header is used; and not the derived IV.
     Weak::MD5 md5;
     int ret = OPENSSL_EVP_BytesToKey(md5, _salt.data(), _pword, _plen, 1, _key.data(), _key.size(), NULL, 0);
-    if(ret != static_cast<int>(ksize))
+    if (ret != static_cast<int>(ksize))
         throw Exception(Exception::OTHER_ERROR, "PEM_CipherForAlgorithm: EVP_BytesToKey failed");
 
     SymmetricCipher* cipher = dynamic_cast<SymmetricCipher*>(stream.get());

@@ -28,6 +28,7 @@ NAMESPACE_BEGIN(CryptoPP)
 /// \brief Get the next PEM object
 /// \param src the source BufferedTransformation
 /// \param dest the destination BufferedTransformation
+/// \returns true if an object was parsed, false otherwise
 /// \details PEM_NextObject attempts to retrieve the next PEM encoded key or
 ///  parameter from <tt>src</tt> and transfers it to <tt>dest</tt>. If there
 ///  are multiple keys or parameters, then only the first is transferred.
@@ -41,7 +42,7 @@ NAMESPACE_BEGIN(CryptoPP)
 ///  (and the dashes). The malformed input will be caught later when a
 ///  particular key or parameter is parsed.
 /// \throws InvalidDataFormat
-void PEM_NextObject(BufferedTransformation& src, BufferedTransformation& dest, bool trimTrailing=true);
+bool PEM_NextObject(BufferedTransformation& src, BufferedTransformation& dest, bool trimTrailing=true);
 
 /// \brief Recognized PEM types.
 /// \details Many PEM types can be read and write, but not all of them.

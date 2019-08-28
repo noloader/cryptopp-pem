@@ -135,7 +135,7 @@ void PEM_Base64Encode(BufferedTransformation& source, BufferedTransformation& de
 SecByteBlock GetControlField(const SecByteBlock& line)
 {
     SecByteBlock::const_iterator it = std::search(line.begin(), line.end(), COLON.begin(), COLON.end());
-    if(it != line.end())
+    if (it != line.end())
     {
         size_t len = it - line.begin();
         return SecByteBlock(line.data(), len);
@@ -147,7 +147,7 @@ SecByteBlock GetControlField(const SecByteBlock& line)
 SecByteBlock GetControlFieldData(const SecByteBlock& line)
 {
     SecByteBlock::const_iterator it = std::search(line.begin(), line.end(), COLON.begin(), COLON.end());
-    if(it != line.end() && ++it != line.end())
+    if (it != line.end() && ++it != line.end())
     {
         size_t len = line.end() - it;
         return SecByteBlock(it, len);
@@ -165,9 +165,9 @@ struct ByteToLower {
 // Returns 0 if a match, non-0 otherwise
 int CompareNoCase(const SecByteBlock& first, const SecByteBlock& second)
 {
-    if(first.size() < second.size())
+    if (first.size() < second.size())
         return -1;
-    else if(first.size() > second.size())
+    else if (first.size() > second.size())
         return 1;
 
     // Same size... compare them....
@@ -206,7 +206,7 @@ int OPENSSL_EVP_BytesToKey(HashTransformation& hash,
     {
         hash.Restart();
 
-        if(addmd++)
+        if (addmd++)
             hash.Update(digest.data(), digest.size());
 
         hash.Update(data, dlen);

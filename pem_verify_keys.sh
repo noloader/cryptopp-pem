@@ -37,8 +37,7 @@ fi
 #################
 # DSA keys
 
-# The DSA command is broken. It returns 1 when using '-noout' option instead of 0.
-# It also fails to parse keys with CRLF.
+# The DSA command returns 0 on success
 
 if [[ -f dsa-params.new.pem ]]; then
 	echo "dsa-params.new.pem:"

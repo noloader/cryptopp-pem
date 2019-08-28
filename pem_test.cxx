@@ -77,6 +77,18 @@ int main(int argc, char* argv[])
 		PEM_Save(fs6, prng, k6, "AES-128-CBC", "test", 4);
 	}
 
+	// Test cacert.pem. There should be ~130 or ~140 certs in it.
+	{
+		FileSource fs("cacert.pem", true);
+		size_t count=0;
+
+		while (PEM_NextObject(fs, TheBitBucket())) {
+			count++;
+		}
+
+		std::cout << "Parsed " << count << " certificates from cacert.pem" << std::endl;	
+	}
+
         // Save an EC public key
         //FileSink fs16("ec-pub-xxx.pem", true);
         //DL_PublicKey_EC<ECP> k16;
@@ -86,7 +98,7 @@ int main(int argc, char* argv[])
         //AutoSeededRandomPool prng;
         //DL_PrivateKey_EC<ECP> k18 = ...;
         //FileSink fs18("ec-enc-priv-xxx.pem", true);
-        //PEM_Save(fs18, prng, k18, "AES-128-CBC", "test", 3);
+        //PEM_Save(fs18, prng, k18, "AES-128-CBC", "test", 4);
     }
     catch(const Exception& ex)
     {
