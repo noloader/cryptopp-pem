@@ -286,10 +286,6 @@ void PEM_LoadParams(BufferedTransformation& bt, DL_GroupParameters_EC<EC>& param
     params.BERDecode(temp);
 }
 
-// Explicit instantiation
-template void PEM_LoadParams<ECP>(BufferedTransformation& bt, DL_GroupParameters_EC<ECP>& params);
-template void PEM_LoadParams<EC2N>(BufferedTransformation& bt, DL_GroupParameters_EC<EC2N>& params);
-
 bool PEM_IsEncrypted(SecByteBlock& sb)
 {
     SecByteBlock::iterator it = search(sb.begin(), sb.end(), PROC_TYPE.begin(), PROC_TYPE.end());
