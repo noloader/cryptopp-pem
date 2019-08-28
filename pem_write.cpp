@@ -444,6 +444,22 @@ void PEM_Save(BufferedTransformation& bt, RandomNumberGenerator& rng, const DSA:
     PEM_SavePrivateKey(bt, rng, dsa, DSA_PRIVATE_BEGIN, DSA_PRIVATE_END, algorithm, password, length);
 }
 
+void PEM_Save(BufferedTransformation& bt, const ElGamal::PublicKey& key)
+{
+    PEM_SavePublicKey(bt, key, PUBLIC_BEGIN, PUBLIC_END);
+}
+
+void PEM_Save(BufferedTransformation& bt, const ElGamal::PrivateKey& key)
+{
+    PEM_SavePrivateKey(bt, key, ELGAMAL_PRIVATE_BEGIN, ELGAMAL_PRIVATE_END);
+}
+
+void PEM_Save(BufferedTransformation& bt, RandomNumberGenerator& rng, const ElGamal::PrivateKey& key, const string& algorithm, const char* password, size_t length)
+{
+    PEM_SavePrivateKey(bt, rng, key, ELGAMAL_PRIVATE_BEGIN, ELGAMAL_PRIVATE_END, algorithm, password, length);
+}
+
+
 void PEM_Save(BufferedTransformation& bt, const DL_GroupParameters_EC<ECP>& params)
 {
     bool old = PEM_GetNamedCurve(params);
