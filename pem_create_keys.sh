@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 
-# Script to create the test keys used pem-test.cpp
+# Script to create the test keys used pem_test.cxx
+
+echo "Compiling test program"
+g++ pem_test.cxx ./libcryptopp.a -o pem_test.exe
 
 # RSA private key, public key, and encrypted private key
 openssl genrsa -out rsa-priv.pem 1024
