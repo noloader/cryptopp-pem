@@ -466,10 +466,10 @@ void PEM_SavePrivateKey(BufferedTransformation& bt, RandomNumberGenerator& rng,
     line += LBL_DEK_INFO + LBL_COLON + LBL_SPACE;
     line += algorithm + LBL_COMMA + encoded;
 
-    // The extra '\n' separates the control fields from the encapsulated
+    // The extra newline separates the control fields from the encapsulated
     //   text (i.e, header from body). Its required by RFC 1421.
     PEM_WriteLine(queue, line);
-    queue.Put('\n');
+    queue.Put(reinterpret_cast<const byte*>(RFC1421_EOL.data()), RFC1421_EOL.size());
 
     ByteQueue temp;
     PEM_DEREncode(temp, key);
