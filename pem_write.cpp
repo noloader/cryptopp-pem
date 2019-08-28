@@ -1,9 +1,5 @@
-// pem-wr.cpp - PEM write routines. Written and placed in the public domain by Jeffrey Walton
-//              Copyright assigned to the Crypto++ project.
-//
-// Crypto++ Library is copyrighted as a compilation and (as of version 5.6.2) licensed
-// under the Boost Software License 1.0, while the individual files in the compilation
-// are all public domain.
+// pem-wr.cpp - PEM write routines.
+//              Written and placed in the public domain by Jeffrey Walton
 
 ///////////////////////////////////////////////////////////////////////////
 // For documentation on the PEM read and write routines, see

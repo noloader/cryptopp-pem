@@ -1,9 +1,6 @@
-// pem-com.h - commom PEM routines. Written and placed in the public domain by Jeffrey Walton
-//             Copyright assigned to the Crypto++ project.
-//
-// Crypto++ Library is copyrighted as a compilation and (as of version 5.6.2) licensed
-// under the Boost Software License 1.0, while the individual files in the compilation
-// are all public domain.
+// pem-com.h - commom PEM routines.
+//             Written and placed in the public domain by Jeffrey Walton
+//             pem_common.h is an internal header. Include pem.h instead.
 
 ///////////////////////////////////////////////////////////////////////////
 // For documentation on the PEM read and write routines, see

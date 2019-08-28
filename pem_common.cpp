@@ -1,9 +1,5 @@
-// pem-com.cpp - commom PEM routines. Written and placed in the public domain by Jeffrey Walton
-//               Copyright assigned to the Crypto++ project.
-//
-// Crypto++ Library is copyrighted as a compilation and (as of version 5.6.2) licensed
-// under the Boost Software License 1.0, while the individual files in the compilation
-// are all public domain.
+// pem-com.cpp - commom PEM routines.
+//               Written and placed in the public domain by Jeffrey Walton
 
 ///////////////////////////////////////////////////////////////////////////
 // For documentation on the PEM read and write routines, see
@@ -45,7 +41,7 @@ void PEM_Base64Decode(BufferedTransformation& source, BufferedTransformation& de
 
 void PEM_Base64Encode(BufferedTransformation& source, BufferedTransformation& dest)
 {
-    Base64Encoder encoder(new Redirector(dest), true /*lineBreak*/, RFC1421_LINE_BREAK);
+    Base64Encoder encoder(new Redirector(dest), true, RFC1421_LINE_BREAK);
     source.TransferTo(encoder);
     encoder.MessageEnd();
 }
@@ -85,7 +81,7 @@ int CompareNoCase(const SecByteBlock& first, const SecByteBlock& second)
 {
     if(first.size() < second.size())
         return -1;
-    else if(second.size() < first.size())
+    else if(first.size() > second.size())
         return 1;
 
     // Same size... compare them....
@@ -99,6 +95,7 @@ int CompareNoCase(const SecByteBlock& first, const SecByteBlock& second)
     std::transform(t2.begin(), t2.end(), t2.begin(), ByteToLower());
 #endif
 
+    // Strings are the same length
     return std::memcmp(t1.begin(), t2.begin(), t2.size());
 }
 
