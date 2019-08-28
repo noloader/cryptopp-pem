@@ -463,8 +463,8 @@ void PEM_SavePrivateKey(BufferedTransformation& bt, RandomNumberGenerator& rng,
 
     // e.g., DEK-Info: AES-128-CBC,5E537774BCCD88B3E2F47FE294C93253
     string line;
-    line += LBL_DEK_INFO + LBL_COLON + LBL_SPACE;
-    line += algorithm + LBL_COMMA + encoded;
+    line += "DEK-Info: ";
+    line += algorithm + "," + encoded;
 
     // The extra newline separates the control fields from the encapsulated
     //   text (i.e, header from body). Its required by RFC 1421.

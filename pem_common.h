@@ -38,22 +38,12 @@ NAMESPACE_BEGIN(CryptoPP)
 //////////////////////////////////////////////////////
 //////////////////////////////////////////////////////
 
-static inline SecByteBlock StringToSecByteBlock(const std::string& str)
-{
-    return SecByteBlock(reinterpret_cast<const byte*>(str.data()), str.size());
-}
-
-static inline SecByteBlock StringToSecByteBlock(const char* str)
-{
-    return SecByteBlock(reinterpret_cast<const byte*>(str), strlen(str));
-}
-
-static inline const byte* BYTE_PTR(const char* cstr)
+inline const byte* BYTE_PTR(const char* cstr)
 {
     return reinterpret_cast<const byte*>(cstr);
 }
 
-static inline byte* BYTE_PTR(char* cstr)
+inline byte* BYTE_PTR(char* cstr)
 {
     return reinterpret_cast<byte*>(cstr);
 }
@@ -91,69 +81,8 @@ static const unsigned int OPENSSL_PKCS5_SALT_LEN = 8;
 static const unsigned int RFC1421_LINE_BREAK = 64;
 static const std::string RFC1421_EOL = "\r\n";
 
-
 // Signals failure
 static const size_t PEM_INVALID = static_cast<size_t>(-1);
-
-static const std::string LBL_PUBLIC_BEGIN("-----BEGIN PUBLIC KEY-----");
-static const std::string LBL_PUBLIC_END("-----END PUBLIC KEY-----");
-
-static const std::string LBL_PRIVATE_BEGIN("-----BEGIN PRIVATE KEY-----");
-static const std::string LBL_PRIVATE_END("-----END PRIVATE KEY-----");
-
-static const std::string LBL_RSA_PUBLIC_BEGIN("-----BEGIN RSA PUBLIC KEY-----");
-static const std::string LBL_RSA_PUBLIC_END("-----END RSA PUBLIC KEY-----");
-
-static const std::string LBL_RSA_PRIVATE_BEGIN("-----BEGIN RSA PRIVATE KEY-----");
-static const std::string LBL_RSA_PRIVATE_END("-----END RSA PRIVATE KEY-----");
-
-static const std::string LBL_DSA_PUBLIC_BEGIN("-----BEGIN DSA PUBLIC KEY-----");
-static const std::string LBL_DSA_PUBLIC_END("-----END DSA PUBLIC KEY-----");
-
-static const std::string LBL_DSA_PRIVATE_BEGIN("-----BEGIN DSA PRIVATE KEY-----");
-static const std::string LBL_DSA_PRIVATE_END("-----END DSA PRIVATE KEY-----");
-
-static const std::string LBL_ELGAMAL_PUBLIC_BEGIN("-----BEGIN ELGAMAL PUBLIC KEY-----");
-static const std::string LBL_ELGAMAL_PUBLIC_END("-----END ELGAMAL PUBLIC KEY-----");
-
-static const std::string LBL_ELGAMAL_PRIVATE_BEGIN("-----BEGIN ELGAMAL PRIVATE KEY-----");
-static const std::string LBL_ELGAMAL_PRIVATE_END("-----END ELGAMAL PRIVATE KEY-----");
-
-static const std::string LBL_EC_PUBLIC_BEGIN("-----BEGIN EC PUBLIC KEY-----");
-static const std::string LBL_EC_PUBLIC_END("-----END EC PUBLIC KEY-----");
-
-static const std::string LBL_ECDSA_PUBLIC_BEGIN("-----BEGIN ECDSA PUBLIC KEY-----");
-static const std::string LBL_ECDSA_PUBLIC_END("-----END ECDSA PUBLIC KEY-----");
-
-static const std::string LBL_EC_PRIVATE_BEGIN("-----BEGIN EC PRIVATE KEY-----");
-static const std::string LBL_EC_PRIVATE_END("-----END EC PRIVATE KEY-----");
-
-static const std::string LBL_EC_PARAMETERS_BEGIN("-----BEGIN EC PARAMETERS-----");
-static const std::string LBL_EC_PARAMETERS_END("-----END EC PARAMETERS-----");
-
-static const std::string LBL_DH_PARAMETERS_BEGIN("-----BEGIN DH PARAMETERS-----");
-static const std::string LBL_DH_PARAMETERS_END("-----END DH PARAMETERS-----");
-
-static const std::string LBL_DSA_PARAMETERS_BEGIN("-----BEGIN DSA PARAMETERS-----");
-static const std::string LBL_DSA_PARAMETERS_END("-----END DSA PARAMETERS-----");
-
-static const std::string LBL_CERTIFICATE_BEGIN("-----BEGIN CERTIFICATE-----");
-static const std::string LBL_CERTIFICATE_END("-----END CERTIFICATE-----");
-
-static const std::string LBL_X509_CERTIFICATE_BEGIN("-----BEGIN X509 CERTIFICATE-----");
-static const std::string LBL_X509_CERTIFICATE_END("-----END X509 CERTIFICATE-----");
-
-static const std::string LBL_REQ_CERTIFICATE_BEGIN("-----BEGIN CERTIFICATE REQUEST-----");
-static const std::string LBL_REQ_CERTIFICATE_END("-----END CERTIFICATE REQUEST-----");
-
-static const std::string LBL_PROC_TYPE("Proc-Type");
-static const std::string LBL_PROC_TYPE_ENC("Proc-Type: 4,ENCRYPTED");
-static const std::string LBL_ENCRYPTED("ENCRYPTED");
-static const std::string LBL_DEK_INFO("DEK-Info");
-static const std::string LBL_CONTENT_DOMAIN("Content-Domain");
-static const std::string LBL_COMMA(",");
-static const std::string LBL_SPACE(" ");
-static const std::string LBL_COLON(":");
 
 static const SecByteBlock CR(BYTE_PTR("\r"), 1);
 static const SecByteBlock LF(BYTE_PTR("\n"), 1);
@@ -163,65 +92,65 @@ static const SecByteBlock SBB_PEM_BEGIN(BYTE_PTR("-----BEGIN"), 10);
 static const SecByteBlock SBB_PEM_TAIL(BYTE_PTR("-----"), 5);
 static const SecByteBlock SBB_PEM_END(BYTE_PTR("-----END"), 8);
 
-static const SecByteBlock SBB_PUBLIC_BEGIN(StringToSecByteBlock(LBL_PUBLIC_BEGIN));
-static const SecByteBlock SBB_PUBLIC_END(StringToSecByteBlock(LBL_PUBLIC_END));
+static const SecByteBlock SBB_PUBLIC_BEGIN(BYTE_PTR("-----BEGIN PUBLIC KEY-----"), 26);
+static const SecByteBlock SBB_PUBLIC_END(BYTE_PTR("-----END PUBLIC KEY-----"), 24);
 
-static const SecByteBlock SBB_PRIVATE_BEGIN(StringToSecByteBlock(LBL_PRIVATE_BEGIN));
-static const SecByteBlock SBB_PRIVATE_END(StringToSecByteBlock(LBL_PRIVATE_END));
+static const SecByteBlock SBB_PRIVATE_BEGIN(BYTE_PTR("-----BEGIN PRIVATE KEY-----"), 27);
+static const SecByteBlock SBB_PRIVATE_END(BYTE_PTR("-----END PRIVATE KEY-----"), 25);
 
-static const SecByteBlock SBB_RSA_PUBLIC_BEGIN(StringToSecByteBlock(LBL_RSA_PUBLIC_BEGIN));
-static const SecByteBlock SBB_RSA_PUBLIC_END(StringToSecByteBlock(LBL_RSA_PUBLIC_END));
+static const SecByteBlock SBB_RSA_PUBLIC_BEGIN(BYTE_PTR("-----BEGIN RSA PUBLIC KEY-----"), 30);
+static const SecByteBlock SBB_RSA_PUBLIC_END(BYTE_PTR("-----END RSA PUBLIC KEY-----"), 28);
 
-static const SecByteBlock SBB_RSA_PRIVATE_BEGIN(StringToSecByteBlock(LBL_RSA_PRIVATE_BEGIN));
-static const SecByteBlock SBB_RSA_PRIVATE_END(StringToSecByteBlock(LBL_RSA_PRIVATE_END));
+static const SecByteBlock SBB_RSA_PRIVATE_BEGIN(BYTE_PTR("-----BEGIN RSA PRIVATE KEY-----"), 31);
+static const SecByteBlock SBB_RSA_PRIVATE_END(BYTE_PTR("-----END RSA PRIVATE KEY-----"), 29);
 
-static const SecByteBlock SBB_DSA_PUBLIC_BEGIN(StringToSecByteBlock(LBL_DSA_PUBLIC_BEGIN));
-static const SecByteBlock SBB_DSA_PUBLIC_END(StringToSecByteBlock(LBL_DSA_PUBLIC_END));
+static const SecByteBlock SBB_DSA_PUBLIC_BEGIN(BYTE_PTR("-----BEGIN DSA PUBLIC KEY-----"), 30);
+static const SecByteBlock SBB_DSA_PUBLIC_END(BYTE_PTR("-----END DSA PUBLIC KEY-----"), 28);
 
-static const SecByteBlock SBB_DSA_PRIVATE_BEGIN(StringToSecByteBlock(LBL_DSA_PRIVATE_BEGIN));
-static const SecByteBlock SBB_DSA_PRIVATE_END(StringToSecByteBlock(LBL_DSA_PRIVATE_END));
+static const SecByteBlock SBB_DSA_PRIVATE_BEGIN(BYTE_PTR("-----BEGIN DSA PRIVATE KEY-----"), 31);
+static const SecByteBlock SBB_DSA_PRIVATE_END(BYTE_PTR("-----END DSA PRIVATE KEY-----"), 28);
 
-static const SecByteBlock SBB_ELGAMAL_PUBLIC_BEGIN(StringToSecByteBlock(LBL_ELGAMAL_PUBLIC_BEGIN));
-static const SecByteBlock SBB_ELGAMAL_PUBLIC_END(StringToSecByteBlock(LBL_ELGAMAL_PUBLIC_END));
+static const SecByteBlock SBB_ELGAMAL_PUBLIC_BEGIN(BYTE_PTR("-----BEGIN ELGAMAL PUBLIC KEY-----"), 34);
+static const SecByteBlock SBB_ELGAMAL_PUBLIC_END(BYTE_PTR("-----END ELGAMAL PUBLIC KEY-----"), 32);
 
-static const SecByteBlock SBB_ELGAMAL_PRIVATE_BEGIN(StringToSecByteBlock(LBL_ELGAMAL_PRIVATE_BEGIN));
-static const SecByteBlock SBB_ELGAMAL_PRIVATE_END(StringToSecByteBlock(LBL_ELGAMAL_PRIVATE_END));
+static const SecByteBlock SBB_ELGAMAL_PRIVATE_BEGIN(BYTE_PTR("-----BEGIN ELGAMAL PRIVATE KEY-----"), 35);
+static const SecByteBlock SBB_ELGAMAL_PRIVATE_END(BYTE_PTR("-----END ELGAMAL PRIVATE KEY-----"), 33);
 
-static const SecByteBlock SBB_EC_PUBLIC_BEGIN(StringToSecByteBlock(LBL_EC_PUBLIC_BEGIN));
-static const SecByteBlock SBB_EC_PUBLIC_END(StringToSecByteBlock(LBL_EC_PUBLIC_END));
+static const SecByteBlock SBB_EC_PUBLIC_BEGIN(BYTE_PTR("-----BEGIN EC PUBLIC KEY-----"), 29);
+static const SecByteBlock SBB_EC_PUBLIC_END(BYTE_PTR("-----END EC PUBLIC KEY-----"), 27);
 
-static const SecByteBlock SBB_ECDSA_PUBLIC_BEGIN(StringToSecByteBlock(LBL_ECDSA_PUBLIC_BEGIN));
-static const SecByteBlock SBB_ECDSA_PUBLIC_END(StringToSecByteBlock(LBL_ECDSA_PUBLIC_END));
+static const SecByteBlock SBB_ECDSA_PUBLIC_BEGIN(BYTE_PTR("-----BEGIN ECDSA PUBLIC KEY-----"), 32);
+static const SecByteBlock SBB_ECDSA_PUBLIC_END(BYTE_PTR("-----END ECDSA PUBLIC KEY-----"), 30);
 
-static const SecByteBlock SBB_EC_PRIVATE_BEGIN(StringToSecByteBlock(LBL_EC_PRIVATE_BEGIN));
-static const SecByteBlock SBB_EC_PRIVATE_END(StringToSecByteBlock(LBL_EC_PRIVATE_END));
+static const SecByteBlock SBB_EC_PRIVATE_BEGIN(BYTE_PTR("-----BEGIN EC PRIVATE KEY-----"), 30);
+static const SecByteBlock SBB_EC_PRIVATE_END(BYTE_PTR("-----END EC PRIVATE KEY-----"), 28);
 
-static const SecByteBlock SBB_EC_PARAMETERS_BEGIN(StringToSecByteBlock(LBL_EC_PARAMETERS_BEGIN));
-static const SecByteBlock SBB_EC_PARAMETERS_END(StringToSecByteBlock(LBL_EC_PARAMETERS_END));
+static const SecByteBlock SBB_EC_PARAMETERS_BEGIN(BYTE_PTR("-----BEGIN EC PARAMETERS-----"), 29);
+static const SecByteBlock SBB_EC_PARAMETERS_END(BYTE_PTR("-----END EC PARAMETERS-----"), 27);
 
-static const SecByteBlock SBB_DH_PARAMETERS_BEGIN(StringToSecByteBlock(LBL_DH_PARAMETERS_BEGIN));
-static const SecByteBlock SBB_DH_PARAMETERS_END(StringToSecByteBlock(LBL_DH_PARAMETERS_END));
+static const SecByteBlock SBB_DH_PARAMETERS_BEGIN(BYTE_PTR("-----BEGIN DH PARAMETERS-----"), 29);
+static const SecByteBlock SBB_DH_PARAMETERS_END(BYTE_PTR("-----END DH PARAMETERS-----"), 27);
 
-static const SecByteBlock SBB_DSA_PARAMETERS_BEGIN(StringToSecByteBlock(LBL_DSA_PARAMETERS_BEGIN));
-static const SecByteBlock SBB_DSA_PARAMETERS_END(StringToSecByteBlock(LBL_DSA_PARAMETERS_END));
+static const SecByteBlock SBB_DSA_PARAMETERS_BEGIN(BYTE_PTR("-----BEGIN DSA PARAMETERS-----"), 30);
+static const SecByteBlock SBB_DSA_PARAMETERS_END(BYTE_PTR("-----END DSA PARAMETERS-----"), 28);
 
-static const SecByteBlock SBB_CERTIFICATE_BEGIN(StringToSecByteBlock(LBL_CERTIFICATE_BEGIN));
-static const SecByteBlock SBB_CERTIFICATE_END(StringToSecByteBlock(LBL_CERTIFICATE_END));
+static const SecByteBlock SBB_CERTIFICATE_BEGIN(BYTE_PTR("-----BEGIN CERTIFICATE-----"), 27);
+static const SecByteBlock SBB_CERTIFICATE_END(BYTE_PTR("-----END CERTIFICATE-----"), 25);
 
-static const SecByteBlock SBB_X509_CERTIFICATE_BEGIN(StringToSecByteBlock(LBL_X509_CERTIFICATE_BEGIN));
-static const SecByteBlock SBB_X509_CERTIFICATE_END(StringToSecByteBlock(LBL_X509_CERTIFICATE_END));
+static const SecByteBlock SBB_X509_CERTIFICATE_BEGIN(BYTE_PTR("-----BEGIN X509 CERTIFICATE-----"), 32);
+static const SecByteBlock SBB_X509_CERTIFICATE_END(BYTE_PTR("-----END X509 CERTIFICATE-----"), 30);
 
-static const SecByteBlock SBB_REQ_CERTIFICATE_BEGIN(StringToSecByteBlock(LBL_REQ_CERTIFICATE_BEGIN));
-static const SecByteBlock SBB_REQ_CERTIFICATE_END(StringToSecByteBlock(LBL_REQ_CERTIFICATE_END));
+static const SecByteBlock SBB_REQ_CERTIFICATE_BEGIN(BYTE_PTR("-----BEGIN CERTIFICATE REQUEST-----"), 35);
+static const SecByteBlock SBB_REQ_CERTIFICATE_END(BYTE_PTR("-----END CERTIFICATE REQUEST-----"), 33);
 
-static const SecByteBlock SBB_PROC_TYPE(StringToSecByteBlock(LBL_PROC_TYPE));
-static const SecByteBlock SBB_PROC_TYPE_ENC(StringToSecByteBlock(LBL_PROC_TYPE_ENC));
-static const SecByteBlock SBB_DEK_INFO(StringToSecByteBlock(LBL_DEK_INFO));
-static const SecByteBlock SBB_CONTENT_DOMAIN(StringToSecByteBlock(LBL_CONTENT_DOMAIN));
-static const SecByteBlock SBB_ENCRYPTED(StringToSecByteBlock(LBL_ENCRYPTED));
-static const SecByteBlock SBB_COMMA(StringToSecByteBlock(LBL_COMMA));
-static const SecByteBlock SBB_SPACE(StringToSecByteBlock(LBL_SPACE));
-static const SecByteBlock SBB_COLON(StringToSecByteBlock(LBL_COLON));
+static const SecByteBlock SBB_PROC_TYPE(BYTE_PTR("Proc-Type"), 9);
+static const SecByteBlock SBB_PROC_TYPE_ENC(BYTE_PTR("Proc-Type: 4,ENCRYPTED"), 22);
+static const SecByteBlock SBB_ENCRYPTED(BYTE_PTR("ENCRYPTED"), 9);
+static const SecByteBlock SBB_DEK_INFO(BYTE_PTR("DEK-Info"), 8);
+static const SecByteBlock SBB_CONTENT_DOMAIN(BYTE_PTR("Content-Domain"), 14);
+static const SecByteBlock SBB_COMMA(BYTE_PTR(","), 1);
+static const SecByteBlock SBB_SPACE(BYTE_PTR(" "), 1);
+static const SecByteBlock SBB_COLON(BYTE_PTR(":"), 1);
 
 NAMESPACE_END
 

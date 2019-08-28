@@ -599,12 +599,12 @@ void PEM_CipherForAlgorithm(const EncapsulatedHeader& header, const char* passwo
 
         stream.reset(new CBC_Mode<DES_EDE3>::Decryption);
     }
-    else if(algorithm == "IDEA-CBC")
+    else if(algorithm == "DES-EDE2-CBC")
     {
         ksize = 16;
         vsize = 8;
 
-        stream.reset(new CBC_Mode<IDEA>::Decryption);
+        stream.reset(new CBC_Mode<DES_EDE2>::Decryption);
     }
     else if(algorithm == "DES-CBC")
     {
@@ -612,6 +612,13 @@ void PEM_CipherForAlgorithm(const EncapsulatedHeader& header, const char* passwo
         vsize = 8;
 
         stream.reset(new CBC_Mode<DES>::Decryption);
+    }
+    else if(algorithm == "IDEA-CBC")
+    {
+        ksize = 16;
+        vsize = 8;
+
+        stream.reset(new CBC_Mode<IDEA>::Decryption);
     }
     else
     {
@@ -736,6 +743,21 @@ PEM_Type PEM_GetType(const SecByteBlock& sb)
             return PEM_DSA_ENC_PRIVATE_KEY;
 
         return PEM_DSA_PRIVATE_KEY;
+    }
+
+    // ElGamal key types
+    it = Search(sb, SBB_ELGAMAL_PUBLIC_BEGIN);
+    if(it != sb.end())
+        return PEM_ELGAMAL_PUBLIC_KEY;
+
+    it = Search(sb, SBB_ELGAMAL_PRIVATE_BEGIN);
+    if(it != sb.end())
+    {
+        it = Search(sb, SBB_PROC_TYPE_ENC);
+        if(it != sb.end())
+            return PEM_ELGAMAL_ENC_PRIVATE_KEY;
+
+        return PEM_ELGAMAL_PRIVATE_KEY;
     }
 
     // EC key types
@@ -925,7 +947,7 @@ void PEM_ParseVersion(const string& proctype, string& version)
     size_t pos1 = 0;
     while(pos1 < proctype.size() && isspace(proctype[pos1])) pos1++;
 
-    size_t pos2 = proctype.find(LBL_COMMA);
+    size_t pos2 = proctype.find(",");
     if(pos2 == string::npos)
         throw InvalidDataFormat("PEM_ParseVersion: failed to locate version");
 
@@ -936,7 +958,7 @@ void PEM_ParseVersion(const string& proctype, string& version)
 // The string will be similar to " 4, ENCRYPTED"
 void PEM_ParseOperation(const string& proctype, string& operation)
 {
-    size_t pos1 = proctype.find(LBL_COMMA);
+    size_t pos1 = proctype.find(",");
     if(pos1 == string::npos)
         throw InvalidDataFormat("PEM_ParseOperation: failed to locate operation");
 
@@ -953,7 +975,7 @@ void PEM_ParseAlgorithm(const string& dekinfo, string& algorithm)
     size_t pos1 = 0;
     while(pos1 < dekinfo.size() && isspace(dekinfo[pos1])) pos1++;
 
-    size_t pos2 = dekinfo.find(LBL_COMMA);
+    size_t pos2 = dekinfo.find(",");
     if(pos2 == string::npos)
         throw InvalidDataFormat("PEM_ParseVersion: failed to locate algorithm");
 
@@ -966,7 +988,7 @@ void PEM_ParseAlgorithm(const string& dekinfo, string& algorithm)
 // The string will be similar to " AES-128-CBC, XXXXXXXXXXXXXXXX"
 void PEM_ParseIV(const string& dekinfo, string& iv)
 {
-    size_t pos1 = dekinfo.find(LBL_COMMA);
+    size_t pos1 = dekinfo.find(",");
     if(pos1 == string::npos)
         throw InvalidDataFormat("PEM_ParseIV: failed to locate initialization vector");
 
