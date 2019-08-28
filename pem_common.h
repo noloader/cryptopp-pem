@@ -113,6 +113,12 @@ static const std::string LBL_DSA_PUBLIC_END("-----END DSA PUBLIC KEY-----");
 static const std::string LBL_DSA_PRIVATE_BEGIN("-----BEGIN DSA PRIVATE KEY-----");
 static const std::string LBL_DSA_PRIVATE_END("-----END DSA PRIVATE KEY-----");
 
+static const std::string LBL_ELGAMAL_PUBLIC_BEGIN("-----BEGIN ELGAMAL PUBLIC KEY-----");
+static const std::string LBL_ELGAMAL_PUBLIC_END("-----END ELGAMAL PUBLIC KEY-----");
+
+static const std::string LBL_ELGAMAL_PRIVATE_BEGIN("-----BEGIN ELGAMAL PRIVATE KEY-----");
+static const std::string LBL_ELGAMAL_PRIVATE_END("-----END ELGAMAL PRIVATE KEY-----");
+
 static const std::string LBL_EC_PUBLIC_BEGIN("-----BEGIN EC PUBLIC KEY-----");
 static const std::string LBL_EC_PUBLIC_END("-----END EC PUBLIC KEY-----");
 
@@ -174,6 +180,12 @@ static const SecByteBlock SBB_DSA_PUBLIC_END(StringToSecByteBlock(LBL_DSA_PUBLIC
 
 static const SecByteBlock SBB_DSA_PRIVATE_BEGIN(StringToSecByteBlock(LBL_DSA_PRIVATE_BEGIN));
 static const SecByteBlock SBB_DSA_PRIVATE_END(StringToSecByteBlock(LBL_DSA_PRIVATE_END));
+
+static const SecByteBlock SBB_ELGAMAL_PUBLIC_BEGIN(StringToSecByteBlock(LBL_ELGAMAL_PUBLIC_BEGIN));
+static const SecByteBlock SBB_ELGAMAL_PUBLIC_END(StringToSecByteBlock(LBL_ELGAMAL_PUBLIC_END));
+
+static const SecByteBlock SBB_ELGAMAL_PRIVATE_BEGIN(StringToSecByteBlock(LBL_ELGAMAL_PRIVATE_BEGIN));
+static const SecByteBlock SBB_ELGAMAL_PRIVATE_END(StringToSecByteBlock(LBL_ELGAMAL_PRIVATE_END));
 
 static const SecByteBlock SBB_EC_PUBLIC_BEGIN(StringToSecByteBlock(LBL_EC_PUBLIC_BEGIN));
 static const SecByteBlock SBB_EC_PUBLIC_END(StringToSecByteBlock(LBL_EC_PUBLIC_END));

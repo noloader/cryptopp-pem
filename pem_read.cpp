@@ -196,6 +196,54 @@ void PEM_Load(BufferedTransformation& bt, DSA::PrivateKey& dsa, const char* pass
     PEM_LoadPrivateKey(temp, dsa);
 }
 
+void PEM_Load(BufferedTransformation& bt, ElGamal::PublicKey& key)
+{
+    ByteQueue obj;
+    PEM_NextObject(bt, obj);
+
+    PEM_Type type = PEM_GetType(obj);
+    if (type == PEM_PUBLIC_KEY)
+        PEM_StripEncapsulatedBoundary(obj, SBB_PUBLIC_BEGIN, SBB_PUBLIC_END);
+    else if(type == PEM_ELGAMAL_PUBLIC_KEY)
+        PEM_StripEncapsulatedBoundary(obj, SBB_ELGAMAL_PUBLIC_BEGIN, SBB_ELGAMAL_PUBLIC_END);
+    else
+        throw InvalidDataFormat("PEM_Load: not a ElGamal public key");
+
+    ByteQueue temp;
+    PEM_Base64Decode(obj, temp);
+
+    PEM_LoadPublicKey(temp, key, type == PEM_PUBLIC_KEY);
+}
+
+void PEM_Load(BufferedTransformation& bt, ElGamal::PrivateKey& key)
+{
+    return PEM_Load(bt, key, NULL, 0);
+}
+
+void PEM_Load(BufferedTransformation& bt, ElGamal::PrivateKey& key, const char* password, size_t length)
+{
+    ByteQueue obj;
+    PEM_NextObject(bt, obj);
+
+    PEM_Type type = PEM_GetType(obj);
+    if(type == PEM_PRIVATE_KEY)
+        PEM_StripEncapsulatedBoundary(obj, SBB_PRIVATE_BEGIN, SBB_PRIVATE_END);
+    else if(type == PEM_ELGAMAL_PRIVATE_KEY || (type == PEM_ELGAMAL_ENC_PRIVATE_KEY && password != NULL))
+        PEM_StripEncapsulatedBoundary(obj, SBB_ELGAMAL_PRIVATE_BEGIN, SBB_ELGAMAL_PRIVATE_END);
+    else if(type == PEM_ELGAMAL_ENC_PRIVATE_KEY && password == NULL)
+        throw InvalidArgument("PEM_Load: ElGamal private key is encrypted");
+    else
+        throw InvalidDataFormat("PEM_Load: not a ElGamal private key");
+
+    ByteQueue temp;
+    if(type == PEM_ELGAMAL_ENC_PRIVATE_KEY)
+        PEM_DecodeAndDecrypt(obj, temp, password, length);
+    else
+        PEM_Base64Decode(obj, temp);
+
+    PEM_LoadPrivateKey(temp, key, type == PEM_PRIVATE_KEY);
+}
+
 void PEM_Load(BufferedTransformation& bt, DL_GroupParameters_EC<ECP>& params)
 {
     PEM_LoadParams(bt, params);

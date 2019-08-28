@@ -19,8 +19,9 @@
 #include "eccrypto.h"
 #include "gfpcrypt.h"
 #include "integer.h"
-#include "dsa.h"
 #include "rsa.h"
+#include "dsa.h"
+#include "elgamal.h"
 
 NAMESPACE_BEGIN(CryptoPP)
 
@@ -65,6 +66,12 @@ enum PEM_Type {
     PEM_DSA_PRIVATE_KEY,
     /// \brief Encrypted DSA private key
     PEM_DSA_ENC_PRIVATE_KEY,
+    /// \brief ElGamal public key
+    PEM_ELGAMAL_PUBLIC_KEY,
+    /// \brief ElGamal private key
+    PEM_ELGAMAL_PRIVATE_KEY,
+    /// \brief Encrypted ElGamal private key
+    PEM_ELGAMAL_ENC_PRIVATE_KEY,
     /// \brief Elliptic curve public key
     /// \details non-specific elliptic curve public key
     PEM_EC_PUBLIC_KEY,
@@ -149,6 +156,27 @@ void PEM_Load(BufferedTransformation& bt, DSA::PrivateKey& key);
 /// \param length the size of the password buffer
 /// \throws Exception on failure
 void PEM_Load(BufferedTransformation& bt, DSA::PrivateKey& key,
+              const char* password, size_t length);
+
+/// \brief Load a PEM encoded ElGamal public key
+/// \param bt the source BufferedTransformation
+/// \param key the ElGamal public key
+/// \throws Exception on failure
+void PEM_Load(BufferedTransformation& bt, ElGamal::PublicKey& key);
+
+/// \brief Load a PEM encoded ElGamal private key
+/// \param bt the source BufferedTransformation
+/// \param key the ElGamal private key
+/// \throws Exception on failure
+void PEM_Load(BufferedTransformation& bt, ElGamal::PrivateKey& key);
+
+/// \brief Load a PEM encoded ElGamal private key
+/// \param bt the source BufferedTransformation
+/// \param key the ElGamal private key
+/// \param password pointer to the password buffer
+/// \param length the size of the password buffer
+/// \throws Exception on failure
+void PEM_Load(BufferedTransformation& bt, ElGamal::PrivateKey& key,
               const char* password, size_t length);
 
 /// \brief Load a PEM encoded ECP public key
@@ -318,6 +346,33 @@ void PEM_Save(BufferedTransformation& bt, const DSA::PrivateKey& key);
 /// \throws Exception on failure
 void PEM_Save(BufferedTransformation& bt, RandomNumberGenerator& rng,
               const DSA::PrivateKey& key, const std::string& algorithm,
+              const char* password, size_t length);
+
+/// \brief Save a PEM encoded ElGamal public key
+/// \param bt the destination BufferedTransformation
+/// \param key the ElGamal public key
+/// \throws Exception on failure
+void PEM_Save(BufferedTransformation& bt, const ElGamal::PublicKey& key);
+
+/// \brief Save a PEM encoded ElGamal private key
+/// \param bt the destination BufferedTransformation
+/// \param key the ElGamal private key
+/// \throws Exception on failure
+void PEM_Save(BufferedTransformation& bt, const ElGamal::PrivateKey& key);
+
+/// \brief Save a PEM encoded ElGamal private key
+/// \param bt the destination BufferedTransformation
+/// \param rng a RandomNumberGenerator to produce an initialization vector
+/// \param key the ElGamal private key
+/// \param algorithm the encryption algorithm
+/// \param password pointer to the password buffer
+/// \param length the size of the password buffer
+/// \details The algorithm should be a value like <tt>AES-128-CBC</tt>. See
+///  <tt>pem_read.cpp</tt> and <tt>pem_write.cpp</tt> for the values that are
+///  recognized.
+/// \throws Exception on failure
+void PEM_Save(BufferedTransformation& bt, RandomNumberGenerator& rng,
+              const ElGamal::PrivateKey& key, const std::string& algorithm,
               const char* password, size_t length);
 
 /// \brief Save a PEM encoded ECP public key
