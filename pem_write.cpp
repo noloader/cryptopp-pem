@@ -36,244 +36,65 @@ using std::transform;
 #define CRYPTOPP_ENABLE_NAMESPACE_WEAK 1
 #include "md5.h"
 
-NAMESPACE_BEGIN(CryptoPP)
-
 //////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+
+ANONYMOUS_NAMESPACE_BEGIN
+
+using namespace CryptoPP;
+
 // Returns a keyed StreamTransformation ready to use to encrypt a DER encoded key
+void PEM_CipherForAlgorithm(RandomNumberGenerator& rng, string algorithm, member_ptr<StreamTransformation>& stream,
+                            SecByteBlock& key, SecByteBlock& iv, const char* password, size_t length);
 
-static void PEM_CipherForAlgorithm(RandomNumberGenerator& rng, string algorithm, member_ptr<StreamTransformation>& stream,
-                                   SecByteBlock& key, SecByteBlock& iv, const char* password, size_t length);
-
-//////////////////////////////////////////////////////////////////////////////
-// DER encodes a key.
-
-static void PEM_DEREncode(BufferedTransformation& bt, const PKCS8PrivateKey& key);
-static void PEM_DEREncode(BufferedTransformation& bt, const X509PublicKey& key);
+void PEM_DEREncode(BufferedTransformation& bt, const PKCS8PrivateKey& key);
+void PEM_DEREncode(BufferedTransformation& bt, const X509PublicKey& key);
 
 // Ambiguous call; needs a best match. Provide an overload.
-static void PEM_DEREncode(BufferedTransformation& bt, const RSA::PrivateKey& key);
+void PEM_DEREncode(BufferedTransformation& bt, const RSA::PrivateKey& key);
 
-// Special handling for DSA private keys. Crypto++ provides {version,x}, while OpenSSL expects {version,p,q,g,y,x}.
-static void PEM_DEREncode(BufferedTransformation& bt, const DSA::PrivateKey& key);
+// Special handling for DSA private keys. Crypto++ provides {version,x},
+//   while OpenSSL expects {version,p,q,g,y,x}.
+void PEM_DEREncode(BufferedTransformation& bt, const DSA::PrivateKey& key);
 
-// Special handling for EC private keys. Crypto++ provides {version,x}, while OpenSSL expects {version,x,curve oid,y}.
+// Special handling for EC private keys. Crypto++ provides {version,x},
+//   while OpenSSL expects {version,x,curve oid,y}.
 template <class EC>
-static void PEM_DEREncode(BufferedTransformation& bt, const DL_PrivateKey_EC<EC>& key);
+void PEM_DEREncode(BufferedTransformation& bt, const DL_PrivateKey_EC<EC>& key);
 
-//////////////////////////////////////////////////////////////////////////////
-// Encrypts a DER encoded key.
-
-static void PEM_Encrypt(BufferedTransformation& src, BufferedTransformation& dest, member_ptr<StreamTransformation>& stream);
-static void PEM_EncryptAndEncode(BufferedTransformation& src, BufferedTransformation& dest, member_ptr<StreamTransformation>& stream);
-
-//////////////////////////////////////////////////////////////////////////////
-// Writes a PEM encoded EC parameters to the BufferedTransformation
+void PEM_Encrypt(BufferedTransformation& src, BufferedTransformation& dest, member_ptr<StreamTransformation>& stream);
+void PEM_EncryptAndEncode(BufferedTransformation& src, BufferedTransformation& dest, member_ptr<StreamTransformation>& stream);
 
 template <class EC>
-static void PEM_SaveParams(BufferedTransformation& bt, const DL_GroupParameters_EC< EC >& params, const SecByteBlock& pre, const SecByteBlock& post);
-
-//////////////////////////////////////////////////////////////////////////////
-// Writes a PEM encoded key to the BufferedTransformation
+void PEM_SaveParams(BufferedTransformation& bt, const DL_GroupParameters_EC< EC >& params, const SecByteBlock& pre, const SecByteBlock& post);
 
 template <class KEY>
-static void PEM_SaveKey(BufferedTransformation& bt,
+void PEM_SaveKey(BufferedTransformation& bt,
                         const KEY& key, const SecByteBlock& pre, const SecByteBlock& post);
 
 template <class PUBLIC_KEY>
-static void PEM_SavePublicKey(BufferedTransformation& bt,
-                              const PUBLIC_KEY& key, const SecByteBlock& pre, const SecByteBlock& post);
+void PEM_SavePublicKey(BufferedTransformation& bt,
+                       const PUBLIC_KEY& key, const SecByteBlock& pre, const SecByteBlock& post);
 
 template <class PRIVATE_KEY>
-static void PEM_SavePrivateKey(BufferedTransformation& bt,
-                               const PRIVATE_KEY& key, const SecByteBlock& pre, const SecByteBlock& post);
+void PEM_SavePrivateKey(BufferedTransformation& bt,
+                        const PRIVATE_KEY& key, const SecByteBlock& pre, const SecByteBlock& post);
 
 template <class PRIVATE_KEY>
-static void PEM_SavePrivateKey(BufferedTransformation& bt, RandomNumberGenerator& rng,
-                               const PRIVATE_KEY& key, const SecByteBlock& pre, const SecByteBlock& post,
-                               const std::string& algorithm, const char* password, size_t length);
+void PEM_SavePrivateKey(BufferedTransformation& bt, RandomNumberGenerator& rng,
+                        const PRIVATE_KEY& key, const SecByteBlock& pre, const SecByteBlock& post,
+                        const std::string& algorithm, const char* password, size_t length);
 
-//////////////////////////////////////////////////////////////////////////////
 // Fetches and sets encodeAsOID parameter
-
 template <class EC>
-static bool PEM_GetNamedCurve(const DL_GroupParameters_EC<EC>& params);
+bool PEM_GetNamedCurve(const DL_GroupParameters_EC<EC>& params);
 
+// Fetches and sets encodeAsOID parameter
 template <class EC>
-static void PEM_SetNamedCurve(const DL_GroupParameters_EC<EC>& params, bool flag);
+void PEM_SetNamedCurve(const DL_GroupParameters_EC<EC>& params, bool flag);
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-
-void PEM_Save(BufferedTransformation& bt, const RSA::PublicKey& rsa)
-{
-    PEM_SavePublicKey(bt, rsa, PUBLIC_BEGIN, PUBLIC_END);
-}
-
-void PEM_Save(BufferedTransformation& bt, const RSA::PrivateKey& rsa)
-{
-    PEM_SavePrivateKey(bt, rsa, RSA_PRIVATE_BEGIN, RSA_PRIVATE_END);
-}
-
-void PEM_Save(BufferedTransformation& bt, RandomNumberGenerator& rng, const RSA::PrivateKey& rsa, const string& algorithm, const char* password, size_t length)
-{
-    PEM_SavePrivateKey(bt, rng, rsa, RSA_PRIVATE_BEGIN, RSA_PRIVATE_END, algorithm, password, length);
-}
-
-void PEM_Save(BufferedTransformation& bt, const DSA::PublicKey& dsa)
-{
-    PEM_SavePublicKey(bt, dsa, PUBLIC_BEGIN, PUBLIC_END);
-}
-
-void PEM_Save(BufferedTransformation& bt, const DSA::PrivateKey& dsa)
-{
-    PEM_SavePrivateKey(bt, dsa, DSA_PRIVATE_BEGIN, DSA_PRIVATE_END);
-}
-
-void PEM_Save(BufferedTransformation& bt, RandomNumberGenerator& rng, const DSA::PrivateKey& dsa, const string& algorithm, const char* password, size_t length)
-{
-    PEM_SavePrivateKey(bt, rng, dsa, DSA_PRIVATE_BEGIN, DSA_PRIVATE_END, algorithm, password, length);
-}
-
-void PEM_Save(BufferedTransformation& bt, const DL_GroupParameters_EC<ECP>& params)
-{
-    bool old = PEM_GetNamedCurve(params);
-    PEM_SetNamedCurve(params, true);
-
-    PEM_SaveParams(bt, params, EC_PARAMETERS_BEGIN, EC_PARAMETERS_END);
-    PEM_SetNamedCurve(params, old);
-}
-
-void PEM_Save(BufferedTransformation& bt, const DL_GroupParameters_EC<EC2N>& params)
-{
-    bool old = PEM_GetNamedCurve(params);
-    PEM_SetNamedCurve(params, true);
-
-    PEM_SaveParams(bt, params, EC_PARAMETERS_BEGIN, EC_PARAMETERS_END);
-    PEM_SetNamedCurve(params, old);
-}
-
-void PEM_Save(BufferedTransformation& bt, const DL_PublicKey_EC<ECP>& ec)
-{
-    bool old = PEM_GetNamedCurve(ec.GetGroupParameters());
-    PEM_SetNamedCurve(ec.GetGroupParameters(), true);
-
-    PEM_SavePublicKey(bt, ec, PUBLIC_BEGIN, PUBLIC_END);
-    PEM_SetNamedCurve(ec.GetGroupParameters(), old);
-}
-
-void PEM_Save(BufferedTransformation& bt, const DL_PrivateKey_EC<ECP>& ec)
-{
-    bool old = PEM_GetNamedCurve(ec.GetGroupParameters());
-    PEM_SetNamedCurve(ec.GetGroupParameters(), true);
-
-    PEM_SavePrivateKey(bt, ec, EC_PRIVATE_BEGIN, EC_PRIVATE_END);
-    PEM_SetNamedCurve(ec.GetGroupParameters(), old);
-}
-
-void PEM_Save(BufferedTransformation& bt, RandomNumberGenerator& rng, const DL_PrivateKey_EC<ECP>& ec, const std::string& algorithm, const char* password, size_t length)
-{
-    bool old = PEM_GetNamedCurve(ec.GetGroupParameters());
-    PEM_SetNamedCurve(ec.GetGroupParameters(), true);
-
-    PEM_SavePrivateKey(bt, rng, ec, EC_PRIVATE_BEGIN, EC_PRIVATE_END, algorithm, password, length);
-    PEM_SetNamedCurve(ec.GetGroupParameters(), old);
-}
-
-void PEM_Save(BufferedTransformation& bt, const DL_PublicKey_EC<EC2N>& ec)
-{
-    bool old = PEM_GetNamedCurve(ec.GetGroupParameters());
-    PEM_SetNamedCurve(ec.GetGroupParameters(), true);
-
-    PEM_SavePublicKey(bt, ec, PUBLIC_BEGIN, PUBLIC_END);
-    PEM_SetNamedCurve(ec.GetGroupParameters(), old);
-}
-
-void PEM_Save(BufferedTransformation& bt, const DL_PrivateKey_EC<EC2N>& ec)
-{
-    bool old = PEM_GetNamedCurve(ec.GetGroupParameters());
-    PEM_SetNamedCurve(ec.GetGroupParameters(), true);
-
-    PEM_SavePrivateKey(bt, ec, EC_PRIVATE_BEGIN, EC_PRIVATE_END);
-    PEM_SetNamedCurve(ec.GetGroupParameters(), old);
-}
-
-void PEM_Save(BufferedTransformation& bt, RandomNumberGenerator& rng, const DL_PrivateKey_EC<EC2N>& ec, const std::string& algorithm, const char* password, size_t length)
-{
-    bool old = PEM_GetNamedCurve(ec.GetGroupParameters());
-    PEM_SetNamedCurve(ec.GetGroupParameters(), true);
-
-    PEM_SavePrivateKey(bt, rng, ec, EC_PRIVATE_BEGIN, EC_PRIVATE_END, algorithm, password, length);
-    PEM_SetNamedCurve(ec.GetGroupParameters(), old);
-}
-
-void PEM_Save(BufferedTransformation& bt, const DL_Keys_ECDSA<ECP>::PrivateKey& ecdsa)
-{
-    PEM_Save(bt, dynamic_cast<const DL_PrivateKey_EC<ECP>&>(ecdsa));
-}
-
-void PEM_Save(BufferedTransformation& bt, RandomNumberGenerator& rng, DL_Keys_ECDSA<ECP>::PrivateKey& ecdsa, const std::string& algorithm, const char* password, size_t length)
-{
-    PEM_Save(bt, rng, dynamic_cast<DL_PrivateKey_EC<ECP>&>(ecdsa), algorithm, password, length);
-}
-
-void PEM_Save(BufferedTransformation& bt, const DL_GroupParameters_DSA& params)
-{
-    ByteQueue queue;
-
-    PEM_WriteLine(queue, DSA_PARAMETERS_BEGIN);
-
-    Base64Encoder encoder(new Redirector(queue), true /*lineBreak*/, RFC1421_LINE_BREAK);
-    params.Save(encoder);
-    encoder.MessageEnd();
-
-    PEM_WriteLine(queue, DSA_PARAMETERS_END);
-
-    queue.TransferTo(bt);
-    bt.MessageEnd();
-}
-
-void PEM_DH_Save(BufferedTransformation& bt, const Integer& p, const Integer& g)
-{
-    ByteQueue queue;
-
-    PEM_WriteLine(queue, DH_PARAMETERS_BEGIN);
-
-    Base64Encoder encoder(new Redirector(queue), true /*lineBreak*/, RFC1421_LINE_BREAK);
-
-    DERSequenceEncoder seq(encoder);
-      p.BEREncode(seq);
-      g.BEREncode(seq);
-    seq.MessageEnd();
-
-    encoder.MessageEnd();
-
-    PEM_WriteLine(queue, DH_PARAMETERS_END);
-
-    queue.TransferTo(bt);
-    bt.MessageEnd();
-}
-
-void PEM_DH_Save(BufferedTransformation& bt, const Integer& p, const Integer& q, const Integer& g)
-{
-    ByteQueue queue;
-
-    PEM_WriteLine(queue, DH_PARAMETERS_BEGIN);
-
-    Base64Encoder encoder(new Redirector(queue), true /*lineBreak*/, RFC1421_LINE_BREAK);
-
-    DERSequenceEncoder seq(encoder);
-      p.BEREncode(seq);
-      q.BEREncode(seq);
-      g.BEREncode(seq);
-    seq.MessageEnd();
-
-    encoder.MessageEnd();
-
-    PEM_WriteLine(queue, DH_PARAMETERS_END);
-
-    queue.TransferTo(bt);
-    bt.MessageEnd();
-}
 
 template <class EC>
 void PEM_SaveParams(BufferedTransformation& bt, const DL_GroupParameters_EC< EC >& params, const SecByteBlock& pre, const SecByteBlock& post)
@@ -315,25 +136,12 @@ void PEM_DEREncode(BufferedTransformation& bt, const DSA::PrivateKey& key)
     key.MakePublicKey(pkey);
 
     DERSequenceEncoder seq(bt);
-
-    // Version
-    DEREncodeUnsigned<word32>(seq, 0);
-
-    // P
-    params.GetModulus().DEREncode(seq);
-
-    // Q
-    params.GetSubgroupOrder().DEREncode(seq);
-
-    // G
-    params.GetGenerator().DEREncode(seq);
-
-    // Y
-    pkey.GetPublicElement().DEREncode(seq);
-
-    // X
-    key.GetPrivateExponent().DEREncode(seq);
-
+        DEREncodeUnsigned<word32>(seq, 0);         // version
+        params.GetModulus().DEREncode(seq);        // p
+        params.GetSubgroupOrder().DEREncode(seq);  // q
+        params.GetGenerator().DEREncode(seq);      // g
+        pkey.GetPublicElement().DEREncode(seq);    // y
+        key.GetPrivateExponent().DEREncode(seq);   // x
     seq.MessageEnd();
 }
 
@@ -346,44 +154,30 @@ void PEM_DEREncode(BufferedTransformation& bt, const DL_PrivateKey_EC<EC>& key)
     DL_PublicKey_EC<EC> pkey;
     key.MakePublicKey(pkey);
 
-    // Prefetch the group parmaters
+    // Prefetch the group parameters
     const DL_GroupParameters_EC<EC>& params = pkey.GetGroupParameters();
-
-    // Sequence begin
-    DERSequenceEncoder seq(bt);
-
-    // Version
-    DEREncodeUnsigned<word32>(seq, 1);
-
-    // Private key
     const Integer& x = key.GetPrivateExponent();
-    x.DEREncodeAsOctetString(seq, params.GetSubgroupOrder().ByteCount());
 
     // Named curve
     OID oid;
     if(!key.GetVoidValue(Name::GroupOID(), typeid(oid), &oid))
         throw Exception(Exception::OTHER_ERROR, "PEM_DEREncode: failed to retrieve curve OID");
 
-    // Encoder for OID
-    DERGeneralEncoder cs1(seq, CONTEXT_SPECIFIC | CONSTRUCTED | 0);
-    oid.DEREncode(cs1);
-    cs1.MessageEnd();
+    DERSequenceEncoder seq(bt);
+        DEREncodeUnsigned<word32>(seq, 1);  // version
+        x.DEREncodeAsOctetString(seq, params.GetSubgroupOrder().ByteCount());
 
-    // Encoder for public key (outer CONTEXT_SPECIFIC)
-    DERGeneralEncoder cs2(seq, CONTEXT_SPECIFIC | CONSTRUCTED | 1);
+        DERGeneralEncoder cs1(seq, CONTEXT_SPECIFIC | CONSTRUCTED | 0);
+            oid.DEREncode(cs1);
+        cs1.MessageEnd();
 
-    // Encoder for public key (inner BIT_STRING)
-    DERGeneralEncoder cs3(cs2, BIT_STRING);
-    cs3.Put(0x00);        // Unused bits
-    params.GetCurve().EncodePoint(cs3, pkey.GetPublicElement(), false);
-
-    // Done encoding
-    cs3.MessageEnd();
-    cs2.MessageEnd();
-
-    // Sequence end
+        DERGeneralEncoder cs2(seq, CONTEXT_SPECIFIC | CONSTRUCTED | 1);
+            DERGeneralEncoder cs3(cs2, BIT_STRING);
+                cs3.Put(0x00);        // Unused bits
+                params.GetCurve().EncodePoint(cs3, pkey.GetPublicElement(), false);
+            cs3.MessageEnd();
+        cs2.MessageEnd();
     seq.MessageEnd();
-
     bt.MessageEnd();
 }
 
@@ -412,7 +206,7 @@ void PEM_SavePublicKey(BufferedTransformation& bt,
 }
 
 template <class PRIVATE_KEY>
-static void PEM_SavePrivateKey(BufferedTransformation& bt,
+void PEM_SavePrivateKey(BufferedTransformation& bt,
                                const PRIVATE_KEY& key, const SecByteBlock& pre, const SecByteBlock& post)
 {
     PEM_SaveKey(bt, key, pre, post);
@@ -607,6 +401,184 @@ void PEM_SetNamedCurve(const DL_GroupParameters_EC<EC>& params, bool flag)
 {
     DL_GroupParameters_EC<EC>& pp = const_cast<DL_GroupParameters_EC<EC>&>(params);
     pp.SetEncodeAsOID(flag);
+}
+
+ANONYMOUS_NAMESPACE_END
+
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+
+NAMESPACE_BEGIN(CryptoPP)
+
+void PEM_Save(BufferedTransformation& bt, const RSA::PublicKey& rsa)
+{
+    PEM_SavePublicKey(bt, rsa, PUBLIC_BEGIN, PUBLIC_END);
+}
+
+void PEM_Save(BufferedTransformation& bt, const RSA::PrivateKey& rsa)
+{
+    PEM_SavePrivateKey(bt, rsa, RSA_PRIVATE_BEGIN, RSA_PRIVATE_END);
+}
+
+void PEM_Save(BufferedTransformation& bt, RandomNumberGenerator& rng, const RSA::PrivateKey& rsa, const string& algorithm, const char* password, size_t length)
+{
+    PEM_SavePrivateKey(bt, rng, rsa, RSA_PRIVATE_BEGIN, RSA_PRIVATE_END, algorithm, password, length);
+}
+
+void PEM_Save(BufferedTransformation& bt, const DSA::PublicKey& dsa)
+{
+    PEM_SavePublicKey(bt, dsa, PUBLIC_BEGIN, PUBLIC_END);
+}
+
+void PEM_Save(BufferedTransformation& bt, const DSA::PrivateKey& dsa)
+{
+    PEM_SavePrivateKey(bt, dsa, DSA_PRIVATE_BEGIN, DSA_PRIVATE_END);
+}
+
+void PEM_Save(BufferedTransformation& bt, RandomNumberGenerator& rng, const DSA::PrivateKey& dsa, const string& algorithm, const char* password, size_t length)
+{
+    PEM_SavePrivateKey(bt, rng, dsa, DSA_PRIVATE_BEGIN, DSA_PRIVATE_END, algorithm, password, length);
+}
+
+void PEM_Save(BufferedTransformation& bt, const DL_GroupParameters_EC<ECP>& params)
+{
+    bool old = PEM_GetNamedCurve(params);
+    PEM_SetNamedCurve(params, true);
+
+    PEM_SaveParams(bt, params, EC_PARAMETERS_BEGIN, EC_PARAMETERS_END);
+    PEM_SetNamedCurve(params, old);
+}
+
+void PEM_Save(BufferedTransformation& bt, const DL_GroupParameters_EC<EC2N>& params)
+{
+    bool old = PEM_GetNamedCurve(params);
+    PEM_SetNamedCurve(params, true);
+
+    PEM_SaveParams(bt, params, EC_PARAMETERS_BEGIN, EC_PARAMETERS_END);
+    PEM_SetNamedCurve(params, old);
+}
+
+void PEM_Save(BufferedTransformation& bt, const DL_PublicKey_EC<ECP>& ec)
+{
+    bool old = PEM_GetNamedCurve(ec.GetGroupParameters());
+    PEM_SetNamedCurve(ec.GetGroupParameters(), true);
+
+    PEM_SavePublicKey(bt, ec, PUBLIC_BEGIN, PUBLIC_END);
+    PEM_SetNamedCurve(ec.GetGroupParameters(), old);
+}
+
+void PEM_Save(BufferedTransformation& bt, const DL_PrivateKey_EC<ECP>& ec)
+{
+    bool old = PEM_GetNamedCurve(ec.GetGroupParameters());
+    PEM_SetNamedCurve(ec.GetGroupParameters(), true);
+
+    PEM_SavePrivateKey(bt, ec, EC_PRIVATE_BEGIN, EC_PRIVATE_END);
+    PEM_SetNamedCurve(ec.GetGroupParameters(), old);
+}
+
+void PEM_Save(BufferedTransformation& bt, RandomNumberGenerator& rng, const DL_PrivateKey_EC<ECP>& ec, const std::string& algorithm, const char* password, size_t length)
+{
+    bool old = PEM_GetNamedCurve(ec.GetGroupParameters());
+    PEM_SetNamedCurve(ec.GetGroupParameters(), true);
+
+    PEM_SavePrivateKey(bt, rng, ec, EC_PRIVATE_BEGIN, EC_PRIVATE_END, algorithm, password, length);
+    PEM_SetNamedCurve(ec.GetGroupParameters(), old);
+}
+
+void PEM_Save(BufferedTransformation& bt, const DL_PublicKey_EC<EC2N>& ec)
+{
+    bool old = PEM_GetNamedCurve(ec.GetGroupParameters());
+    PEM_SetNamedCurve(ec.GetGroupParameters(), true);
+
+    PEM_SavePublicKey(bt, ec, PUBLIC_BEGIN, PUBLIC_END);
+    PEM_SetNamedCurve(ec.GetGroupParameters(), old);
+}
+
+void PEM_Save(BufferedTransformation& bt, const DL_PrivateKey_EC<EC2N>& ec)
+{
+    bool old = PEM_GetNamedCurve(ec.GetGroupParameters());
+    PEM_SetNamedCurve(ec.GetGroupParameters(), true);
+
+    PEM_SavePrivateKey(bt, ec, EC_PRIVATE_BEGIN, EC_PRIVATE_END);
+    PEM_SetNamedCurve(ec.GetGroupParameters(), old);
+}
+
+void PEM_Save(BufferedTransformation& bt, RandomNumberGenerator& rng, const DL_PrivateKey_EC<EC2N>& ec, const std::string& algorithm, const char* password, size_t length)
+{
+    bool old = PEM_GetNamedCurve(ec.GetGroupParameters());
+    PEM_SetNamedCurve(ec.GetGroupParameters(), true);
+
+    PEM_SavePrivateKey(bt, rng, ec, EC_PRIVATE_BEGIN, EC_PRIVATE_END, algorithm, password, length);
+    PEM_SetNamedCurve(ec.GetGroupParameters(), old);
+}
+
+void PEM_Save(BufferedTransformation& bt, const DL_Keys_ECDSA<ECP>::PrivateKey& ecdsa)
+{
+    PEM_Save(bt, dynamic_cast<const DL_PrivateKey_EC<ECP>&>(ecdsa));
+}
+
+void PEM_Save(BufferedTransformation& bt, RandomNumberGenerator& rng, DL_Keys_ECDSA<ECP>::PrivateKey& ecdsa, const std::string& algorithm, const char* password, size_t length)
+{
+    PEM_Save(bt, rng, dynamic_cast<DL_PrivateKey_EC<ECP>&>(ecdsa), algorithm, password, length);
+}
+
+void PEM_Save(BufferedTransformation& bt, const DL_GroupParameters_DSA& params)
+{
+    ByteQueue queue;
+
+    PEM_WriteLine(queue, DSA_PARAMETERS_BEGIN);
+
+    Base64Encoder encoder(new Redirector(queue), true /*lineBreak*/, RFC1421_LINE_BREAK);
+    params.Save(encoder);
+    encoder.MessageEnd();
+
+    PEM_WriteLine(queue, DSA_PARAMETERS_END);
+
+    queue.TransferTo(bt);
+    bt.MessageEnd();
+}
+
+void PEM_DH_Save(BufferedTransformation& bt, const Integer& p, const Integer& g)
+{
+    ByteQueue queue;
+
+    PEM_WriteLine(queue, DH_PARAMETERS_BEGIN);
+
+    Base64Encoder encoder(new Redirector(queue), true /*lineBreak*/, RFC1421_LINE_BREAK);
+
+    DERSequenceEncoder seq(encoder);
+        p.BEREncode(seq);
+        g.BEREncode(seq);
+    seq.MessageEnd();
+
+    encoder.MessageEnd();
+
+    PEM_WriteLine(queue, DH_PARAMETERS_END);
+
+    queue.TransferTo(bt);
+    bt.MessageEnd();
+}
+
+void PEM_DH_Save(BufferedTransformation& bt, const Integer& p, const Integer& q, const Integer& g)
+{
+    ByteQueue queue;
+
+    PEM_WriteLine(queue, DH_PARAMETERS_BEGIN);
+
+    Base64Encoder encoder(new Redirector(queue), true /*lineBreak*/, RFC1421_LINE_BREAK);
+
+    DERSequenceEncoder seq(encoder);
+        p.BEREncode(seq);
+        q.BEREncode(seq);
+        g.BEREncode(seq);
+    seq.MessageEnd();
+
+    encoder.MessageEnd();
+
+    PEM_WriteLine(queue, DH_PARAMETERS_END);
+
+    queue.TransferTo(bt);
+    bt.MessageEnd();
 }
 
 NAMESPACE_END
