@@ -153,6 +153,7 @@ void PEM_SavePrivateKey(BufferedTransformation& bt, const DL_PrivateKey_EC<EC>& 
 void PEM_DEREncode(BufferedTransformation& bt, const DSA::PrivateKey& key)
 {
     // Crypto++ provides {version,x}, while OpenSSL expects {version,p,q,g,y,x}.
+    // PEM_SavePrivateKey(bt, key, DSA_PRIVATE_BEGIN, DSA_PRIVATE_END);
 
     const DL_GroupParameters_DSA& params = key.GetGroupParameters();
 
@@ -173,6 +174,7 @@ template <class EC>
 void PEM_DEREncode(BufferedTransformation& bt, const DL_PrivateKey_EC<EC>& key)
 {
     // Crypto++ provides {version,x}, while OpenSSL expects {version,x,curve oid,y}.
+    // PEM_SavePrivateKey(bt, key, EC_PRIVATE_BEGIN, EC_PRIVATE_END);
 
     // Need a public key to encode the public element.
     DL_PublicKey_EC<EC> pkey;

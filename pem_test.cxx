@@ -90,7 +90,7 @@ int main(int argc, char* argv[])
     }
     catch(const Exception& ex)
     {
-        std::cout << "Caught excpetion" << ex.what() << std::endl;
+        std::cout << "Caught exception: " << ex.what() << std::endl;
     }
 
     return 0;

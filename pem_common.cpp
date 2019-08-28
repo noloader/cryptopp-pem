@@ -65,7 +65,7 @@ const SecByteBlock DSA_PUBLIC_BEGIN(BYTE_PTR("-----BEGIN DSA PUBLIC KEY-----"), 
 const SecByteBlock DSA_PUBLIC_END(BYTE_PTR("-----END DSA PUBLIC KEY-----"), 28);
 
 const SecByteBlock DSA_PRIVATE_BEGIN(BYTE_PTR("-----BEGIN DSA PRIVATE KEY-----"), 31);
-const SecByteBlock DSA_PRIVATE_END(BYTE_PTR("-----END DSA PRIVATE KEY-----"), 28);
+const SecByteBlock DSA_PRIVATE_END(BYTE_PTR("-----END DSA PRIVATE KEY-----"), 29);
 
 const SecByteBlock ELGAMAL_PUBLIC_BEGIN(BYTE_PTR("-----BEGIN ELGAMAL PUBLIC KEY-----"), 34);
 const SecByteBlock ELGAMAL_PUBLIC_END(BYTE_PTR("-----END ELGAMAL PUBLIC KEY-----"), 32);
