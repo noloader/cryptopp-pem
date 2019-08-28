@@ -1,6 +1,6 @@
-#! /bin/sh
+#!/usr/bin/env bash
 
-# Script to verify the test keys written by pem-test.cpp
+# Script to verify the test keys written by pem-test.cxx
 
 #################
 # RSA keys
