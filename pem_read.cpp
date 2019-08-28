@@ -723,6 +723,13 @@ PEM_Type PEM_GetType(const BufferedTransformation& bt)
 
 bool PEM_NextObject(BufferedTransformation& src, BufferedTransformation& dest, bool trimTrailing)
 {
+    // Skip whitespace
+    byte b;
+    while (src.Peek(b) && isspace(b)) {
+        src.Skip(1);
+    }
+
+    // Anything to parse?
     if (!src.AnyRetrievable())
         return false;
 
@@ -756,7 +763,7 @@ bool PEM_NextObject(BufferedTransformation& src, BufferedTransformation& dest, b
     //   is invalid, `accum.begin() + index` will be valid.
 
     // Reading 8 or 10 lines at a time is an optimization from testing
-    //   against cacerts.pem. The file has 153 certs, so its a good test.
+    //   cacerts.pem. The file has 150 or so certs, so its a good test.
     // +2 to allow for CR + LF line endings. There's no guarantee a line
     //   will be present, or it will be RFC1421_LINE_BREAK in size.
     const size_t READ_SIZE = (RFC1421_LINE_BREAK + 1) * 10;

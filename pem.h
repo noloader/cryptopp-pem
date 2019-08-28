@@ -32,6 +32,11 @@ NAMESPACE_BEGIN(CryptoPP)
 /// \details PEM_NextObject attempts to retrieve the next PEM encoded key or
 ///  parameter from <tt>src</tt> and transfers it to <tt>dest</tt>. If there
 ///  are multiple keys or parameters, then only the first is transferred.
+/// \details If <tt>src</tt> is empty then PEM_NextObject() returns false.
+///  If <tt>src</tt> holds a partial or malformed object is present then
+///  InvalidDataFormat is thrown. The exception is used to distinguish
+///  from an empty <tt>src</tt>, and the exception signals the caller to fix
+///  <tt>src</tt>.
 /// \details If <tt>trimTrailing</tt> is true, then trailing whitespace is
 ///  trimmed from the source BufferedTransformation. The destination
 ///  BufferedTransformation will have one line ending if it was present in
