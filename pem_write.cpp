@@ -327,12 +327,12 @@ void PEM_CipherForAlgorithm(RandomNumberGenerator& rng, string algorithm, member
 
         stream.reset(new CBC_Mode<DES_EDE3>::Encryption);
     }
-    else if(algorithm == "IDEA-CBC")
+    else if(algorithm == "DES-EDE2-CBC")
     {
         ksize = 16;
         vsize = 8;
 
-        stream.reset(new CBC_Mode<IDEA>::Encryption);
+        stream.reset(new CBC_Mode<DES_EDE2>::Encryption);
     }
     else if(algorithm == "DES-CBC")
     {
@@ -340,6 +340,13 @@ void PEM_CipherForAlgorithm(RandomNumberGenerator& rng, string algorithm, member
         vsize = 8;
 
         stream.reset(new CBC_Mode<DES>::Encryption);
+    }
+    else if(algorithm == "IDEA-CBC")
+    {
+        ksize = 16;
+        vsize = 8;
+
+        stream.reset(new CBC_Mode<IDEA>::Encryption);
     }
     else
     {
@@ -353,7 +360,6 @@ void PEM_CipherForAlgorithm(RandomNumberGenerator& rng, string algorithm, member
 
     // The IV pulls double duty. First, the first PKCS5_SALT_LEN bytes are used
     //   as the Salt in EVP_BytesToKey. Second, its used as the IV in the cipher.
-    // assert(_iv.size() >= OPENSSL_PKCS5_SALT_LEN);
 
     rng.GenerateBlock(_iv.data(), _iv.size());
     _salt = _iv;
@@ -367,8 +373,6 @@ void PEM_CipherForAlgorithm(RandomNumberGenerator& rng, string algorithm, member
         throw Exception(Exception::OTHER_ERROR, "PEM_CipherForAlgorithm: EVP_BytesToKey failed");
 
     SymmetricCipher* cipher = dynamic_cast<SymmetricCipher*>(stream.get());
-    // assert(cipher != NULL);
-
     cipher->SetKeyWithIV(_key.data(), _key.size(), _iv.data(), _iv.size());
 
     _key.swap(key);

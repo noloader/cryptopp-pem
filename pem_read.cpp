@@ -409,7 +409,6 @@ void PEM_CipherForAlgorithm(const EncapsulatedHeader& header, const char* passwo
     // The IV pulls double duty. First, the first PKCS5_SALT_LEN bytes are used
     //   as the Salt in EVP_BytesToKey. Second, its used as the IV in the cipher.
     _salt = _iv;
-    // assert(_salt.size() >= OPENSSL_PKCS5_SALT_LEN);
 
     // MD5 is engrained OpenSSL goodness. MD5, IV and Password are IN; KEY is OUT.
     //   {NULL,0} parameters are the OUT IV. However, the original IV in the PEM
