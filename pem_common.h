@@ -31,7 +31,7 @@ NAMESPACE_BEGIN(CryptoPP)
 // #define PEM_KEY_OR_PARAMETER_VALIDATION 1
 
 // Perform key or parameter validation in Debug builds.
-#if !defined(NDEBUG) && !defined(PEM_KEY_OR_PARAMETER_VALIDATION)
+#if defined(CRYPTOPP_DEBUG) && !defined(PEM_KEY_OR_PARAMETER_VALIDATION)
 # define PEM_KEY_OR_PARAMETER_VALIDATION 1
 #endif
 

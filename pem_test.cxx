@@ -13,7 +13,7 @@
 int main(int argc, char* argv[])
 {
     using namespace CryptoPP;
-    
+
     try
     {
         std::cout << "Load RSA public key" << std::endl;
