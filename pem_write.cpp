@@ -43,6 +43,38 @@ ANONYMOUS_NAMESPACE_BEGIN
 
 using namespace CryptoPP;
 
+template <class T>
+struct OID_State
+{
+    OID_State(const T& obj);
+    virtual ~OID_State();
+
+    const T& m_obj;
+    bool m_oid;
+};
+
+template <>
+OID_State<DL_GroupParameters_EC<ECP> >::OID_State(const DL_GroupParameters_EC<ECP>& obj)
+: m_obj(obj), m_oid(obj.GetEncodeAsOID()) {
+}
+
+template <>
+OID_State<DL_GroupParameters_EC<ECP> >::~OID_State() {
+    DL_GroupParameters_EC<ECP>& obj = const_cast<DL_GroupParameters_EC<ECP>&>(m_obj);
+    obj.SetEncodeAsOID(m_oid);
+}
+
+template <>
+OID_State<DL_GroupParameters_EC<EC2N> >::OID_State(const DL_GroupParameters_EC<EC2N>& obj)
+: m_obj(obj), m_oid(obj.GetEncodeAsOID()) {
+}
+
+template <>
+OID_State<DL_GroupParameters_EC<EC2N> >::~OID_State() {
+    DL_GroupParameters_EC<EC2N>& obj = const_cast<DL_GroupParameters_EC<EC2N>&>(m_obj);
+    obj.SetEncodeAsOID(m_oid);
+}
+
 // Returns a keyed StreamTransformation ready to use to encrypt a DER encoded key
 void PEM_CipherForAlgorithm(RandomNumberGenerator& rng, string algorithm, member_ptr<StreamTransformation>& stream,
                             SecByteBlock& key, SecByteBlock& iv, const char* password, size_t length);
@@ -69,29 +101,21 @@ template <class EC>
 void PEM_SaveParams(BufferedTransformation& bt, const DL_GroupParameters_EC< EC >& params, const SecByteBlock& pre, const SecByteBlock& post);
 
 template <class KEY>
-void PEM_SaveKey(BufferedTransformation& bt,
-                        const KEY& key, const SecByteBlock& pre, const SecByteBlock& post);
+void PEM_SaveKey(BufferedTransformation& bt, const KEY& key,
+                 const SecByteBlock& pre, const SecByteBlock& post);
 
 template <class PUBLIC_KEY>
-void PEM_SavePublicKey(BufferedTransformation& bt,
-                       const PUBLIC_KEY& key, const SecByteBlock& pre, const SecByteBlock& post);
+void PEM_SavePublicKey(BufferedTransformation& bt, const PUBLIC_KEY& key,
+                       const SecByteBlock& pre, const SecByteBlock& post);
 
 template <class PRIVATE_KEY>
-void PEM_SavePrivateKey(BufferedTransformation& bt,
-                        const PRIVATE_KEY& key, const SecByteBlock& pre, const SecByteBlock& post);
+void PEM_SavePrivateKey(BufferedTransformation& bt, const PRIVATE_KEY& key,
+                        const SecByteBlock& pre, const SecByteBlock& post);
 
 template <class PRIVATE_KEY>
 void PEM_SavePrivateKey(BufferedTransformation& bt, RandomNumberGenerator& rng,
                         const PRIVATE_KEY& key, const SecByteBlock& pre, const SecByteBlock& post,
                         const std::string& algorithm, const char* password, size_t length);
-
-// Fetches and sets encodeAsOID parameter
-template <class EC>
-bool PEM_GetNamedCurve(const DL_GroupParameters_EC<EC>& params);
-
-// Fetches and sets encodeAsOID parameter
-template <class EC>
-void PEM_SetNamedCurve(const DL_GroupParameters_EC<EC>& params, bool flag);
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
@@ -101,7 +125,7 @@ void PEM_SaveParams(BufferedTransformation& bt, const DL_GroupParameters_EC< EC 
 {
     PEM_WriteLine(bt, pre);
 
-    Base64Encoder encoder(new Redirector(bt), true /*lineBreak*/, RFC1421_LINE_BREAK);
+    Base64Encoder encoder(new Redirector(bt), true, RFC1421_LINE_BREAK);
 
     params.DEREncode(encoder);
     encoder.MessageEnd();
@@ -394,19 +418,6 @@ void PEM_EncryptAndEncode(BufferedTransformation& src, BufferedTransformation& d
     PEM_Base64Encode(temp, dest);
 }
 
-template <class EC>
-bool PEM_GetNamedCurve(const DL_GroupParameters_EC<EC>& params)
-{
-    return params.GetEncodeAsOID();
-}
-
-template <class EC>
-void PEM_SetNamedCurve(const DL_GroupParameters_EC<EC>& params, bool flag)
-{
-    DL_GroupParameters_EC<EC>& pp = const_cast<DL_GroupParameters_EC<EC>&>(params);
-    pp.SetEncodeAsOID(flag);
-}
-
 ANONYMOUS_NAMESPACE_END
 
 //////////////////////////////////////////////////////////////////////////////
@@ -462,74 +473,50 @@ void PEM_Save(BufferedTransformation& bt, RandomNumberGenerator& rng, const ElGa
 
 void PEM_Save(BufferedTransformation& bt, const DL_GroupParameters_EC<ECP>& params)
 {
-    bool old = PEM_GetNamedCurve(params);
-    PEM_SetNamedCurve(params, true);
-
+    OID_State<DL_GroupParameters_EC<ECP> > state(params);
     PEM_SaveParams(bt, params, EC_PARAMETERS_BEGIN, EC_PARAMETERS_END);
-    PEM_SetNamedCurve(params, old);
 }
 
 void PEM_Save(BufferedTransformation& bt, const DL_GroupParameters_EC<EC2N>& params)
 {
-    bool old = PEM_GetNamedCurve(params);
-    PEM_SetNamedCurve(params, true);
-
+    OID_State<DL_GroupParameters_EC<EC2N> > state(params);
     PEM_SaveParams(bt, params, EC_PARAMETERS_BEGIN, EC_PARAMETERS_END);
-    PEM_SetNamedCurve(params, old);
 }
 
 void PEM_Save(BufferedTransformation& bt, const DL_PublicKey_EC<ECP>& ec)
 {
-    bool old = PEM_GetNamedCurve(ec.GetGroupParameters());
-    PEM_SetNamedCurve(ec.GetGroupParameters(), true);
-
+    OID_State<DL_GroupParameters_EC<ECP> > state(ec.GetGroupParameters());
     PEM_SavePublicKey(bt, ec, PUBLIC_BEGIN, PUBLIC_END);
-    PEM_SetNamedCurve(ec.GetGroupParameters(), old);
 }
 
 void PEM_Save(BufferedTransformation& bt, const DL_PrivateKey_EC<ECP>& ec)
 {
-    bool old = PEM_GetNamedCurve(ec.GetGroupParameters());
-    PEM_SetNamedCurve(ec.GetGroupParameters(), true);
-
+    OID_State<DL_GroupParameters_EC<ECP> > state(ec.GetGroupParameters());
     PEM_SavePrivateKey(bt, ec, EC_PRIVATE_BEGIN, EC_PRIVATE_END);
-    PEM_SetNamedCurve(ec.GetGroupParameters(), old);
 }
 
 void PEM_Save(BufferedTransformation& bt, RandomNumberGenerator& rng, const DL_PrivateKey_EC<ECP>& ec, const std::string& algorithm, const char* password, size_t length)
 {
-    bool old = PEM_GetNamedCurve(ec.GetGroupParameters());
-    PEM_SetNamedCurve(ec.GetGroupParameters(), true);
-
+    OID_State<DL_GroupParameters_EC<ECP> > state(ec.GetGroupParameters());
     PEM_SavePrivateKey(bt, rng, ec, EC_PRIVATE_BEGIN, EC_PRIVATE_END, algorithm, password, length);
-    PEM_SetNamedCurve(ec.GetGroupParameters(), old);
 }
 
 void PEM_Save(BufferedTransformation& bt, const DL_PublicKey_EC<EC2N>& ec)
 {
-    bool old = PEM_GetNamedCurve(ec.GetGroupParameters());
-    PEM_SetNamedCurve(ec.GetGroupParameters(), true);
-
+    OID_State<DL_GroupParameters_EC<EC2N> > state(ec.GetGroupParameters());
     PEM_SavePublicKey(bt, ec, PUBLIC_BEGIN, PUBLIC_END);
-    PEM_SetNamedCurve(ec.GetGroupParameters(), old);
 }
 
 void PEM_Save(BufferedTransformation& bt, const DL_PrivateKey_EC<EC2N>& ec)
 {
-    bool old = PEM_GetNamedCurve(ec.GetGroupParameters());
-    PEM_SetNamedCurve(ec.GetGroupParameters(), true);
-
+    OID_State<DL_GroupParameters_EC<EC2N> > state(ec.GetGroupParameters());
     PEM_SavePrivateKey(bt, ec, EC_PRIVATE_BEGIN, EC_PRIVATE_END);
-    PEM_SetNamedCurve(ec.GetGroupParameters(), old);
 }
 
 void PEM_Save(BufferedTransformation& bt, RandomNumberGenerator& rng, const DL_PrivateKey_EC<EC2N>& ec, const std::string& algorithm, const char* password, size_t length)
 {
-    bool old = PEM_GetNamedCurve(ec.GetGroupParameters());
-    PEM_SetNamedCurve(ec.GetGroupParameters(), true);
-
+    OID_State<DL_GroupParameters_EC<EC2N> > state(ec.GetGroupParameters());
     PEM_SavePrivateKey(bt, rng, ec, EC_PRIVATE_BEGIN, EC_PRIVATE_END, algorithm, password, length);
-    PEM_SetNamedCurve(ec.GetGroupParameters(), old);
 }
 
 void PEM_Save(BufferedTransformation& bt, const DL_Keys_ECDSA<ECP>::PrivateKey& ecdsa)
@@ -548,7 +535,7 @@ void PEM_Save(BufferedTransformation& bt, const DL_GroupParameters_DSA& params)
 
     PEM_WriteLine(queue, DSA_PARAMETERS_BEGIN);
 
-    Base64Encoder encoder(new Redirector(queue), true /*lineBreak*/, RFC1421_LINE_BREAK);
+    Base64Encoder encoder(new Redirector(queue), true, RFC1421_LINE_BREAK);
     params.Save(encoder);
     encoder.MessageEnd();
 
@@ -564,7 +551,7 @@ void PEM_DH_Save(BufferedTransformation& bt, const Integer& p, const Integer& g)
 
     PEM_WriteLine(queue, DH_PARAMETERS_BEGIN);
 
-    Base64Encoder encoder(new Redirector(queue), true /*lineBreak*/, RFC1421_LINE_BREAK);
+    Base64Encoder encoder(new Redirector(queue), true, RFC1421_LINE_BREAK);
 
     DERSequenceEncoder seq(encoder);
         p.BEREncode(seq);
@@ -585,7 +572,7 @@ void PEM_DH_Save(BufferedTransformation& bt, const Integer& p, const Integer& q,
 
     PEM_WriteLine(queue, DH_PARAMETERS_BEGIN);
 
-    Base64Encoder encoder(new Redirector(queue), true /*lineBreak*/, RFC1421_LINE_BREAK);
+    Base64Encoder encoder(new Redirector(queue), true, RFC1421_LINE_BREAK);
 
     DERSequenceEncoder seq(encoder);
         p.BEREncode(seq);
