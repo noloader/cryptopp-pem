@@ -156,11 +156,11 @@ int main(int argc, char* argv[])
         fail =  true;
     }
 
-    // Malformed, missing CRLF, should be OK
+    // Load malformed, missing final CRLF, should be OK
     try
     {
         RSA::PublicKey k1;
-        std::cout << "Malformed key 1" << std::endl;
+        std::cout << "Load malformed key 1" << std::endl;
         FileSource fs1("rsa-trunc-1.pem", true);
         PEM_Load(fs1, k1);
         std::cout << "  - OK" << std::endl;
@@ -171,11 +171,11 @@ int main(int argc, char* argv[])
         fail = true;
     }
 
-    // Malformed, tampered encapsulation boundary
+    // Load malformed, tampered encapsulation boundary
     try
     {
         RSA::PublicKey k2;
-        std::cout << "Malformed key 2" << std::endl;
+        std::cout << "Load malformed key 2" << std::endl;
         FileSource fs2("rsa-trunc-2.pem", true);
         PEM_Load(fs2, k2);
         std::cout << "  - Failed" << std::endl;
@@ -186,11 +186,11 @@ int main(int argc, char* argv[])
         std::cout << "  - OK" << std::endl;
     }
 
-    // Malformed, missing CRLF with another key concat'd, should be OK
+    // Load malformed, missing final CRLF, another key concat'd, should be OK
     try
     {
         RSA::PublicKey k3;
-        std::cout << "Malformed key 3" << std::endl;
+        std::cout << "Load malformed key 3" << std::endl;
         FileSource fs3("rsa-concat.pem", true);
         PEM_Load(fs3, k3);
         std::cout << "  - OK" << std::endl;
@@ -201,11 +201,11 @@ int main(int argc, char* argv[])
         fail = true;
     }
 
-    // Malformed, only -----BEGIN RSA KEY-----
+    // Load malformed, only -----BEGIN RSA KEY-----
     try
     {
         RSA::PublicKey k4;
-        std::cout << "Malformed key 4" << std::endl;
+        std::cout << "Load malformed key 4" << std::endl;
         FileSource fs4("rsa-short.pem", true);
         PEM_Load(fs4, k4);
         std::cout << "  - Failed" << std::endl;
@@ -214,6 +214,60 @@ int main(int argc, char* argv[])
     catch(const Exception& ex)
     {
         std::cout << "  - OK" << std::endl;
+    }
+
+    // Load malformed, EOL is CR, should be OK
+    try
+    {
+        RSA::PublicKey k5;
+        std::cout << "Load malformed key 5" << std::endl;
+        FileSource fs5("rsa-eol-cr.pem", true);
+        PEM_Load(fs5, k5);
+        std::cout << "  - OK" << std::endl;
+    }
+    catch(const Exception& ex)
+    {
+        std::cout << "  - Failed" << std::endl;
+        fail = true;
+    }
+
+    // Load malformed, EOL is LF, should be OK
+    try
+    {
+        RSA::PublicKey k6;
+        std::cout << "Load malformed key 6" << std::endl;
+        FileSource fs6("rsa-eol-lf.pem", true);
+        PEM_Load(fs6, k6);
+        std::cout << "  - OK" << std::endl;
+    }
+    catch(const Exception& ex)
+    {
+        fail = true;
+        std::cout << "  - Failed" << std::endl;
+    }
+
+    // Test cacert.pem. There should be ~130 to ~150 certs in it.
+    try
+    {
+        FileSource fs("cacert.pem", true);
+        size_t count=0;
+
+        while (PEM_NextObject(fs, TheBitBucket())) {
+            count++;
+        }
+
+        std::cout << "Parsed " << count << " certificates from cacert.pem" << std::endl;
+        if (count >= 120)
+            std::cout << "  - OK" << std::endl;
+        else {
+            std::cout << "  - Failed" << std::endl;
+            fail =  true;
+        }
+    }
+    catch(const Exception& ex)
+    {
+        std::cout << "Caught exception: " << ex.what() << std::endl;
+        fail =  true;
     }
 
     return fail ? 1 : 0;

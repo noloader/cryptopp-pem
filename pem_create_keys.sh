@@ -72,6 +72,12 @@ perl -pe 'chop if eof' rsa-trunc-1.pem > rsa-trunc-2.pem
 cat rsa-trunc-1.pem > rsa-concat.pem
 cat rsa-pub.pem >> rsa-concat.pem
 
+# Uses on CR (remove LF)
+sed 's/\n//g' rsa-pub.pem > rsa-eol-cr.pem
+
+# Uses on LF (remove CR)
+sed 's/\r//g' rsa-pub.pem > rsa-eol-lf.pem
+
 ##################################
 # cacert.pem
 
