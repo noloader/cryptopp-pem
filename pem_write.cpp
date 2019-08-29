@@ -43,35 +43,42 @@ ANONYMOUS_NAMESPACE_BEGIN
 
 using namespace CryptoPP;
 
+// This class saves the existing EncodeAsOID setting for EC group parameters.
+// PEM_Save unconditionally sets it to TRUE for OpenSSL compatibility. See
+// https://wiki.openssl.org/index.php/Elliptic_Curve_Cryptography#Named_Curves
 template <class T>
 struct OID_State
 {
     OID_State(const T& obj);
     virtual ~OID_State();
 
-    const T& m_obj;
+    const T& m_gp;
     bool m_oid;
 };
 
 template <>
-OID_State<DL_GroupParameters_EC<ECP> >::OID_State(const DL_GroupParameters_EC<ECP>& obj)
-: m_obj(obj), m_oid(obj.GetEncodeAsOID()) {
+OID_State<DL_GroupParameters_EC<ECP> >::OID_State(const DL_GroupParameters_EC<ECP>& gp)
+: m_gp(gp), m_oid(gp.GetEncodeAsOID()) {
+    DL_GroupParameters_EC<ECP>& obj = const_cast<DL_GroupParameters_EC<ECP>&>(m_gp);
+    obj.SetEncodeAsOID(true);
 }
 
 template <>
 OID_State<DL_GroupParameters_EC<ECP> >::~OID_State() {
-    DL_GroupParameters_EC<ECP>& obj = const_cast<DL_GroupParameters_EC<ECP>&>(m_obj);
+    DL_GroupParameters_EC<ECP>& obj = const_cast<DL_GroupParameters_EC<ECP>&>(m_gp);
     obj.SetEncodeAsOID(m_oid);
 }
 
 template <>
-OID_State<DL_GroupParameters_EC<EC2N> >::OID_State(const DL_GroupParameters_EC<EC2N>& obj)
-: m_obj(obj), m_oid(obj.GetEncodeAsOID()) {
+OID_State<DL_GroupParameters_EC<EC2N> >::OID_State(const DL_GroupParameters_EC<EC2N>& gp)
+: m_gp(gp), m_oid(gp.GetEncodeAsOID()) {
+    DL_GroupParameters_EC<EC2N>& obj = const_cast<DL_GroupParameters_EC<EC2N>&>(m_gp);
+    obj.SetEncodeAsOID(true);
 }
 
 template <>
 OID_State<DL_GroupParameters_EC<EC2N> >::~OID_State() {
-    DL_GroupParameters_EC<EC2N>& obj = const_cast<DL_GroupParameters_EC<EC2N>&>(m_obj);
+    DL_GroupParameters_EC<EC2N>& obj = const_cast<DL_GroupParameters_EC<EC2N>&>(m_gp);
     obj.SetEncodeAsOID(m_oid);
 }
 

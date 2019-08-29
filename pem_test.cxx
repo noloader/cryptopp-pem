@@ -160,7 +160,7 @@ int main(int argc, char* argv[])
     try
     {
         RSA::PublicKey k1;
-        std::cout << "Malformed RSA public key 1" << std::endl;
+        std::cout << "Malformed key 1" << std::endl;
         FileSource fs1("rsa-trunc-1.pem", true);
         PEM_Load(fs1, k1);
         std::cout << "  - OK" << std::endl;
@@ -175,7 +175,7 @@ int main(int argc, char* argv[])
     try
     {
         RSA::PublicKey k2;
-        std::cout << "Malformed RSA public key 2" << std::endl;
+        std::cout << "Malformed key 2" << std::endl;
         FileSource fs2("rsa-trunc-2.pem", true);
         PEM_Load(fs2, k2);
         std::cout << "  - Failed" << std::endl;
@@ -190,7 +190,7 @@ int main(int argc, char* argv[])
     try
     {
         RSA::PublicKey k3;
-        std::cout << "Malformed RSA public key 3" << std::endl;
+        std::cout << "Malformed key 3" << std::endl;
         FileSource fs3("rsa-concat.pem", true);
         PEM_Load(fs3, k3);
         std::cout << "  - OK" << std::endl;
@@ -205,7 +205,7 @@ int main(int argc, char* argv[])
     try
     {
         RSA::PublicKey k4;
-        std::cout << "Malformed RSA public key 4" << std::endl;
+        std::cout << "Malformed key 4" << std::endl;
         FileSource fs4("rsa-short.pem", true);
         PEM_Load(fs4, k4);
         std::cout << "  - Failed" << std::endl;
