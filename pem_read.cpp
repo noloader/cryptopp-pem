@@ -577,13 +577,13 @@ void PEM_StripEncapsulatedHeader(BufferedTransformation& src, BufferedTransforma
 void PEM_ParseVersion(const std::string& proctype, std::string& version)
 {
     size_t pos1 = 0;
-    while (pos1 < proctype.size() && isspace(proctype[pos1])) pos1++;
+    while (pos1 < proctype.size() && std::isspace(proctype[pos1])) pos1++;
 
     size_t pos2 = proctype.find(",");
     if (pos2 == std::string::npos)
         throw InvalidDataFormat("PEM_ParseVersion: failed to locate version");
 
-    while (pos2 > pos1 && isspace(proctype[pos2])) pos2--;
+    while (pos2 > pos1 && std::isspace(proctype[pos2])) pos2--;
     version = proctype.substr(pos1, pos2 - pos1);
 }
 
@@ -595,7 +595,7 @@ void PEM_ParseOperation(const std::string& proctype, std::string& operation)
         throw InvalidDataFormat("PEM_ParseOperation: failed to locate operation");
 
     pos1++;
-    while (pos1 < proctype.size() && isspace(proctype[pos1])) pos1++;
+    while (pos1 < proctype.size() && std::isspace(proctype[pos1])) pos1++;
 
     operation = proctype.substr(pos1, std::string::npos);
     std::transform(operation.begin(), operation.end(), operation.begin(), (int(*)(int))std::toupper);
@@ -605,13 +605,13 @@ void PEM_ParseOperation(const std::string& proctype, std::string& operation)
 void PEM_ParseAlgorithm(const std::string& dekinfo, std::string& algorithm)
 {
     size_t pos1 = 0;
-    while (pos1 < dekinfo.size() && isspace(dekinfo[pos1])) pos1++;
+    while (pos1 < dekinfo.size() && std::isspace(dekinfo[pos1])) pos1++;
 
     size_t pos2 = dekinfo.find(",");
     if (pos2 == std::string::npos)
         throw InvalidDataFormat("PEM_ParseVersion: failed to locate algorithm");
 
-    while (pos2 > pos1 && isspace(dekinfo[pos2])) pos2--;
+    while (pos2 > pos1 && std::isspace(dekinfo[pos2])) pos2--;
 
     algorithm = dekinfo.substr(pos1, pos2 - pos1);
     std::transform(algorithm.begin(), algorithm.end(), algorithm.begin(),  (int(*)(int))std::toupper);
@@ -625,7 +625,7 @@ void PEM_ParseIV(const std::string& dekinfo, std::string& iv)
         throw InvalidDataFormat("PEM_ParseIV: failed to locate initialization vector");
 
     pos1++;
-    while (pos1 < dekinfo.size() && isspace(dekinfo[pos1])) pos1++;
+    while (pos1 < dekinfo.size() && std::isspace(dekinfo[pos1])) pos1++;
 
     iv = dekinfo.substr(pos1, std::string::npos);
     std::transform(iv.begin(), iv.end(), iv.begin(), (int(*)(int))std::toupper);
@@ -697,6 +697,14 @@ size_t PEM_ReadLine(BufferedTransformation& source, SecByteBlock& line, SecByteB
     return line.size() + ending.size();
 }
 
+inline void PEM_TrimLeadingWhitespace(BufferedTransformation& source)
+{
+    byte b;
+    while (source.Peek(b) && std::isspace(b)) {
+        source.Skip(1);
+    }
+}
+
 NAMESPACE_END
 
 //////////////////////////////////////////////////////////////////////////////
@@ -713,11 +721,8 @@ PEM_Type PEM_GetType(const BufferedTransformation& bt)
 
 bool PEM_NextObject(BufferedTransformation& src, BufferedTransformation& dest, bool trimTrailing)
 {
-    // Skip whitespace
-    byte b;
-    while (src.Peek(b) && isspace(b)) {
-        src.Skip(1);
-    }
+    // Skip leading whitespace
+    PEM_TrimLeadingWhitespace(src);
 
     // Anything to parse?
     if (!src.AnyRetrievable())
@@ -894,17 +899,10 @@ bool PEM_NextObject(BufferedTransformation& src, BufferedTransformation& dest, b
 
     src.Skip(used + adjust);
 
+    // Trailing whitespace of former queue is now
+    // leading whitespace of the new queue.
     if (trimTrailing)
-    {
-        while (src.AnyRetrievable())
-        {
-            byte b;
-            src.Peek(b);
-
-            if (!isspace(b)) break;
-            src.Skip(1);
-        }
-    }
+        PEM_TrimLeadingWhitespace(src);
 
     return true;
 }
