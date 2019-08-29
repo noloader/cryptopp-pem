@@ -93,7 +93,7 @@ int main(int argc, char* argv[])
 
 		std::cout << "Save encrypted RSA private key" << std::endl;
 		FileSink fs3("rsa-enc-priv.new.pem");
-		PEM_Save(fs3, prng, k3, "AES-128-CBC", "test", 4);
+		PEM_Save(fs3, k3, prng, "AES-128-CBC", "test", 4);
 		std::cout << "  - OK" << std::endl;
 
 		std::cout << "Save DSA public key" << std::endl;
@@ -108,7 +108,7 @@ int main(int argc, char* argv[])
 
 		std::cout << "Save encrypted DSA private key" << std::endl;
 		FileSink fs6("dsa-enc-priv.new.pem");
-		PEM_Save(fs6, prng, k6, "AES-128-CBC", "test", 4);
+		PEM_Save(fs6, k6, prng, "AES-128-CBC", "test", 4);
 		std::cout << "  - OK" << std::endl;
 
 		std::cout << "Save ECP parameters" << std::endl;
@@ -127,7 +127,7 @@ int main(int argc, char* argv[])
 
 		std::cout << "Save encrypted ECP private key" << std::endl;
 		FileSink fs10("ec-enc-priv.new.pem", true);
-		PEM_Save(fs10, prng, k10, "AES-128-CBC", "test", 4);
+		PEM_Save(fs10, k10, prng, "AES-128-CBC", "test", 4);
 		std::cout << "  - OK" << std::endl;
 	}
 
@@ -143,21 +143,11 @@ int main(int argc, char* argv[])
 		std::cout << "Parsed " << count << " certificates from cacert.pem" << std::endl;
 		std::cout << "  - OK" << std::endl;
 	}
-
-        // Save an EC public key
-        //FileSink fs16("ec-pub-xxx.pem", true);
-        //DL_PublicKey_EC<ECP> k16;
-        //PEM_Save(fs16, k16);
-
-        // Save an encrypted EC private key
-        //AutoSeededRandomPool prng;
-        //DL_PrivateKey_EC<ECP> k18 = ...;
-        //FileSink fs18("ec-enc-priv-xxx.pem", true);
-        //PEM_Save(fs18, prng, k18, "AES-128-CBC", "test", 4);
     }
     catch(const Exception& ex)
     {
         std::cout << "Caught exception: " << ex.what() << std::endl;
+	return 1;
     }
 
     return 0;

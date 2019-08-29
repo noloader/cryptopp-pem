@@ -323,8 +323,8 @@ void PEM_Save(BufferedTransformation& bt, const RSA::PrivateKey& key);
 ///  <tt>pem_read.cpp</tt> and <tt>pem_write.cpp</tt> for the values that are
 ///  recognized.
 /// \throws Exception on failure
-void PEM_Save(BufferedTransformation& bt, RandomNumberGenerator& rng,
-              const RSA::PrivateKey& key, const std::string& algorithm,
+void PEM_Save(BufferedTransformation& bt, const RSA::PrivateKey& key,
+              RandomNumberGenerator& rng, const std::string& algorithm,
               const char* password, size_t length);
 
 /// \brief Save a PEM encoded DSA public key
@@ -350,8 +350,8 @@ void PEM_Save(BufferedTransformation& bt, const DSA::PrivateKey& key);
 //   <tt>pem_read.cpp</tt> and <tt>pem_write.cpp</tt> for the values that are
 ///  recognized.
 /// \throws Exception on failure
-void PEM_Save(BufferedTransformation& bt, RandomNumberGenerator& rng,
-              const DSA::PrivateKey& key, const std::string& algorithm,
+void PEM_Save(BufferedTransformation& bt, const DSA::PrivateKey& key,
+              RandomNumberGenerator& rng, const std::string& algorithm,
               const char* password, size_t length);
 
 /// \brief Save a PEM encoded ElGamal public key
@@ -377,8 +377,8 @@ void PEM_Save(BufferedTransformation& bt, const ElGamal::PrivateKey& key);
 ///  <tt>pem_read.cpp</tt> and <tt>pem_write.cpp</tt> for the values that are
 ///  recognized.
 /// \throws Exception on failure
-void PEM_Save(BufferedTransformation& bt, RandomNumberGenerator& rng,
-              const ElGamal::PrivateKey& key, const std::string& algorithm,
+void PEM_Save(BufferedTransformation& bt, const ElGamal::PrivateKey& key,
+              RandomNumberGenerator& rng, const std::string& algorithm,
               const char* password, size_t length);
 
 /// \brief Save a PEM encoded ECP public key
@@ -408,8 +408,8 @@ void PEM_Save(BufferedTransformation& bt, const DL_PrivateKey_EC<ECP>& key);
 ///  In addition, OpenSSL cannot load and utilize an EC key with a non-named
 ///  curve into a server.
 /// \throws Exception on failure
-void PEM_Save(BufferedTransformation& bt, RandomNumberGenerator& rng,
-              const DL_PrivateKey_EC<ECP>& key, const std::string& algorithm,
+void PEM_Save(BufferedTransformation& bt, const DL_PrivateKey_EC<ECP>& key,
+              RandomNumberGenerator& rng, const std::string& algorithm,
               const char* password, size_t length);
 
 /// \brief Save a PEM encoded EC2N public key
@@ -439,8 +439,8 @@ void PEM_Save(BufferedTransformation& bt, const DL_PrivateKey_EC<EC2N>& key);
 ///  addition, OpenSSL cannot load and utilize an EC key with a non-named curve
 ///  into a server.
 /// \throws Exception on failure
-void PEM_Save(BufferedTransformation& bt, RandomNumberGenerator& rng,
-              const DL_PrivateKey_EC<EC2N>& key, const std::string& algorithm,
+void PEM_Save(BufferedTransformation& bt, const DL_PrivateKey_EC<EC2N>& key,
+              RandomNumberGenerator& rng, const std::string& algorithm,
               const char* password, size_t length);
 
 /// \brief Save a PEM encoded ECDSA private key
@@ -464,8 +464,8 @@ void PEM_Save(BufferedTransformation& bt, const DL_Keys_ECDSA<ECP>::PrivateKey& 
 ///  In addition, OpenSSL cannot load and utilize an EC key with a non-named
 ///  curve into a server.
 /// \throws Exception on failure
-void PEM_Save(BufferedTransformation& bt, RandomNumberGenerator& rng,
-              const DL_Keys_ECDSA<ECP>::PrivateKey& key, const std::string& algorithm,
+void PEM_Save(BufferedTransformation& bt, const DL_Keys_ECDSA<ECP>::PrivateKey& key,
+              RandomNumberGenerator& rng, const std::string& algorithm,
               const char* password, size_t length);
 
 /// \brief Save a PEM encoded DSA group parameters

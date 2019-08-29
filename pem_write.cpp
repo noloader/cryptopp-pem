@@ -113,9 +113,10 @@ void PEM_SavePrivateKey(BufferedTransformation& bt, const PRIVATE_KEY& key,
                         const SecByteBlock& pre, const SecByteBlock& post);
 
 template <class PRIVATE_KEY>
-void PEM_SavePrivateKey(BufferedTransformation& bt, RandomNumberGenerator& rng,
-                        const PRIVATE_KEY& key, const SecByteBlock& pre, const SecByteBlock& post,
-                        const std::string& algorithm, const char* password, size_t length);
+void PEM_SavePrivateKey(BufferedTransformation& bt, const PRIVATE_KEY& key,
+                        RandomNumberGenerator& rng, const std::string& algorithm,
+                        const char* password, size_t length,
+                        const SecByteBlock& pre, const SecByteBlock& post);
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
@@ -136,7 +137,8 @@ void PEM_SaveParams(BufferedTransformation& bt, const DL_GroupParameters_EC< EC 
 }
 
 template <class EC>
-void PEM_SavePrivateKey(BufferedTransformation& bt, const DL_PrivateKey_EC<EC>& key, const SecByteBlock& pre, const SecByteBlock& post)
+void PEM_SavePrivateKey(BufferedTransformation& bt, const DL_PrivateKey_EC<EC>& key,
+                        const SecByteBlock& pre, const SecByteBlock& post)
 {
     PEM_WriteLine(bt, pre);
 
@@ -232,14 +234,15 @@ void PEM_SavePublicKey(BufferedTransformation& bt,
 }
 
 template <class PRIVATE_KEY>
-void PEM_SavePrivateKey(BufferedTransformation& bt,
-                               const PRIVATE_KEY& key, const SecByteBlock& pre, const SecByteBlock& post)
+void PEM_SavePrivateKey(BufferedTransformation& bt, const PRIVATE_KEY& key,
+                        const SecByteBlock& pre, const SecByteBlock& post)
 {
     PEM_SaveKey(bt, key, pre, post);
 }
 
 template <class KEY>
-void PEM_SaveKey(BufferedTransformation& bt, const KEY& key, const SecByteBlock& pre, const SecByteBlock& post)
+void PEM_SaveKey(BufferedTransformation& bt, const KEY& key,
+                 const SecByteBlock& pre, const SecByteBlock& post)
 {
     PEM_WriteLine(bt, pre);
 
@@ -254,9 +257,10 @@ void PEM_SaveKey(BufferedTransformation& bt, const KEY& key, const SecByteBlock&
 }
 
 template<class PRIVATE_KEY>
-void PEM_SavePrivateKey(BufferedTransformation& bt, RandomNumberGenerator& rng,
-                        const PRIVATE_KEY& key, const SecByteBlock& pre, const SecByteBlock& post,
-                        const std::string& algorithm, const char* password, size_t length)
+void PEM_SavePrivateKey(BufferedTransformation& bt, const PRIVATE_KEY& key,
+                        RandomNumberGenerator& rng, const std::string& algorithm,
+                        const char* password, size_t length,
+                        const SecByteBlock& pre, const SecByteBlock& post)
 {
     ByteQueue queue;
 
@@ -437,9 +441,11 @@ void PEM_Save(BufferedTransformation& bt, const RSA::PrivateKey& rsa)
     PEM_SavePrivateKey(bt, rsa, RSA_PRIVATE_BEGIN, RSA_PRIVATE_END);
 }
 
-void PEM_Save(BufferedTransformation& bt, RandomNumberGenerator& rng, const RSA::PrivateKey& rsa, const string& algorithm, const char* password, size_t length)
+void PEM_Save(BufferedTransformation& bt, const RSA::PrivateKey& rsa,
+              RandomNumberGenerator& rng, const string& algorithm,
+              const char* password, size_t length)
 {
-    PEM_SavePrivateKey(bt, rng, rsa, RSA_PRIVATE_BEGIN, RSA_PRIVATE_END, algorithm, password, length);
+    PEM_SavePrivateKey(bt, rsa, rng, algorithm, password, length, RSA_PRIVATE_BEGIN, RSA_PRIVATE_END);
 }
 
 void PEM_Save(BufferedTransformation& bt, const DSA::PublicKey& dsa)
@@ -452,9 +458,11 @@ void PEM_Save(BufferedTransformation& bt, const DSA::PrivateKey& dsa)
     PEM_SavePrivateKey(bt, dsa, DSA_PRIVATE_BEGIN, DSA_PRIVATE_END);
 }
 
-void PEM_Save(BufferedTransformation& bt, RandomNumberGenerator& rng, const DSA::PrivateKey& dsa, const string& algorithm, const char* password, size_t length)
+void PEM_Save(BufferedTransformation& bt, const DSA::PrivateKey& dsa,
+              RandomNumberGenerator& rng, const string& algorithm,
+              const char* password, size_t length)
 {
-    PEM_SavePrivateKey(bt, rng, dsa, DSA_PRIVATE_BEGIN, DSA_PRIVATE_END, algorithm, password, length);
+    PEM_SavePrivateKey(bt, dsa, rng, algorithm, password, length, DSA_PRIVATE_BEGIN, DSA_PRIVATE_END);
 }
 
 void PEM_Save(BufferedTransformation& bt, const ElGamal::PublicKey& key)
@@ -467,9 +475,11 @@ void PEM_Save(BufferedTransformation& bt, const ElGamal::PrivateKey& key)
     PEM_SavePrivateKey(bt, key, ELGAMAL_PRIVATE_BEGIN, ELGAMAL_PRIVATE_END);
 }
 
-void PEM_Save(BufferedTransformation& bt, RandomNumberGenerator& rng, const ElGamal::PrivateKey& key, const string& algorithm, const char* password, size_t length)
+void PEM_Save(BufferedTransformation& bt, const ElGamal::PrivateKey& key,
+              RandomNumberGenerator& rng, const string& algorithm,
+              const char* password, size_t length)
 {
-    PEM_SavePrivateKey(bt, rng, key, ELGAMAL_PRIVATE_BEGIN, ELGAMAL_PRIVATE_END, algorithm, password, length);
+    PEM_SavePrivateKey(bt, key, rng, algorithm, password, length, ELGAMAL_PRIVATE_BEGIN, ELGAMAL_PRIVATE_END);
 }
 
 
@@ -497,10 +507,12 @@ void PEM_Save(BufferedTransformation& bt, const DL_PrivateKey_EC<ECP>& ec)
     PEM_SavePrivateKey(bt, ec, EC_PRIVATE_BEGIN, EC_PRIVATE_END);
 }
 
-void PEM_Save(BufferedTransformation& bt, RandomNumberGenerator& rng, const DL_PrivateKey_EC<ECP>& ec, const std::string& algorithm, const char* password, size_t length)
+void PEM_Save(BufferedTransformation& bt, const DL_PrivateKey_EC<ECP>& ec,
+              RandomNumberGenerator& rng, const std::string& algorithm,
+              const char* password, size_t length)
 {
     OID_State<DL_GroupParameters_EC<ECP> > state(ec.GetGroupParameters());
-    PEM_SavePrivateKey(bt, rng, ec, EC_PRIVATE_BEGIN, EC_PRIVATE_END, algorithm, password, length);
+    PEM_SavePrivateKey(bt, ec, rng, algorithm, password, length, EC_PRIVATE_BEGIN, EC_PRIVATE_END);
 }
 
 void PEM_Save(BufferedTransformation& bt, const DL_PublicKey_EC<EC2N>& ec)
@@ -515,10 +527,12 @@ void PEM_Save(BufferedTransformation& bt, const DL_PrivateKey_EC<EC2N>& ec)
     PEM_SavePrivateKey(bt, ec, EC_PRIVATE_BEGIN, EC_PRIVATE_END);
 }
 
-void PEM_Save(BufferedTransformation& bt, RandomNumberGenerator& rng, const DL_PrivateKey_EC<EC2N>& ec, const std::string& algorithm, const char* password, size_t length)
+void PEM_Save(BufferedTransformation& bt, const DL_PrivateKey_EC<EC2N>& ec,
+              RandomNumberGenerator& rng, const std::string& algorithm,
+              const char* password, size_t length)
 {
     OID_State<DL_GroupParameters_EC<EC2N> > state(ec.GetGroupParameters());
-    PEM_SavePrivateKey(bt, rng, ec, EC_PRIVATE_BEGIN, EC_PRIVATE_END, algorithm, password, length);
+    PEM_SavePrivateKey(bt, ec, rng, algorithm, password, length, EC_PRIVATE_BEGIN, EC_PRIVATE_END);
 }
 
 void PEM_Save(BufferedTransformation& bt, const DL_Keys_ECDSA<ECP>::PrivateKey& ecdsa)
@@ -526,9 +540,11 @@ void PEM_Save(BufferedTransformation& bt, const DL_Keys_ECDSA<ECP>::PrivateKey& 
     PEM_Save(bt, dynamic_cast<const DL_PrivateKey_EC<ECP>&>(ecdsa));
 }
 
-void PEM_Save(BufferedTransformation& bt, RandomNumberGenerator& rng, DL_Keys_ECDSA<ECP>::PrivateKey& ecdsa, const std::string& algorithm, const char* password, size_t length)
+void PEM_Save(BufferedTransformation& bt, DL_Keys_ECDSA<ECP>::PrivateKey& ecdsa,
+              RandomNumberGenerator& rng, const std::string& algorithm,
+              const char* password, size_t length)
 {
-    PEM_Save(bt, rng, dynamic_cast<DL_PrivateKey_EC<ECP>&>(ecdsa), algorithm, password, length);
+    PEM_Save(bt, dynamic_cast<DL_PrivateKey_EC<ECP>&>(ecdsa), rng, algorithm, password, length);
 }
 
 void PEM_Save(BufferedTransformation& bt, const DL_GroupParameters_DSA& params)
