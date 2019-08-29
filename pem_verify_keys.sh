@@ -3,6 +3,11 @@
 # Script to verify the test keys written by pem_test.cxx
 
 #################
+# pem_test program
+
+./pem_test.exe
+
+#################
 # RSA keys
 
 # The RSA command returns 0 on success
