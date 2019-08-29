@@ -59,10 +59,14 @@ void PEM_StripEncapsulatedBoundary(SecByteBlock& sb, const SecByteBlock& pre, co
 
 void PEM_StripEncapsulatedHeader(BufferedTransformation& src, BufferedTransformation& dest, EncapsulatedHeader& header);
 
-void PEM_CipherForAlgorithm(const EncapsulatedHeader& header, const char* password, size_t length, member_ptr<StreamTransformation>& stream);
+void PEM_CipherForAlgorithm(const EncapsulatedHeader& header,
+                            const char* password, size_t length,
+                            member_ptr<StreamTransformation>& stream);
 
-void PEM_DecodeAndDecrypt(BufferedTransformation& src, BufferedTransformation& dest, const char* password, size_t length);
-void PEM_Decrypt(BufferedTransformation& src, BufferedTransformation& dest, member_ptr<StreamTransformation>& stream);
+void PEM_DecodeAndDecrypt(BufferedTransformation& src, BufferedTransformation& dest,
+                          const char* password, size_t length);
+void PEM_Decrypt(BufferedTransformation& src, BufferedTransformation& dest,
+                 member_ptr<StreamTransformation>& stream);
 
 bool PEM_IsEncrypted(SecByteBlock& sb);
 bool PEM_IsEncrypted(BufferedTransformation& bt);
@@ -294,7 +298,9 @@ bool PEM_IsEncrypted(BufferedTransformation& bt)
     return PEM_IsEncrypted(sb);
 }
 
-void PEM_CipherForAlgorithm(const EncapsulatedHeader& header, const char* password, size_t length, member_ptr<StreamTransformation>& stream)
+void PEM_CipherForAlgorithm(const EncapsulatedHeader& header,
+                            const char* password, size_t length,
+                            member_ptr<StreamTransformation>& stream)
 {
     unsigned int ksize, vsize;
 
@@ -408,7 +414,8 @@ void PEM_CipherForAlgorithm(const EncapsulatedHeader& header, const char* passwo
     cipher->SetKeyWithIV(_key.data(), _key.size(), _iv.data(), _iv.size());
 }
 
-void PEM_DecodeAndDecrypt(BufferedTransformation& src, BufferedTransformation& dest, const char* password, size_t length)
+void PEM_DecodeAndDecrypt(BufferedTransformation& src, BufferedTransformation& dest,
+                          const char* password, size_t length)
 {
     ByteQueue temp1;
     EncapsulatedHeader header;
@@ -423,7 +430,8 @@ void PEM_DecodeAndDecrypt(BufferedTransformation& src, BufferedTransformation& d
     PEM_Decrypt(temp2, dest, stream);
 }
 
-void PEM_Decrypt(BufferedTransformation& src, BufferedTransformation& dest, member_ptr<StreamTransformation>& stream)
+void PEM_Decrypt(BufferedTransformation& src, BufferedTransformation& dest,
+                 member_ptr<StreamTransformation>& stream)
 {
     try
     {

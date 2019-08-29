@@ -79,8 +79,10 @@ OID_State<DL_GroupParameters_EC<EC2N> >::~OID_State() {
 }
 
 // Returns a keyed StreamTransformation ready to use to encrypt a DER encoded key
-void PEM_CipherForAlgorithm(RandomNumberGenerator& rng, std::string algorithm, member_ptr<StreamTransformation>& stream,
-                            SecByteBlock& key, SecByteBlock& iv, const char* password, size_t length);
+void PEM_CipherForAlgorithm(RandomNumberGenerator& rng, std::string algorithm,
+                            member_ptr<StreamTransformation>& stream,
+                            SecByteBlock& key, SecByteBlock& iv,
+                            const char* password, size_t length);
 
 void PEM_DEREncode(BufferedTransformation& bt, const PKCS8PrivateKey& key);
 void PEM_DEREncode(BufferedTransformation& bt, const X509PublicKey& key);
@@ -97,11 +99,14 @@ void PEM_DEREncode(BufferedTransformation& bt, const DSA::PrivateKey& key);
 template <class EC>
 void PEM_DEREncode(BufferedTransformation& bt, const DL_PrivateKey_EC<EC>& key);
 
-void PEM_Encrypt(BufferedTransformation& src, BufferedTransformation& dest, member_ptr<StreamTransformation>& stream);
-void PEM_EncryptAndEncode(BufferedTransformation& src, BufferedTransformation& dest, member_ptr<StreamTransformation>& stream);
+void PEM_Encrypt(BufferedTransformation& src, BufferedTransformation& dest,
+                 member_ptr<StreamTransformation>& stream);
+void PEM_EncryptAndEncode(BufferedTransformation& src, BufferedTransformation& dest,
+                          member_ptr<StreamTransformation>& stream);
 
 template <class EC>
-void PEM_SaveParams(BufferedTransformation& bt, const DL_GroupParameters_EC< EC >& params, const SecByteBlock& pre, const SecByteBlock& post);
+void PEM_SaveParams(BufferedTransformation& bt, const DL_GroupParameters_EC< EC >& params,
+                    const SecByteBlock& pre, const SecByteBlock& post);
 
 template <class KEY>
 void PEM_SaveKey(BufferedTransformation& bt, const KEY& key,
@@ -230,8 +235,8 @@ void PEM_DEREncode(BufferedTransformation& bt, const RSA::PrivateKey& key)
 }
 
 template <class PUBLIC_KEY>
-void PEM_SavePublicKey(BufferedTransformation& bt,
-                       const PUBLIC_KEY& key, const SecByteBlock& pre, const SecByteBlock& post)
+void PEM_SavePublicKey(BufferedTransformation& bt, const PUBLIC_KEY& key,
+                       const SecByteBlock& pre, const SecByteBlock& post)
 {
     PEM_SaveKey(bt, key, pre, post);
 }
@@ -305,8 +310,10 @@ void PEM_SavePrivateKey(BufferedTransformation& bt, const PRIVATE_KEY& key,
     bt.MessageEnd();
 }
 
-void PEM_CipherForAlgorithm(RandomNumberGenerator& rng, std::string algorithm, member_ptr<StreamTransformation>& stream,
-                            SecByteBlock& key, SecByteBlock& iv, const char* password, size_t length)
+void PEM_CipherForAlgorithm(RandomNumberGenerator& rng, std::string algorithm,
+                            member_ptr<StreamTransformation>& stream,
+                            SecByteBlock& key, SecByteBlock& iv,
+                            const char* password, size_t length)
 {
     unsigned int ksize, vsize;
     std::transform(algorithm.begin(), algorithm.end(), algorithm.begin(), (int(*)(int))std::toupper);
@@ -412,14 +419,16 @@ void PEM_CipherForAlgorithm(RandomNumberGenerator& rng, std::string algorithm, m
     _iv.swap(iv);
 }
 
-void PEM_Encrypt(BufferedTransformation& src, BufferedTransformation& dest, member_ptr<StreamTransformation>& stream)
+void PEM_Encrypt(BufferedTransformation& src, BufferedTransformation& dest,
+                 member_ptr<StreamTransformation>& stream)
 {
     StreamTransformationFilter filter(*stream, new Redirector(dest));
     src.TransferTo(filter);
     filter.MessageEnd();
 }
 
-void PEM_EncryptAndEncode(BufferedTransformation& src, BufferedTransformation& dest, member_ptr<StreamTransformation>& stream)
+void PEM_EncryptAndEncode(BufferedTransformation& src, BufferedTransformation& dest,
+                          member_ptr<StreamTransformation>& stream)
 {
     ByteQueue temp;
     PEM_Encrypt(src, temp, stream);
