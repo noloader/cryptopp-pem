@@ -133,22 +133,6 @@ int main(int argc, char* argv[])
         PEM_Save(fs10, k10, prng, "AES-128-CBC", "test", 4);
         std::cout << "  - OK" << std::endl;
         }
-
-        // Test cacert.pem. There should be ~130 or ~140 certs in it.
-        {
-        FileSource fs("cacert.pem", true);
-        size_t count=0;
-
-        while (PEM_NextObject(fs, TheBitBucket())) {
-            count++;
-        }
-
-        std::cout << "Parsed " << count << " certificates from cacert.pem" << std::endl;
-        if (count > 100)
-            std::cout << "  - OK" << std::endl;
-        else
-            std::cout << "  - Failed" << std::endl;
-        }
     }
     catch(const Exception& ex)
     {
