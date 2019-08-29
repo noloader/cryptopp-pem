@@ -50,6 +50,7 @@ int main(int argc, char* argv[])
 		std::cout << "Load DSA private key" << std::endl;
 		FileSource fs5("dsa-priv.pem", true);
 		PEM_Load(fs5, k5);
+		std::cout << "  - OK" << std::endl;
 
 		std::cout << "Load encrypted DSA private key" << std::endl;
 		FileSource fs6("dsa-enc-priv.pem", true);
@@ -119,6 +120,7 @@ int main(int argc, char* argv[])
 		std::cout << "Save ECP public key" << std::endl;
 		FileSink fs8("ec-pub.new.pem", true);
 		PEM_Save(fs8, k8);
+		std::cout << "  - OK" << std::endl;
 
 		std::cout << "Save ECP private key" << std::endl;
 		FileSink fs9("ec-priv.new.pem", true);
