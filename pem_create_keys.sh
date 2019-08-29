@@ -78,6 +78,13 @@ sed 's/\n//g' rsa-pub.pem > rsa-eol-cr.pem
 # Uses only LF (remove CR)
 sed 's/\r//g' rsa-pub.pem > rsa-eol-lf.pem
 
+# No EOL (remove CR and LF)
+sed 's/\r//g; s/\n//g' rsa-pub.pem > rsa-eol-none.pem
+
+echo "-----BEGIN FOO-----" > foobar.pem
+head -c 180 /dev/urandom | base64 -w 64 >> foobar.pem
+echo "-----END BAR-----" >> foobar.pem
+
 ##################################
 # cacert.pem
 

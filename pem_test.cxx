@@ -137,7 +137,7 @@ int main(int argc, char* argv[])
     catch(const Exception& ex)
     {
         std::cout << "Caught exception: " << ex.what() << std::endl;
-        fail =  true;
+        fail = true;
     }
 
     // Load malformed, missing final CRLF, should be OK
@@ -226,8 +226,38 @@ int main(int argc, char* argv[])
     }
     catch(const Exception& ex)
     {
-        fail = true;
         std::cout << "  - Failed" << std::endl;
+        fail = true;
+    }
+
+    // Load malformed, no EOL, should be OK
+    try
+    {
+        RSA::PublicKey k7;
+        std::cout << "Load malformed key 7" << std::endl;
+        FileSource fs7("rsa-eol-none.pem", true);
+        PEM_Load(fs7, k7);
+        std::cout << "  - OK" << std::endl;
+    }
+    catch(const Exception& ex)
+    {
+        std::cout << "  - Failed" << std::endl;
+        fail = true;
+    }
+
+    // Load malformed, -----BEGIN FOO----- and -----END BAR-----
+    try
+    {
+        RSA::PublicKey k8;
+        std::cout << "Load malformed key 8" << std::endl;
+        FileSource fs8("foobar.pem", true);
+        PEM_Load(fs8, k8);
+        std::cout << "  - Failed" << std::endl;
+        fail = true;
+    }
+    catch(const Exception& ex)
+    {
+        std::cout << "  - OK" << std::endl;
     }
 
     // Test cacert.pem. There should be ~130 to ~150 certs in it.
@@ -245,13 +275,13 @@ int main(int argc, char* argv[])
             std::cout << "  - OK" << std::endl;
         else {
             std::cout << "  - Failed" << std::endl;
-            fail =  true;
+            fail = true;
         }
     }
     catch(const Exception& ex)
     {
         std::cout << "Caught exception: " << ex.what() << std::endl;
-        fail =  true;
+        fail = true;
     }
 
     return fail ? 1 : 0;
