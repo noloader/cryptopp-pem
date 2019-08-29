@@ -7,17 +7,7 @@
 ///////////////////////////////////////////////////////////////////////////
 
 #include <string>
-using std::string;
-
 #include <algorithm>
-using std::search;
-using std::min;
-using std::max;
-
-#if !defined(NDEBUG)
-# include <iostream>
-#endif
-
 #include <cctype>
 
 #include "cryptlib.h"
@@ -33,13 +23,13 @@ using std::max;
 #include "asn.h"
 #include "aes.h"
 #include "idea.h"
-#include "des.h"
 #include "hex.h"
 
 #include "pem.h"
 #include "pem_common.h"
 
 #define CRYPTOPP_ENABLE_NAMESPACE_WEAK 1
+#include "des.h"
 #include "md5.h"
 
 //////////////////////////////////////////////////////////////////////////////
@@ -52,11 +42,11 @@ using namespace CryptoPP;
 // Info from the encapsulated header
 struct EncapsulatedHeader
 {
-    string m_version;
-    string m_operation;
-    string m_algorithm;
+    std::string m_version;
+    std::string m_operation;
+    std::string m_algorithm;
 
-    string m_iv;
+    std::string m_iv;
 };
 
 // GCC 9 compile error using overload PEM_GetType
@@ -77,11 +67,11 @@ void PEM_Decrypt(BufferedTransformation& src, BufferedTransformation& dest, memb
 bool PEM_IsEncrypted(SecByteBlock& sb);
 bool PEM_IsEncrypted(BufferedTransformation& bt);
 
-void PEM_ParseVersion(const string& proctype, string& version);
-void PEM_ParseOperation(const string& proctype, string& operation);
+void PEM_ParseVersion(const std::string& proctype, std::string& version);
+void PEM_ParseOperation(const std::string& proctype, std::string& operation);
 
-void PEM_ParseAlgorithm(const string& dekinfo, string& algorithm);
-void PEM_ParseIV(const string& dekinfo, string& iv);
+void PEM_ParseAlgorithm(const std::string& dekinfo, std::string& algorithm);
+void PEM_ParseIV(const std::string& dekinfo, std::string& iv);
 
 inline SecByteBlock::const_iterator Search(const SecByteBlock& source, const SecByteBlock& target);
 
@@ -99,7 +89,7 @@ void PEM_LoadPrivateKey(BufferedTransformation& bt, DSA::PrivateKey& key);
 
 SecByteBlock::const_iterator Search(const SecByteBlock& source, const SecByteBlock& target)
 {
-    return search(source.begin(), source.end(), target.begin(), target.end());
+    return std::search(source.begin(), source.end(), target.begin(), target.end());
 }
 
 PEM_Type PEM_GetTypeFromBlock(const SecByteBlock& sb)
@@ -288,10 +278,10 @@ void PEM_LoadParams(BufferedTransformation& bt, DL_GroupParameters_EC<EC>& param
 
 bool PEM_IsEncrypted(SecByteBlock& sb)
 {
-    SecByteBlock::iterator it = search(sb.begin(), sb.end(), PROC_TYPE.begin(), PROC_TYPE.end());
+    SecByteBlock::iterator it = std::search(sb.begin(), sb.end(), PROC_TYPE.begin(), PROC_TYPE.end());
     if (it == sb.end()) return false;
 
-    it = search(it + PROC_TYPE.size(), sb.end(), ENCRYPTED.begin(), ENCRYPTED.end());
+    it = std::search(it + PROC_TYPE.size(), sb.end(), ENCRYPTED.begin(), ENCRYPTED.end());
     return it != sb.end();
 }
 
@@ -308,7 +298,7 @@ void PEM_CipherForAlgorithm(const EncapsulatedHeader& header, const char* passwo
 {
     unsigned int ksize, vsize;
 
-    string algorithm(header.m_algorithm);
+    std::string algorithm(header.m_algorithm);
     std::transform(algorithm.begin(), algorithm.end(), algorithm.begin(),  (int(*)(int))std::toupper);
 
     if (algorithm == "AES-256-CBC")
@@ -443,12 +433,12 @@ void PEM_Decrypt(BufferedTransformation& src, BufferedTransformation& dest, memb
     }
     catch (const Exception& ex)
     {
-        string message(ex.what());
+        std::string message(ex.what());
         size_t pos = message.find(":");
-        if (pos != string::npos && pos+2 < message.size())
+        if (pos != std::string::npos && pos+2 < message.size())
             message = message.substr(pos+2);
 
-        throw Exception(Exception::OTHER_ERROR, string("PEM_Decrypt: ") + message);
+        throw Exception(Exception::OTHER_ERROR, std::string("PEM_Decrypt: ") + message);
     }
 }
 
@@ -486,15 +476,15 @@ void PEM_StripEncapsulatedBoundary(BufferedTransformation& bt, const SecByteBloc
 
     if (prePos == -1)
     {
-        string msg = "PEM_StripEncapsulatedBoundary: '";
-        msg += string((char*)pre.data(), pre.size()) + "' not found";
+        std::string msg = "PEM_StripEncapsulatedBoundary: '";
+        msg += std::string((char*)pre.data(), pre.size()) + "' not found";
         throw InvalidDataFormat(msg);
     }
 
     if (postPos == -1)
     {
-        string msg = "PEM_StripEncapsulatedBoundary: '";
-        msg += string((char*)post.data(), post.size()) + "' not found";
+        std::string msg = "PEM_StripEncapsulatedBoundary: '";
+        msg += std::string((char*)post.data(), post.size()) + "' not found";
         throw InvalidDataFormat(msg);
     }
 
@@ -525,7 +515,7 @@ void PEM_StripEncapsulatedHeader(BufferedTransformation& src, BufferedTransforma
         throw InvalidDataFormat("PEM_StripEncapsulatedHeader: failed to locate Proc-Type");
 
     line = GetControlFieldData(line);
-    string tline(reinterpret_cast<const char*>(line.data()),line.size());
+    std::string tline(reinterpret_cast<const char*>(line.data()),line.size());
 
     PEM_ParseVersion(tline, header.m_version);
     if (header.m_version != "4")
@@ -548,7 +538,7 @@ void PEM_StripEncapsulatedHeader(BufferedTransformation& src, BufferedTransforma
         if (0 == CompareNoCase(field, DEK_INFO))
         {
             line = GetControlFieldData(line);
-            tline = string(reinterpret_cast<const char*>(line.data()),line.size());
+            tline = std::string(reinterpret_cast<const char*>(line.data()),line.size());
 
             PEM_ParseAlgorithm(tline, header.m_algorithm);
             PEM_ParseIV(tline, header.m_iv);
@@ -568,7 +558,7 @@ void PEM_StripEncapsulatedHeader(BufferedTransformation& src, BufferedTransforma
             const char* ptr = (char*)field.begin();
             size_t len = field.size();
 
-            string m(ptr, len);
+            std::string m(ptr, len);
             throw NotImplemented("PEM_StripEncapsulatedHeader: " + m + " not supported");
         }
     }
@@ -583,42 +573,42 @@ void PEM_StripEncapsulatedHeader(BufferedTransformation& src, BufferedTransforma
     src.TransferTo(dest);
 }
 
-// The string will be similar to " 4, ENCRYPTED"
-void PEM_ParseVersion(const string& proctype, string& version)
+// The std::string will be similar to " 4, ENCRYPTED"
+void PEM_ParseVersion(const std::string& proctype, std::string& version)
 {
     size_t pos1 = 0;
     while (pos1 < proctype.size() && isspace(proctype[pos1])) pos1++;
 
     size_t pos2 = proctype.find(",");
-    if (pos2 == string::npos)
+    if (pos2 == std::string::npos)
         throw InvalidDataFormat("PEM_ParseVersion: failed to locate version");
 
     while (pos2 > pos1 && isspace(proctype[pos2])) pos2--;
     version = proctype.substr(pos1, pos2 - pos1);
 }
 
-// The string will be similar to " 4, ENCRYPTED"
-void PEM_ParseOperation(const string& proctype, string& operation)
+// The std::string will be similar to " 4, ENCRYPTED"
+void PEM_ParseOperation(const std::string& proctype, std::string& operation)
 {
     size_t pos1 = proctype.find(",");
-    if (pos1 == string::npos)
+    if (pos1 == std::string::npos)
         throw InvalidDataFormat("PEM_ParseOperation: failed to locate operation");
 
     pos1++;
     while (pos1 < proctype.size() && isspace(proctype[pos1])) pos1++;
 
-    operation = proctype.substr(pos1, string::npos);
+    operation = proctype.substr(pos1, std::string::npos);
     std::transform(operation.begin(), operation.end(), operation.begin(), (int(*)(int))std::toupper);
 }
 
-// The string will be similar to " AES-128-CBC, XXXXXXXXXXXXXXXX"
-void PEM_ParseAlgorithm(const string& dekinfo, string& algorithm)
+// The std::string will be similar to " AES-128-CBC, XXXXXXXXXXXXXXXX"
+void PEM_ParseAlgorithm(const std::string& dekinfo, std::string& algorithm)
 {
     size_t pos1 = 0;
     while (pos1 < dekinfo.size() && isspace(dekinfo[pos1])) pos1++;
 
     size_t pos2 = dekinfo.find(",");
-    if (pos2 == string::npos)
+    if (pos2 == std::string::npos)
         throw InvalidDataFormat("PEM_ParseVersion: failed to locate algorithm");
 
     while (pos2 > pos1 && isspace(dekinfo[pos2])) pos2--;
@@ -627,17 +617,17 @@ void PEM_ParseAlgorithm(const string& dekinfo, string& algorithm)
     std::transform(algorithm.begin(), algorithm.end(), algorithm.begin(),  (int(*)(int))std::toupper);
 }
 
-// The string will be similar to " AES-128-CBC, XXXXXXXXXXXXXXXX"
-void PEM_ParseIV(const string& dekinfo, string& iv)
+// The std::string will be similar to " AES-128-CBC, XXXXXXXXXXXXXXXX"
+void PEM_ParseIV(const std::string& dekinfo, std::string& iv)
 {
     size_t pos1 = dekinfo.find(",");
-    if (pos1 == string::npos)
+    if (pos1 == std::string::npos)
         throw InvalidDataFormat("PEM_ParseIV: failed to locate initialization vector");
 
     pos1++;
     while (pos1 < dekinfo.size() && isspace(dekinfo[pos1])) pos1++;
 
-    iv = dekinfo.substr(pos1, string::npos);
+    iv = dekinfo.substr(pos1, std::string::npos);
     std::transform(iv.begin(), iv.end(), iv.begin(), (int(*)(int))std::toupper);
 }
 
@@ -767,7 +757,7 @@ bool PEM_NextObject(BufferedTransformation& src, BufferedTransformation& dest, b
     // +2 to allow for CR + LF line endings. There's no guarantee a line
     //   will be present, or it will be RFC1421_LINE_BREAK in size.
     const size_t READ_SIZE = (RFC1421_LINE_BREAK + 1) * 10;
-    const size_t REWIND = max(PEM_BEGIN.size(), PEM_END.size()) + 2;
+    const size_t REWIND_SIZE = (std::max)(PEM_BEGIN.size(), PEM_END.size()) + 2;
 
     SecByteBlock accum;
     size_t idx = 0, next = 0;
@@ -782,18 +772,12 @@ bool PEM_NextObject(BufferedTransformation& src, BufferedTransformation& dest, b
         //   we need to rewind a bit in case a token spans the previous
         //   block and the block we are reading. But we can't rewind
         //   into a previous index. Once we find an index, the variable
-        //   next is set to it. Hence the reason for the max()
-        if (idx > REWIND)
+        //   next is set to it. Hence the reason for the std::max()
+        if (idx > REWIND_SIZE)
         {
-            const size_t x = idx - REWIND;
-            next = max(next, x);
+            const size_t x = idx - REWIND_SIZE;
+            next = (std::max)(next, x);
         }
-
-#if 0
-        // Next should be less than index by 10 or so
-        std::cout << "  Index: " << idx << std::endl;
-        std::cout << "   Next: " << next << std::endl;
-#endif
 
         // We need a temp queue to use CopyRangeTo. We have to use it
         //   because there's no Peek that allows us to peek a range.
@@ -811,7 +795,7 @@ bool PEM_NextObject(BufferedTransformation& src, BufferedTransformation& dest, b
         // Locate '-----BEGIN'
         if (idx1 == BAD_IDX)
         {
-            it = search(accum.begin() + next, accum.end(), PEM_BEGIN.begin(), PEM_BEGIN.end());
+            it = std::search(accum.begin() + next, accum.end(), PEM_BEGIN.begin(), PEM_BEGIN.end());
             if (it == accum.end())
                 continue;
 
@@ -822,7 +806,7 @@ bool PEM_NextObject(BufferedTransformation& src, BufferedTransformation& dest, b
         // Locate '-----'
         if (idx2 == BAD_IDX && idx1 != BAD_IDX)
         {
-            it = search(accum.begin() + next, accum.end(), PEM_TAIL.begin(), PEM_TAIL.end());
+            it = std::search(accum.begin() + next, accum.end(), PEM_TAIL.begin(), PEM_TAIL.end());
             if (it == accum.end())
                 continue;
 
@@ -833,7 +817,7 @@ bool PEM_NextObject(BufferedTransformation& src, BufferedTransformation& dest, b
         // Locate '-----END'
         if (idx3 == BAD_IDX && idx2 != BAD_IDX)
         {
-            it = search(accum.begin() + next, accum.end(), PEM_END.begin(), PEM_END.end());
+            it = std::search(accum.begin() + next, accum.end(), PEM_END.begin(), PEM_END.end());
             if (it == accum.end())
                 continue;
 
@@ -844,7 +828,7 @@ bool PEM_NextObject(BufferedTransformation& src, BufferedTransformation& dest, b
         // Locate '-----'
         if (idx4 == BAD_IDX && idx3 != BAD_IDX)
         {
-            it = search(accum.begin() + next, accum.end(), PEM_TAIL.begin(), PEM_TAIL.end());
+            it = std::search(accum.begin() + next, accum.end(), PEM_TAIL.begin(), PEM_TAIL.end());
             if (it == accum.end())
                 continue;
 

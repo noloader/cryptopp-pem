@@ -27,7 +27,7 @@ fi
 ##################################
 # test program
 
-echo "Compiling test program"
+echo "*** Compiling test program ***"
 
 rm -rf pem_test.exe
 "$CXX" pem_test.cxx ./libcryptopp.a -o pem_test.exe
@@ -35,7 +35,7 @@ rm -rf pem_test.exe
 ##################################
 # Test keys
 
-echo "Generating OpenSSL keys"
+echo "*** Generating OpenSSL keys ***"
 
 # RSA private key, public key, and encrypted private key
 openssl genrsa -out rsa-priv.pem 1024

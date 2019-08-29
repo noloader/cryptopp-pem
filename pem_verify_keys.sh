@@ -5,6 +5,7 @@
 #################
 # pem_test program
 
+echo
 echo "*** Crypto++ reading and writing ***"
 
 ./pem_test.exe
@@ -14,6 +15,7 @@ echo "*** Crypto++ reading and writing ***"
 
 # The RSA command returns 0 on success
 
+echo
 echo "*** OpenSSL reading ***"
 
 if [[ -f rsa-pub.new.pem ]]; then

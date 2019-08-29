@@ -7,11 +7,7 @@
 ///////////////////////////////////////////////////////////////////////////
 
 #include <string>
-using std::string;
-
 #include <algorithm>
-using std::transform;
-
 #include <cctype>
 
 #include "cryptlib.h"
@@ -27,13 +23,13 @@ using std::transform;
 #include "asn.h"
 #include "aes.h"
 #include "idea.h"
-#include "des.h"
 #include "hex.h"
 
 #include "pem.h"
 #include "pem_common.h"
 
 #define CRYPTOPP_ENABLE_NAMESPACE_WEAK 1
+#include "des.h"
 #include "md5.h"
 
 //////////////////////////////////////////////////////////////////////////////
@@ -83,7 +79,7 @@ OID_State<DL_GroupParameters_EC<EC2N> >::~OID_State() {
 }
 
 // Returns a keyed StreamTransformation ready to use to encrypt a DER encoded key
-void PEM_CipherForAlgorithm(RandomNumberGenerator& rng, string algorithm, member_ptr<StreamTransformation>& stream,
+void PEM_CipherForAlgorithm(RandomNumberGenerator& rng, std::string algorithm, member_ptr<StreamTransformation>& stream,
                             SecByteBlock& key, SecByteBlock& iv, const char* password, size_t length);
 
 void PEM_DEREncode(BufferedTransformation& bt, const PKCS8PrivateKey& key);
@@ -283,13 +279,13 @@ void PEM_SavePrivateKey(BufferedTransformation& bt, const PRIVATE_KEY& key,
     PEM_CipherForAlgorithm(rng, algorithm, stream, _key, _iv, password, length);
 
     // Encode the IV. It gets written to the encapsulated header.
-    string encoded;
+    std::string encoded;
     HexEncoder hex(new StringSink(encoded));
     hex.Put(_iv.data(), _iv.size());
     hex.MessageEnd();
 
     // e.g., DEK-Info: AES-128-CBC,5E537774BCCD88B3E2F47FE294C93253
-    string line;
+    std::string line;
     line += "DEK-Info: ";
     line += algorithm + "," + encoded;
 
@@ -309,7 +305,7 @@ void PEM_SavePrivateKey(BufferedTransformation& bt, const PRIVATE_KEY& key,
     bt.MessageEnd();
 }
 
-void PEM_CipherForAlgorithm(RandomNumberGenerator& rng, string algorithm, member_ptr<StreamTransformation>& stream,
+void PEM_CipherForAlgorithm(RandomNumberGenerator& rng, std::string algorithm, member_ptr<StreamTransformation>& stream,
                             SecByteBlock& key, SecByteBlock& iv, const char* password, size_t length)
 {
     unsigned int ksize, vsize;
@@ -449,7 +445,7 @@ void PEM_Save(BufferedTransformation& bt, const RSA::PrivateKey& rsa)
 }
 
 void PEM_Save(BufferedTransformation& bt, const RSA::PrivateKey& rsa,
-              RandomNumberGenerator& rng, const string& algorithm,
+              RandomNumberGenerator& rng, const std::string& algorithm,
               const char* password, size_t length)
 {
     PEM_SavePrivateKey(bt, rsa, rng, algorithm, password, length, RSA_PRIVATE_BEGIN, RSA_PRIVATE_END);
@@ -466,7 +462,7 @@ void PEM_Save(BufferedTransformation& bt, const DSA::PrivateKey& dsa)
 }
 
 void PEM_Save(BufferedTransformation& bt, const DSA::PrivateKey& dsa,
-              RandomNumberGenerator& rng, const string& algorithm,
+              RandomNumberGenerator& rng, const std::string& algorithm,
               const char* password, size_t length)
 {
     PEM_SavePrivateKey(bt, dsa, rng, algorithm, password, length, DSA_PRIVATE_BEGIN, DSA_PRIVATE_END);
@@ -483,7 +479,7 @@ void PEM_Save(BufferedTransformation& bt, const ElGamal::PrivateKey& key)
 }
 
 void PEM_Save(BufferedTransformation& bt, const ElGamal::PrivateKey& key,
-              RandomNumberGenerator& rng, const string& algorithm,
+              RandomNumberGenerator& rng, const std::string& algorithm,
               const char* password, size_t length)
 {
     PEM_SavePrivateKey(bt, key, rng, algorithm, password, length, ELGAMAL_PRIVATE_BEGIN, ELGAMAL_PRIVATE_END);
