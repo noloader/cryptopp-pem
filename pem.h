@@ -25,6 +25,12 @@
 
 NAMESPACE_BEGIN(CryptoPP)
 
+/// \brief X.509 Certificate
+struct X509Certificate
+{
+    // Not implemented
+};
+
 /// \brief Get the next PEM object
 /// \param src the source BufferedTransformation
 /// \param dest the destination BufferedTransformation
@@ -275,6 +281,12 @@ void PEM_Load(BufferedTransformation& bt, DL_GroupParameters_EC<ECP>& params);
 /// \throws Exception on failure
 void PEM_Load(BufferedTransformation& bt, DL_GroupParameters_EC<EC2N>& params);
 
+/// \brief Load a PEM encoded X.509 certificate
+/// \param bt the source BufferedTransformation
+/// \param cert the X.509 certificate
+/// \throws Exception on failure
+void PEM_Load(BufferedTransformation& bt, X509Certificate& cert);
+
 /// \brief Load a PEM encoded Diffie-Hellman parameters
 /// \param bt the source BufferedTransformation
 /// \param p the prime modulus
@@ -485,6 +497,12 @@ void PEM_Save(BufferedTransformation& bt, const DL_GroupParameters_EC<ECP>& para
 /// \param params the EC2N group parameters
 /// \throws Exception on failure
 void PEM_Save(BufferedTransformation& bt, const DL_GroupParameters_EC<EC2N>& params);
+
+/// \brief Save a PEM encoded X.509 certificate
+/// \param bt the destination BufferedTransformation
+/// \param cert the X.509 certificate
+/// \throws Exception on failure
+void PEM_Save(BufferedTransformation& bt, const X509Certificate& cert);
 
 /// \brief Save a PEM encoded Diffie-Hellman parameters
 /// \param bt the destination BufferedTransformation

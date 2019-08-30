@@ -266,7 +266,8 @@ template < class EC >
 void PEM_LoadParams(BufferedTransformation& bt, DL_GroupParameters_EC<EC>& params)
 {
     ByteQueue obj;
-    PEM_NextObject(bt, obj);
+    if (PEM_NextObject(bt, obj) == false)
+        throw InvalidDataFormat("PEM_Load: PEM object not available");
 
     PEM_Type type = PEM_GetType(obj);
     if (type == PEM_EC_PARAMETERS)
@@ -915,11 +916,11 @@ bool PEM_NextObject(BufferedTransformation& src, BufferedTransformation& dest, b
     return true;
 }
 
-
 void PEM_Load(BufferedTransformation& bt, RSA::PublicKey& rsa)
 {
     ByteQueue obj;
-    PEM_NextObject(bt, obj);
+    if (PEM_NextObject(bt, obj) == false)
+        throw InvalidDataFormat("PEM_Load: PEM object not available");
 
     PEM_Type type = PEM_GetType(obj);
     if (type == PEM_PUBLIC_KEY)
@@ -943,7 +944,8 @@ void PEM_Load(BufferedTransformation& bt, RSA::PrivateKey& rsa)
 void PEM_Load(BufferedTransformation& bt, RSA::PrivateKey& rsa, const char* password, size_t length)
 {
     ByteQueue obj;
-    PEM_NextObject(bt, obj);
+    if (PEM_NextObject(bt, obj) == false)
+        throw InvalidDataFormat("PEM_Load: PEM object not available");
 
     PEM_Type type = PEM_GetType(obj);
     if (type == PEM_PRIVATE_KEY)
@@ -967,7 +969,8 @@ void PEM_Load(BufferedTransformation& bt, RSA::PrivateKey& rsa, const char* pass
 void PEM_Load(BufferedTransformation& bt, DSA::PublicKey& dsa)
 {
     ByteQueue obj;
-    PEM_NextObject(bt, obj);
+    if (PEM_NextObject(bt, obj) == false)
+        throw InvalidDataFormat("PEM_Load: PEM object not available");
 
     PEM_Type type = PEM_GetType(obj);
     if (type == PEM_PUBLIC_KEY)
@@ -991,7 +994,8 @@ void PEM_Load(BufferedTransformation& bt, DSA::PrivateKey& dsa)
 void PEM_Load(BufferedTransformation& bt, DSA::PrivateKey& dsa, const char* password, size_t length)
 {
     ByteQueue obj;
-    PEM_NextObject(bt, obj);
+    if (PEM_NextObject(bt, obj) == false)
+        throw InvalidDataFormat("PEM_Load: PEM object not available");
 
     PEM_Type type = PEM_GetType(obj);
     if (type == PEM_PRIVATE_KEY)
@@ -1015,7 +1019,8 @@ void PEM_Load(BufferedTransformation& bt, DSA::PrivateKey& dsa, const char* pass
 void PEM_Load(BufferedTransformation& bt, ElGamal::PublicKey& key)
 {
     ByteQueue obj;
-    PEM_NextObject(bt, obj);
+    if (PEM_NextObject(bt, obj) == false)
+        throw InvalidDataFormat("PEM_Load: PEM object not available");
 
     PEM_Type type = PEM_GetType(obj);
     if (type == PEM_PUBLIC_KEY)
@@ -1039,7 +1044,8 @@ void PEM_Load(BufferedTransformation& bt, ElGamal::PrivateKey& key)
 void PEM_Load(BufferedTransformation& bt, ElGamal::PrivateKey& key, const char* password, size_t length)
 {
     ByteQueue obj;
-    PEM_NextObject(bt, obj);
+    if (PEM_NextObject(bt, obj) == false)
+        throw InvalidDataFormat("PEM_Load: PEM object not available");
 
     PEM_Type type = PEM_GetType(obj);
     if (type == PEM_PRIVATE_KEY)
@@ -1073,7 +1079,8 @@ void PEM_Load(BufferedTransformation& bt, DL_GroupParameters_EC<EC2N>& params)
 void PEM_Load(BufferedTransformation& bt, DL_PublicKey_EC<ECP>& ec)
 {
     ByteQueue obj;
-    PEM_NextObject(bt, obj);
+    if (PEM_NextObject(bt, obj) == false)
+        throw InvalidDataFormat("PEM_Load: PEM object not available");
 
     PEM_Type type = PEM_GetType(obj);
     if (type == PEM_PUBLIC_KEY)
@@ -1097,7 +1104,8 @@ void PEM_Load(BufferedTransformation& bt, DL_PrivateKey_EC<ECP>& ec)
 void PEM_Load(BufferedTransformation& bt, DL_PrivateKey_EC<ECP>& ec, const char* password, size_t length)
 {
     ByteQueue obj;
-    PEM_NextObject(bt, obj);
+    if (PEM_NextObject(bt, obj) == false)
+        throw InvalidDataFormat("PEM_Load: PEM object not available");
 
     PEM_Type type = PEM_GetType(obj);
     if (type == PEM_PRIVATE_KEY)
@@ -1121,7 +1129,8 @@ void PEM_Load(BufferedTransformation& bt, DL_PrivateKey_EC<ECP>& ec, const char*
 void PEM_Load(BufferedTransformation& bt, DL_PublicKey_EC<EC2N>& ec)
 {
     ByteQueue obj;
-    PEM_NextObject(bt, obj);
+    if (PEM_NextObject(bt, obj) == false)
+        throw InvalidDataFormat("PEM_Load: PEM object not available");
 
     PEM_Type type = PEM_GetType(obj);
     if (type == PEM_PUBLIC_KEY)
@@ -1145,7 +1154,8 @@ void PEM_Load(BufferedTransformation& bt, DL_PrivateKey_EC<EC2N>& ec)
 void PEM_Load(BufferedTransformation& bt, DL_PrivateKey_EC<EC2N>& ec, const char* password, size_t length)
 {
     ByteQueue obj;
-    PEM_NextObject(bt, obj);
+    if (PEM_NextObject(bt, obj) == false)
+        throw InvalidDataFormat("PEM_Load: PEM object not available");
 
     PEM_Type type = PEM_GetType(obj);
     if (type == PEM_PRIVATE_KEY)
@@ -1189,7 +1199,8 @@ void PEM_Load(BufferedTransformation& bt, DL_Keys_ECDSA<EC2N>::PrivateKey& ecdsa
 void PEM_Load(BufferedTransformation& bt, DL_GroupParameters_DSA& params)
 {
     ByteQueue obj;
-    PEM_NextObject(bt, obj);
+    if (PEM_NextObject(bt, obj) == false)
+        throw InvalidDataFormat("PEM_Load: PEM object not available");
 
     PEM_Type type = PEM_GetType(obj);
     if (type == PEM_DSA_PARAMETERS)
@@ -1203,10 +1214,20 @@ void PEM_Load(BufferedTransformation& bt, DL_GroupParameters_DSA& params)
     params.Load(temp);
 }
 
+void PEM_Load(BufferedTransformation& bt, X509Certificate& cert)
+{
+    ByteQueue obj;
+    bool result = PEM_NextObject(bt, obj);
+    CRYPTOPP_ASSERT(result);
+
+    throw NotImplemented("PEM_Load: X.509 certificate is not implemented");
+}
+
 void PEM_DH_Load(BufferedTransformation& bt, Integer& p, Integer& g)
 {
     ByteQueue obj;
-    PEM_NextObject(bt, obj);
+    if (PEM_NextObject(bt, obj) == false)
+        throw InvalidDataFormat("PEM_Load: PEM object not available");
 
     PEM_Type type = PEM_GetType(obj);
     if (type == PEM_DH_PARAMETERS)
@@ -1237,7 +1258,8 @@ void PEM_DH_Load(BufferedTransformation& bt, Integer& p, Integer& g)
 void PEM_DH_Load(BufferedTransformation& bt, Integer& p, Integer& q, Integer& g)
 {
     ByteQueue obj;
-    PEM_NextObject(bt, obj);
+    if (PEM_NextObject(bt, obj) == false)
+        throw InvalidDataFormat("PEM_Load: PEM object not available");
 
     PEM_Type type = PEM_GetType(obj);
     if (type == PEM_DH_PARAMETERS)
