@@ -267,7 +267,7 @@ void PEM_LoadParams(BufferedTransformation& bt, DL_GroupParameters_EC<EC>& param
 {
     ByteQueue obj;
     if (PEM_NextObject(bt, obj) == false)
-        throw InvalidDataFormat("PEM_Load: PEM object not available");
+        throw InvalidArgument("PEM_Load: PEM object not available");
 
     PEM_Type type = PEM_GetType(obj);
     if (type == PEM_EC_PARAMETERS)
@@ -920,7 +920,7 @@ void PEM_Load(BufferedTransformation& bt, RSA::PublicKey& rsa)
 {
     ByteQueue obj;
     if (PEM_NextObject(bt, obj) == false)
-        throw InvalidDataFormat("PEM_Load: PEM object not available");
+        throw InvalidArgument("PEM_Load: PEM object not available");
 
     PEM_Type type = PEM_GetType(obj);
     if (type == PEM_PUBLIC_KEY)
@@ -945,7 +945,7 @@ void PEM_Load(BufferedTransformation& bt, RSA::PrivateKey& rsa, const char* pass
 {
     ByteQueue obj;
     if (PEM_NextObject(bt, obj) == false)
-        throw InvalidDataFormat("PEM_Load: PEM object not available");
+        throw InvalidArgument("PEM_Load: PEM object not available");
 
     PEM_Type type = PEM_GetType(obj);
     if (type == PEM_PRIVATE_KEY)
@@ -970,7 +970,7 @@ void PEM_Load(BufferedTransformation& bt, DSA::PublicKey& dsa)
 {
     ByteQueue obj;
     if (PEM_NextObject(bt, obj) == false)
-        throw InvalidDataFormat("PEM_Load: PEM object not available");
+        throw InvalidArgument("PEM_Load: PEM object not available");
 
     PEM_Type type = PEM_GetType(obj);
     if (type == PEM_PUBLIC_KEY)
@@ -995,7 +995,7 @@ void PEM_Load(BufferedTransformation& bt, DSA::PrivateKey& dsa, const char* pass
 {
     ByteQueue obj;
     if (PEM_NextObject(bt, obj) == false)
-        throw InvalidDataFormat("PEM_Load: PEM object not available");
+        throw InvalidArgument("PEM_Load: PEM object not available");
 
     PEM_Type type = PEM_GetType(obj);
     if (type == PEM_PRIVATE_KEY)
@@ -1020,7 +1020,7 @@ void PEM_Load(BufferedTransformation& bt, ElGamal::PublicKey& key)
 {
     ByteQueue obj;
     if (PEM_NextObject(bt, obj) == false)
-        throw InvalidDataFormat("PEM_Load: PEM object not available");
+        throw InvalidArgument("PEM_Load: PEM object not available");
 
     PEM_Type type = PEM_GetType(obj);
     if (type == PEM_PUBLIC_KEY)
@@ -1045,7 +1045,7 @@ void PEM_Load(BufferedTransformation& bt, ElGamal::PrivateKey& key, const char* 
 {
     ByteQueue obj;
     if (PEM_NextObject(bt, obj) == false)
-        throw InvalidDataFormat("PEM_Load: PEM object not available");
+        throw InvalidArgument("PEM_Load: PEM object not available");
 
     PEM_Type type = PEM_GetType(obj);
     if (type == PEM_PRIVATE_KEY)
@@ -1080,7 +1080,7 @@ void PEM_Load(BufferedTransformation& bt, DL_PublicKey_EC<ECP>& ec)
 {
     ByteQueue obj;
     if (PEM_NextObject(bt, obj) == false)
-        throw InvalidDataFormat("PEM_Load: PEM object not available");
+        throw InvalidArgument("PEM_Load: PEM object not available");
 
     PEM_Type type = PEM_GetType(obj);
     if (type == PEM_PUBLIC_KEY)
@@ -1105,7 +1105,7 @@ void PEM_Load(BufferedTransformation& bt, DL_PrivateKey_EC<ECP>& ec, const char*
 {
     ByteQueue obj;
     if (PEM_NextObject(bt, obj) == false)
-        throw InvalidDataFormat("PEM_Load: PEM object not available");
+        throw InvalidArgument("PEM_Load: PEM object not available");
 
     PEM_Type type = PEM_GetType(obj);
     if (type == PEM_PRIVATE_KEY)
@@ -1130,7 +1130,7 @@ void PEM_Load(BufferedTransformation& bt, DL_PublicKey_EC<EC2N>& ec)
 {
     ByteQueue obj;
     if (PEM_NextObject(bt, obj) == false)
-        throw InvalidDataFormat("PEM_Load: PEM object not available");
+        throw InvalidArgument("PEM_Load: PEM object not available");
 
     PEM_Type type = PEM_GetType(obj);
     if (type == PEM_PUBLIC_KEY)
@@ -1155,7 +1155,7 @@ void PEM_Load(BufferedTransformation& bt, DL_PrivateKey_EC<EC2N>& ec, const char
 {
     ByteQueue obj;
     if (PEM_NextObject(bt, obj) == false)
-        throw InvalidDataFormat("PEM_Load: PEM object not available");
+        throw InvalidArgument("PEM_Load: PEM object not available");
 
     PEM_Type type = PEM_GetType(obj);
     if (type == PEM_PRIVATE_KEY)
@@ -1200,7 +1200,7 @@ void PEM_Load(BufferedTransformation& bt, DL_GroupParameters_DSA& params)
 {
     ByteQueue obj;
     if (PEM_NextObject(bt, obj) == false)
-        throw InvalidDataFormat("PEM_Load: PEM object not available");
+        throw InvalidArgument("PEM_Load: PEM object not available");
 
     PEM_Type type = PEM_GetType(obj);
     if (type == PEM_DSA_PARAMETERS)
@@ -1217,8 +1217,8 @@ void PEM_Load(BufferedTransformation& bt, DL_GroupParameters_DSA& params)
 void PEM_Load(BufferedTransformation& bt, X509Certificate& cert)
 {
     ByteQueue obj;
-    bool result = PEM_NextObject(bt, obj);
-    CRYPTOPP_ASSERT(result);
+    if (PEM_NextObject(bt, obj) == false)
+        throw InvalidArgument("PEM_Load: PEM object not available");
 
     throw NotImplemented("PEM_Load: X.509 certificate is not implemented");
 }
@@ -1227,7 +1227,7 @@ void PEM_DH_Load(BufferedTransformation& bt, Integer& p, Integer& g)
 {
     ByteQueue obj;
     if (PEM_NextObject(bt, obj) == false)
-        throw InvalidDataFormat("PEM_Load: PEM object not available");
+        throw InvalidArgument("PEM_Load: PEM object not available");
 
     PEM_Type type = PEM_GetType(obj);
     if (type == PEM_DH_PARAMETERS)
@@ -1259,7 +1259,7 @@ void PEM_DH_Load(BufferedTransformation& bt, Integer& p, Integer& q, Integer& g)
 {
     ByteQueue obj;
     if (PEM_NextObject(bt, obj) == false)
-        throw InvalidDataFormat("PEM_Load: PEM object not available");
+        throw InvalidArgument("PEM_Load: PEM object not available");
 
     PEM_Type type = PEM_GetType(obj);
     if (type == PEM_DH_PARAMETERS)
