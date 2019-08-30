@@ -35,11 +35,12 @@ inline byte* BYTE_PTR(char* cstr)
 ANONYMOUS_NAMESPACE_END
 
 NAMESPACE_BEGIN(CryptoPP)
+NAMESPACE_BEGIN(PEM)
 
 const SecByteBlock CR(BYTE_PTR("\r"), 1);
 const SecByteBlock LF(BYTE_PTR("\n"), 1);
+const SecByteBlock EOL(BYTE_PTR("\r\n"), 2);
 const SecByteBlock CRLF(BYTE_PTR("\r\n"), 2);
-const SecByteBlock PEM_EOL(BYTE_PTR("\r\n"), 2);
 
 const SecByteBlock COMMA(BYTE_PTR(","), 1);
 const SecByteBlock SPACE(BYTE_PTR(" "), 1);
@@ -109,13 +110,13 @@ const SecByteBlock CONTENT_DOMAIN(BYTE_PTR("Content-Domain"), 14);
 void PEM_WriteLine(BufferedTransformation& bt, const SecByteBlock& line)
 {
     bt.Put(line.data(), line.size());
-    bt.Put(PEM_EOL.data(), PEM_EOL.size());
+    bt.Put(EOL.data(), EOL.size());
 }
 
 void PEM_WriteLine(BufferedTransformation& bt, const std::string& line)
 {
     bt.Put(reinterpret_cast<const byte*>(line.data()), line.size());
-    bt.Put(PEM_EOL.data(), PEM_EOL.size());
+    bt.Put(EOL.data(), EOL.size());
 }
 
 void PEM_Base64Decode(BufferedTransformation& source, BufferedTransformation& dest)
@@ -254,4 +255,5 @@ int OPENSSL_EVP_BytesToKey(HashTransformation& hash,
     return static_cast<int>(ksize);
 }
 
-NAMESPACE_END
+NAMESPACE_END  // PEM
+NAMESPACE_END  // Cryptopp

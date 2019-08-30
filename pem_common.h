@@ -18,6 +18,7 @@
 #include <string>
 
 NAMESPACE_BEGIN(CryptoPP)
+NAMESPACE_BEGIN(PEM)
 
 //////////////////////////////////////////////////////
 //////////////////////////////////////////////////////
@@ -27,7 +28,6 @@ NAMESPACE_BEGIN(CryptoPP)
 //   validation, then uncomment the line below or set it on the command line.
 // #define PEM_KEY_OR_PARAMETER_VALIDATION 1
 
-// Perform key or parameter validation in Debug builds.
 #if defined(CRYPTOPP_DEBUG) && !defined(PEM_KEY_OR_PARAMETER_VALIDATION)
 # define PEM_KEY_OR_PARAMETER_VALIDATION 1
 #endif
@@ -72,8 +72,8 @@ static const unsigned int PEM_LINE_BREAK = 64;
 
 extern const SecByteBlock CR;
 extern const SecByteBlock LF;
+extern const SecByteBlock EOL;
 extern const SecByteBlock CRLF;
-extern const SecByteBlock PEM_EOL;
 
 extern const SecByteBlock COMMA;
 extern const SecByteBlock SPACE;
@@ -140,6 +140,7 @@ extern const SecByteBlock ENCRYPTED;
 extern const SecByteBlock DEK_INFO;
 extern const SecByteBlock CONTENT_DOMAIN;
 
-NAMESPACE_END
+NAMESPACE_END  // PEM
+NAMESPACE_END  // CryptoPP
 
 #endif // CRYPTOPP_PEM_COM_H

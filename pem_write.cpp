@@ -38,6 +38,7 @@
 ANONYMOUS_NAMESPACE_BEGIN
 
 using namespace CryptoPP;
+using namespace CryptoPP::PEM;
 
 // This class saves the existing EncodeAsOID setting for EC group parameters.
 // PEM_Save unconditionally sets it to TRUE for OpenSSL compatibility. See
@@ -297,7 +298,7 @@ void PEM_SavePrivateKey(BufferedTransformation& bt, const PRIVATE_KEY& key,
     // The extra newline separates the control fields from the encapsulated
     //   text (i.e, header from body). Its required by RFC 1421.
     PEM_WriteLine(queue, line);
-    queue.Put(reinterpret_cast<const byte*>(PEM_EOL.data()), PEM_EOL.size());
+    queue.Put(reinterpret_cast<const byte*>(EOL.data()), EOL.size());
 
     ByteQueue temp;
     PEM_DEREncode(temp, key);
@@ -442,6 +443,8 @@ ANONYMOUS_NAMESPACE_END
 //////////////////////////////////////////////////////////////////////////////
 
 NAMESPACE_BEGIN(CryptoPP)
+
+using namespace CryptoPP::PEM;
 
 void PEM_Save(BufferedTransformation& bt, const RSA::PublicKey& rsa)
 {

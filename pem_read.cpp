@@ -38,6 +38,7 @@
 ANONYMOUS_NAMESPACE_BEGIN
 
 using namespace CryptoPP;
+using namespace CryptoPP::PEM;
 
 // Info from the encapsulated header
 struct EncapsulatedHeader
@@ -720,6 +721,8 @@ NAMESPACE_END
 //////////////////////////////////////////////////////////////////////////////
 
 NAMESPACE_BEGIN(CryptoPP)
+
+using namespace CryptoPP::PEM;
 
 PEM_Type PEM_GetType(const BufferedTransformation& bt)
 {
