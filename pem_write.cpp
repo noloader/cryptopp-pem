@@ -1,5 +1,5 @@
-// pem-wr.cpp - PEM write routines.
-//              Written and placed in the public domain by Jeffrey Walton
+// pem_write.cpp - PEM write routines.
+//                 Written and placed in the public domain by Jeffrey Walton
 
 ///////////////////////////////////////////////////////////////////////////
 // For documentation on the PEM read and write routines, see

@@ -1,6 +1,6 @@
-// pem-com.h - commom PEM routines.
-//             Written and placed in the public domain by Jeffrey Walton
-//             pem_common.h is an internal header. Include pem.h instead.
+// pem_common.h - commom PEM routines.
+//                Written and placed in the public domain by Jeffrey Walton
+//                pem_common.h is an internal header. Include pem.h instead.
 
 ///////////////////////////////////////////////////////////////////////////
 // For documentation on the PEM read and write routines, see

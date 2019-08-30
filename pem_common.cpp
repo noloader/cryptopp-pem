@@ -1,5 +1,5 @@
-// pem-com.cpp - commom PEM routines.
-//               Written and placed in the public domain by Jeffrey Walton
+// pem_common.cpp - commom PEM routines.
+//                  Written and placed in the public domain by Jeffrey Walton
 
 ///////////////////////////////////////////////////////////////////////////
 // For documentation on the PEM read and write routines, see
