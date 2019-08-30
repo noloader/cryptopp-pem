@@ -7,8 +7,8 @@
 //   http://www.cryptopp.com/wiki/PEM_Pack
 ///////////////////////////////////////////////////////////////////////////
 
-#ifndef CRYPTOPP_PEM_COM_H
-#define CRYPTOPP_PEM_COM_H
+#ifndef CRYPTOPP_PEM_COMMON_H
+#define CRYPTOPP_PEM_COMMON_H
 
 #include "cryptlib.h"
 #include "secblock.h"
@@ -16,9 +16,6 @@
 #include "pem.h"
 
 #include <string>
-
-NAMESPACE_BEGIN(CryptoPP)
-NAMESPACE_BEGIN(PEM)
 
 //////////////////////////////////////////////////////
 //////////////////////////////////////////////////////
@@ -34,6 +31,9 @@ NAMESPACE_BEGIN(PEM)
 
 //////////////////////////////////////////////////////
 //////////////////////////////////////////////////////
+
+NAMESPACE_BEGIN(CryptoPP)
+NAMESPACE_BEGIN(PEM)
 
 // Attempts to locate a control field in a line
 SecByteBlock GetControlField(const SecByteBlock& line);
@@ -143,4 +143,4 @@ extern const SecByteBlock CONTENT_DOMAIN;
 NAMESPACE_END  // PEM
 NAMESPACE_END  // CryptoPP
 
-#endif // CRYPTOPP_PEM_COM_H
+#endif // CRYPTOPP_PEM_COMMON_H

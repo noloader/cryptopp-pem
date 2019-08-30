@@ -29,8 +29,12 @@ fi
 
 echo "Compiling test program"
 
-rm -rf pem_test.exe
-"$CXX" pem_test.cxx ./libcryptopp.a -o pem_test.exe
+rm -rf pem_test.exe &>/dev/null
+
+if ! "$CXX" pem_test.cxx ./libcryptopp.a -o pem_test.exe 2>/dev/null; then
+    echo "Failed to build pem_test.exe"
+    exit 1
+fi
 
 ##################################
 # test keys

@@ -8,6 +8,11 @@
 echo
 echo "Crypto++ reading and writing"
 
+if [[ ! -f pem_test.exe ]]; then
+	echo "Failed to find pem_test.exe"
+	exit 1
+fi
+
 ./pem_test.exe
 
 #################

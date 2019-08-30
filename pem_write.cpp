@@ -131,7 +131,8 @@ void PEM_SavePrivateKey(BufferedTransformation& bt, const PRIVATE_KEY& key,
 //////////////////////////////////////////////////////////////////////////////
 
 template <class EC>
-void PEM_SaveParams(BufferedTransformation& bt, const DL_GroupParameters_EC< EC >& params, const SecByteBlock& pre, const SecByteBlock& post)
+void PEM_SaveParams(BufferedTransformation& bt, const DL_GroupParameters_EC< EC >& params,
+                    const SecByteBlock& pre, const SecByteBlock& post)
 {
     PEM_WriteLine(bt, pre);
 
