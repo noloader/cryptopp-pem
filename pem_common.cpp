@@ -39,7 +39,7 @@ NAMESPACE_BEGIN(CryptoPP)
 const SecByteBlock CR(BYTE_PTR("\r"), 1);
 const SecByteBlock LF(BYTE_PTR("\n"), 1);
 const SecByteBlock CRLF(BYTE_PTR("\r\n"), 2);
-const SecByteBlock RFC1421_EOL(BYTE_PTR("\r\n"), 2);
+const SecByteBlock PEM_EOL(BYTE_PTR("\r\n"), 2);
 
 const SecByteBlock COMMA(BYTE_PTR(","), 1);
 const SecByteBlock SPACE(BYTE_PTR(" "), 1);
@@ -109,13 +109,13 @@ const SecByteBlock CONTENT_DOMAIN(BYTE_PTR("Content-Domain"), 14);
 void PEM_WriteLine(BufferedTransformation& bt, const SecByteBlock& line)
 {
     bt.Put(line.data(), line.size());
-    bt.Put(RFC1421_EOL.data(), RFC1421_EOL.size());
+    bt.Put(PEM_EOL.data(), PEM_EOL.size());
 }
 
 void PEM_WriteLine(BufferedTransformation& bt, const std::string& line)
 {
     bt.Put(reinterpret_cast<const byte*>(line.data()), line.size());
-    bt.Put(RFC1421_EOL.data(), RFC1421_EOL.size());
+    bt.Put(PEM_EOL.data(), PEM_EOL.size());
 }
 
 void PEM_Base64Decode(BufferedTransformation& source, BufferedTransformation& dest)
@@ -127,7 +127,7 @@ void PEM_Base64Decode(BufferedTransformation& source, BufferedTransformation& de
 
 void PEM_Base64Encode(BufferedTransformation& source, BufferedTransformation& dest)
 {
-    Base64Encoder encoder(new Redirector(dest), true, RFC1421_LINE_BREAK);
+    Base64Encoder encoder(new Redirector(dest), true, PEM_LINE_BREAK);
     source.TransferTo(encoder);
     encoder.MessageEnd();
 }

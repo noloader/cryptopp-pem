@@ -134,7 +134,7 @@ void PEM_SaveParams(BufferedTransformation& bt, const DL_GroupParameters_EC< EC 
 {
     PEM_WriteLine(bt, pre);
 
-    Base64Encoder encoder(new Redirector(bt), true, RFC1421_LINE_BREAK);
+    Base64Encoder encoder(new Redirector(bt), true, PEM_LINE_BREAK);
 
     params.DEREncode(encoder);
     encoder.MessageEnd();
@@ -297,7 +297,7 @@ void PEM_SavePrivateKey(BufferedTransformation& bt, const PRIVATE_KEY& key,
     // The extra newline separates the control fields from the encapsulated
     //   text (i.e, header from body). Its required by RFC 1421.
     PEM_WriteLine(queue, line);
-    queue.Put(reinterpret_cast<const byte*>(RFC1421_EOL.data()), RFC1421_EOL.size());
+    queue.Put(reinterpret_cast<const byte*>(PEM_EOL.data()), PEM_EOL.size());
 
     ByteQueue temp;
     PEM_DEREncode(temp, key);
@@ -565,7 +565,7 @@ void PEM_Save(BufferedTransformation& bt, const DL_GroupParameters_DSA& params)
 
     PEM_WriteLine(queue, DSA_PARAMETERS_BEGIN);
 
-    Base64Encoder encoder(new Redirector(queue), true, RFC1421_LINE_BREAK);
+    Base64Encoder encoder(new Redirector(queue), true, PEM_LINE_BREAK);
     params.Save(encoder);
     encoder.MessageEnd();
 
@@ -581,7 +581,7 @@ void PEM_DH_Save(BufferedTransformation& bt, const Integer& p, const Integer& g)
 
     PEM_WriteLine(queue, DH_PARAMETERS_BEGIN);
 
-    Base64Encoder encoder(new Redirector(queue), true, RFC1421_LINE_BREAK);
+    Base64Encoder encoder(new Redirector(queue), true, PEM_LINE_BREAK);
 
     DERSequenceEncoder seq(encoder);
         p.BEREncode(seq);
@@ -602,7 +602,7 @@ void PEM_DH_Save(BufferedTransformation& bt, const Integer& p, const Integer& q,
 
     PEM_WriteLine(queue, DH_PARAMETERS_BEGIN);
 
-    Base64Encoder encoder(new Redirector(queue), true, RFC1421_LINE_BREAK);
+    Base64Encoder encoder(new Redirector(queue), true, PEM_LINE_BREAK);
 
     DERSequenceEncoder seq(encoder);
         p.BEREncode(seq);

@@ -68,12 +68,12 @@ static const unsigned int OPENSSL_PKCS5_SALT_LEN = 8;
 static const size_t PEM_INVALID = static_cast<size_t>(-1);
 
 // 64-character line length is required by RFC 1421.
-static const unsigned int RFC1421_LINE_BREAK = 64;
+static const unsigned int PEM_LINE_BREAK = 64;
 
 extern const SecByteBlock CR;
 extern const SecByteBlock LF;
 extern const SecByteBlock CRLF;
-extern const SecByteBlock RFC1421_EOL;
+extern const SecByteBlock PEM_EOL;
 
 extern const SecByteBlock COMMA;
 extern const SecByteBlock SPACE;

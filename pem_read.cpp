@@ -769,8 +769,8 @@ bool PEM_NextObject(BufferedTransformation& src, BufferedTransformation& dest, b
     // Reading 8 or 10 lines at a time is an optimization from testing
     //   cacerts.pem. The file has 150 or so certs, so its a good test.
     // +2 to allow for CR + LF line endings. There's no guarantee a line
-    //   will be present, or it will be RFC1421_LINE_BREAK in size.
-    const size_t READ_SIZE = (RFC1421_LINE_BREAK + 1) * 10;
+    //   will be present, or it will be PEM_LINE_BREAK in size.
+    const size_t READ_SIZE = (PEM_LINE_BREAK + 1) * 10;
     const size_t REWIND_SIZE = (std::max)(PEM_BEGIN.size(), PEM_END.size()) + 2;
 
     SecByteBlock accum;
