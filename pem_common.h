@@ -49,22 +49,30 @@ inline byte* byte_ptr(char* cstr)
 
 inline const byte* byte_ptr(const secure_string& str)
 {
-    return reinterpret_cast<const byte*>(&str[0]);
+    static const char empty[1] = {0};
+    return str.empty() ?
+        reinterpret_cast<const byte*>(empty) : reinterpret_cast<const byte*>(&str[0]);
 }
 
 inline byte* byte_ptr(secure_string& str)
 {
-    return reinterpret_cast<byte*>(&str[0]);
+    static char empty[1] = {0};
+    return str.empty() ?
+        reinterpret_cast<byte*>(empty) : reinterpret_cast<byte*>(&str[0]);
 }
 
 inline const byte* byte_ptr(const std::string& str)
 {
-    return reinterpret_cast<const byte*>(&str[0]);
+    static const char empty[1] = {0};
+    return str.empty() ?
+        reinterpret_cast<const byte*>(empty) : reinterpret_cast<const byte*>(&str[0]);
 }
 
 inline byte* byte_ptr(std::string& str)
 {
-    return reinterpret_cast<byte*>(&str[0]);
+    static char empty[1] = {0};
+    return str.empty() ?
+        reinterpret_cast<byte*>(empty) : reinterpret_cast<byte*>(&str[0]);
 }
 
 // Attempts to locate a control field in a line

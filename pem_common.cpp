@@ -18,10 +18,6 @@
 #include "pem.h"
 #include "pem_common.h"
 
-ANONYMOUS_NAMESPACE_BEGIN
-
-ANONYMOUS_NAMESPACE_END
-
 NAMESPACE_BEGIN(CryptoPP)
 NAMESPACE_BEGIN(PEM)
 
