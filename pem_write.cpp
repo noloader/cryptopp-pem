@@ -102,8 +102,8 @@ void PEM_DEREncode(BufferedTransformation& bt, const DL_PrivateKey_EC<EC>& key);
 
 void PEM_Encrypt(BufferedTransformation& src, BufferedTransformation& dest,
                  member_ptr<StreamTransformation>& stream);
-void PEM_EncryptAndEncode(BufferedTransformation& src, BufferedTransformation& dest,
-                          member_ptr<StreamTransformation>& stream);
+void PEM_EncryptAndBase64Encode(BufferedTransformation& src, BufferedTransformation& dest,
+                                member_ptr<StreamTransformation>& stream);
 
 template <class EC>
 void PEM_SaveParams(BufferedTransformation& bt, const DL_GroupParameters_EC< EC >& params,
@@ -304,7 +304,7 @@ void PEM_SavePrivateKey(BufferedTransformation& bt, const PRIVATE_KEY& key,
     ByteQueue temp;
     PEM_DEREncode(temp, key);
 
-    PEM_EncryptAndEncode(temp, queue, stream);
+    PEM_EncryptAndBase64Encode(temp, queue, stream);
 
     PEM_WriteLine(queue, post);
 
@@ -430,7 +430,7 @@ void PEM_Encrypt(BufferedTransformation& src, BufferedTransformation& dest,
     filter.MessageEnd();
 }
 
-void PEM_EncryptAndEncode(BufferedTransformation& src, BufferedTransformation& dest,
+void PEM_EncryptAndBase64Encode(BufferedTransformation& src, BufferedTransformation& dest,
                           member_ptr<StreamTransformation>& stream)
 {
     ByteQueue temp;

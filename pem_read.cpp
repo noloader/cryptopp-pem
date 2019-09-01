@@ -55,7 +55,8 @@ PEM_Type PEM_GetTypeFromString(const secure_string& str);
 
 size_t PEM_ReadLine(BufferedTransformation& source, secure_string& line, secure_string& ending);
 
-void PEM_StripEncapsulatedBoundary(BufferedTransformation& bt, const secure_string& pre, const secure_string& post);
+void PEM_StripEncapsulatedBoundary(BufferedTransformation& src, BufferedTransformation& dest,
+                                   const secure_string& pre, const secure_string& post);
 void PEM_StripEncapsulatedBoundary(secure_string& sb, const secure_string& pre, const secure_string& post);
 
 void PEM_StripEncapsulatedHeader(BufferedTransformation& src, BufferedTransformation& dest, EncapsulatedHeader& header);
@@ -64,7 +65,7 @@ void PEM_CipherForAlgorithm(const EncapsulatedHeader& header,
                             const char* password, size_t length,
                             member_ptr<StreamTransformation>& stream);
 
-void PEM_DecodeAndDecrypt(BufferedTransformation& src, BufferedTransformation& dest,
+void PEM_Base64DecodeAndDecrypt(BufferedTransformation& src, BufferedTransformation& dest,
                           const char* password, size_t length);
 void PEM_Decrypt(BufferedTransformation& src, BufferedTransformation& dest,
                  member_ptr<StreamTransformation>& stream);
@@ -266,20 +267,18 @@ void PEM_LoadPrivateKey(BufferedTransformation& bt, DSA::PrivateKey& key)
 template < class EC >
 void PEM_LoadParams(BufferedTransformation& bt, DL_GroupParameters_EC<EC>& params)
 {
-    ByteQueue obj;
-    if (PEM_NextObject(bt, obj) == false)
+    ByteQueue t1, t2, t3;
+    if (PEM_NextObject(bt, t1) == false)
         throw InvalidArgument("PEM_Load: PEM object not available");
 
-    PEM_Type type = PEM_GetType(obj);
+    PEM_Type type = PEM_GetType(t1);
     if (type == PEM_EC_PARAMETERS)
-        PEM_StripEncapsulatedBoundary(obj, EC_PARAMETERS_BEGIN, EC_PARAMETERS_END);
+        PEM_StripEncapsulatedBoundary(t1, t2, EC_PARAMETERS_BEGIN, EC_PARAMETERS_END);
     else
         throw InvalidDataFormat("PEM_Read: invalid EC parameters");
 
-    ByteQueue temp;
-    PEM_Base64Decode(obj, temp);
-
-    params.BERDecode(temp);
+    PEM_Base64Decode(t2, t3);
+    params.BERDecode(t3);
 
 #if defined(PEM_KEY_OR_PARAMETER_VALIDATION) && !defined(NO_OS_DEPENDENCE)
     AutoSeededRandomPool prng;
@@ -319,70 +318,60 @@ void PEM_CipherForAlgorithm(const EncapsulatedHeader& header,
     {
         ksize = 32;
         vsize = 16;
-
         stream.reset(new CBC_Mode<AES>::Decryption);
     }
     else if (algorithm == "AES-192-CBC")
     {
         ksize = 24;
         vsize = 16;
-
         stream.reset(new CBC_Mode<AES>::Decryption);
     }
     else if (algorithm == "AES-128-CBC")
     {
         ksize = 16;
         vsize = 16;
-
         stream.reset(new CBC_Mode<AES>::Decryption);
     }
     else if (algorithm == "CAMELLIA-256-CBC")
     {
         ksize = 32;
         vsize = 16;
-
         stream.reset(new CBC_Mode<Camellia>::Decryption);
     }
     else if (algorithm == "CAMELLIA-192-CBC")
     {
         ksize = 24;
         vsize = 16;
-
         stream.reset(new CBC_Mode<Camellia>::Decryption);
     }
     else if (algorithm == "CAMELLIA-128-CBC")
     {
         ksize = 16;
         vsize = 16;
-
         stream.reset(new CBC_Mode<Camellia>::Decryption);
     }
     else if (algorithm == "DES-EDE3-CBC")
     {
         ksize = 24;
         vsize = 8;
-
         stream.reset(new CBC_Mode<DES_EDE3>::Decryption);
     }
     else if (algorithm == "DES-EDE2-CBC")
     {
         ksize = 16;
         vsize = 8;
-
         stream.reset(new CBC_Mode<DES_EDE2>::Decryption);
     }
     else if (algorithm == "DES-CBC")
     {
         ksize = 8;
         vsize = 8;
-
         stream.reset(new CBC_Mode<DES>::Decryption);
     }
     else if (algorithm == "IDEA-CBC")
     {
         ksize = 16;
         vsize = 8;
-
         stream.reset(new CBC_Mode<IDEA>::Decryption);
     }
     else
@@ -394,7 +383,7 @@ void PEM_CipherForAlgorithm(const EncapsulatedHeader& header,
     // Decode the IV. It used as the Salt in EVP_BytesToKey,
     //   and its used as the IV in the cipher.
     HexDecoder hex;
-    hex.Put((const byte*)header.m_iv.data(), header.m_iv.size());
+    hex.Put(byte_ptr(header.m_iv), header.m_iv.size());
     hex.MessageEnd();
 
     // If the IV size is wrong, SetKeyWithIV will throw an exception.
@@ -424,7 +413,7 @@ void PEM_CipherForAlgorithm(const EncapsulatedHeader& header,
     cipher->SetKeyWithIV(byte_ptr(_key), _key.size(), byte_ptr(_iv), _iv.size());
 }
 
-void PEM_DecodeAndDecrypt(BufferedTransformation& src, BufferedTransformation& dest,
+void PEM_Base64DecodeAndDecrypt(BufferedTransformation& src, BufferedTransformation& dest,
                           const char* password, size_t length)
 {
     ByteQueue temp1;
@@ -460,16 +449,17 @@ void PEM_Decrypt(BufferedTransformation& src, BufferedTransformation& dest,
     }
 }
 
-void PEM_StripEncapsulatedBoundary(BufferedTransformation& bt, const secure_string& pre, const secure_string& post)
+void PEM_StripEncapsulatedBoundary(BufferedTransformation& src, BufferedTransformation& dest,
+                                   const secure_string& pre, const secure_string& post)
 {
     ByteQueue temp;
     secure_string::const_iterator it;
     int n = 1, prePos = -1, postPos = -1;
 
-    while (bt.AnyRetrievable() && n++)
+    while (src.AnyRetrievable() && n++)
     {
         secure_string line, unused;
-        PEM_ReadLine(bt, line, unused);
+        PEM_ReadLine(src, line, unused);
 
         // The write associated with an empty line must occur. Otherwise, we loose the CR or LF
         //    in an ecrypted private key between the control fields and the encapsulated text.
@@ -507,7 +497,7 @@ void PEM_StripEncapsulatedBoundary(BufferedTransformation& bt, const secure_stri
     if (prePos > postPos)
         throw InvalidDataFormat("PEM_StripEncapsulatedBoundary: header boundary follows footer boundary");
 
-    temp.TransferTo(bt);
+    temp.TransferTo(dest);
 }
 
 void PEM_StripEncapsulatedHeader(BufferedTransformation& src, BufferedTransformation& dest, EncapsulatedHeader& header)
@@ -923,22 +913,20 @@ bool PEM_NextObject(BufferedTransformation& src, BufferedTransformation& dest, b
 
 void PEM_Load(BufferedTransformation& bt, RSA::PublicKey& rsa)
 {
-    ByteQueue obj;
-    if (PEM_NextObject(bt, obj) == false)
+    ByteQueue t1, t2, t3;
+    if (PEM_NextObject(bt, t1) == false)
         throw InvalidArgument("PEM_Load: PEM object not available");
 
-    PEM_Type type = PEM_GetType(obj);
+    PEM_Type type = PEM_GetType(t1);
     if (type == PEM_PUBLIC_KEY)
-        PEM_StripEncapsulatedBoundary(obj, PUBLIC_BEGIN, PUBLIC_END);
+        PEM_StripEncapsulatedBoundary(t1, t2, PUBLIC_BEGIN, PUBLIC_END);
     else if (type == PEM_RSA_PUBLIC_KEY)
-        PEM_StripEncapsulatedBoundary(obj, RSA_PUBLIC_BEGIN, RSA_PUBLIC_END);
+        PEM_StripEncapsulatedBoundary(t1, t2, RSA_PUBLIC_BEGIN, RSA_PUBLIC_END);
     else
         throw InvalidDataFormat("PEM_Load: not a RSA public key");
 
-    ByteQueue temp;
-    PEM_Base64Decode(obj, temp);
-
-    PEM_LoadPublicKey(temp, rsa, type == PEM_PUBLIC_KEY);
+    PEM_Base64Decode(t2, t3);
+    PEM_LoadPublicKey(t3, rsa, type == PEM_PUBLIC_KEY);
 }
 
 void PEM_Load(BufferedTransformation& bt, RSA::PrivateKey& rsa)
@@ -948,47 +936,44 @@ void PEM_Load(BufferedTransformation& bt, RSA::PrivateKey& rsa)
 
 void PEM_Load(BufferedTransformation& bt, RSA::PrivateKey& rsa, const char* password, size_t length)
 {
-    ByteQueue obj;
-    if (PEM_NextObject(bt, obj) == false)
+    ByteQueue t1, t2, t3;
+    if (PEM_NextObject(bt, t1) == false)
         throw InvalidArgument("PEM_Load: PEM object not available");
 
-    PEM_Type type = PEM_GetType(obj);
+    PEM_Type type = PEM_GetType(t1);
     if (type == PEM_PRIVATE_KEY)
-        PEM_StripEncapsulatedBoundary(obj, PRIVATE_BEGIN, PRIVATE_END);
+        PEM_StripEncapsulatedBoundary(t1, t2, PRIVATE_BEGIN, PRIVATE_END);
     else if (type == PEM_RSA_PRIVATE_KEY || (type == PEM_RSA_ENC_PRIVATE_KEY && password != NULL))
-        PEM_StripEncapsulatedBoundary(obj, RSA_PRIVATE_BEGIN, RSA_PRIVATE_END);
+        PEM_StripEncapsulatedBoundary(t1, t2, RSA_PRIVATE_BEGIN, RSA_PRIVATE_END);
     else if (type == PEM_RSA_ENC_PRIVATE_KEY && password == NULL)
         throw InvalidArgument("PEM_Load: RSA private key is encrypted");
     else
         throw InvalidDataFormat("PEM_Load: not a RSA private key");
 
-    ByteQueue temp;
     if (type == PEM_RSA_ENC_PRIVATE_KEY)
-        PEM_DecodeAndDecrypt(obj, temp, password, length);
+        PEM_Base64DecodeAndDecrypt(t2, t3, password, length);
     else
-        PEM_Base64Decode(obj, temp);
+        PEM_Base64Decode(t2, t3);
 
-    PEM_LoadPrivateKey(temp, rsa, type == PEM_PRIVATE_KEY);
+    PEM_LoadPrivateKey(t3, rsa, type == PEM_PRIVATE_KEY);
 }
 
 void PEM_Load(BufferedTransformation& bt, DSA::PublicKey& dsa)
 {
-    ByteQueue obj;
-    if (PEM_NextObject(bt, obj) == false)
+    ByteQueue t1, t2, t3;
+    if (PEM_NextObject(bt, t1) == false)
         throw InvalidArgument("PEM_Load: PEM object not available");
 
-    PEM_Type type = PEM_GetType(obj);
+    PEM_Type type = PEM_GetType(t1);
     if (type == PEM_PUBLIC_KEY)
-        PEM_StripEncapsulatedBoundary(obj, PUBLIC_BEGIN, PUBLIC_END);
+        PEM_StripEncapsulatedBoundary(t1, t2, PUBLIC_BEGIN, PUBLIC_END);
     else if (type == PEM_DSA_PUBLIC_KEY)
-        PEM_StripEncapsulatedBoundary(obj, DSA_PUBLIC_BEGIN, DSA_PUBLIC_END);
+        PEM_StripEncapsulatedBoundary(t1, t2, DSA_PUBLIC_BEGIN, DSA_PUBLIC_END);
     else
         throw InvalidDataFormat("PEM_Load: not a DSA public key");
 
-    ByteQueue temp;
-    PEM_Base64Decode(obj, temp);
-
-    PEM_LoadPublicKey(temp, dsa, type == PEM_PUBLIC_KEY);
+    PEM_Base64Decode(t2, t3);
+    PEM_LoadPublicKey(t3, dsa, type == PEM_PUBLIC_KEY);
 }
 
 void PEM_Load(BufferedTransformation& bt, DSA::PrivateKey& dsa)
@@ -998,47 +983,44 @@ void PEM_Load(BufferedTransformation& bt, DSA::PrivateKey& dsa)
 
 void PEM_Load(BufferedTransformation& bt, DSA::PrivateKey& dsa, const char* password, size_t length)
 {
-    ByteQueue obj;
-    if (PEM_NextObject(bt, obj) == false)
+    ByteQueue t1, t2, t3;
+    if (PEM_NextObject(bt, t1) == false)
         throw InvalidArgument("PEM_Load: PEM object not available");
 
-    PEM_Type type = PEM_GetType(obj);
+    PEM_Type type = PEM_GetType(t1);
     if (type == PEM_PRIVATE_KEY)
-        PEM_StripEncapsulatedBoundary(obj, PRIVATE_BEGIN, PRIVATE_END);
+        PEM_StripEncapsulatedBoundary(t1, t2, PRIVATE_BEGIN, PRIVATE_END);
     else if (type == PEM_DSA_PRIVATE_KEY || (type == PEM_DSA_ENC_PRIVATE_KEY && password != NULL))
-        PEM_StripEncapsulatedBoundary(obj, DSA_PRIVATE_BEGIN, DSA_PRIVATE_END);
+        PEM_StripEncapsulatedBoundary(t1, t2, DSA_PRIVATE_BEGIN, DSA_PRIVATE_END);
     else if (type == PEM_DSA_ENC_PRIVATE_KEY && password == NULL)
         throw InvalidArgument("PEM_Load: DSA private key is encrypted");
     else
         throw InvalidDataFormat("PEM_Load: not a DSA private key");
 
-    ByteQueue temp;
     if (type == PEM_DSA_ENC_PRIVATE_KEY)
-        PEM_DecodeAndDecrypt(obj, temp, password, length);
+        PEM_Base64DecodeAndDecrypt(t2, t3, password, length);
     else
-        PEM_Base64Decode(obj, temp);
+        PEM_Base64Decode(t2, t3);
 
-    PEM_LoadPrivateKey(temp, dsa);
+    PEM_LoadPrivateKey(t3, dsa);
 }
 
 void PEM_Load(BufferedTransformation& bt, ElGamal::PublicKey& key)
 {
-    ByteQueue obj;
-    if (PEM_NextObject(bt, obj) == false)
+    ByteQueue t1, t2, t3;
+    if (PEM_NextObject(bt, t1) == false)
         throw InvalidArgument("PEM_Load: PEM object not available");
 
-    PEM_Type type = PEM_GetType(obj);
+    PEM_Type type = PEM_GetType(t1);
     if (type == PEM_PUBLIC_KEY)
-        PEM_StripEncapsulatedBoundary(obj, PUBLIC_BEGIN, PUBLIC_END);
+        PEM_StripEncapsulatedBoundary(t1, t2, PUBLIC_BEGIN, PUBLIC_END);
     else if (type == PEM_ELGAMAL_PUBLIC_KEY)
-        PEM_StripEncapsulatedBoundary(obj, ELGAMAL_PUBLIC_BEGIN, ELGAMAL_PUBLIC_END);
+        PEM_StripEncapsulatedBoundary(t1, t2, ELGAMAL_PUBLIC_BEGIN, ELGAMAL_PUBLIC_END);
     else
         throw InvalidDataFormat("PEM_Load: not a ElGamal public key");
 
-    ByteQueue temp;
-    PEM_Base64Decode(obj, temp);
-
-    PEM_LoadPublicKey(temp, key, type == PEM_PUBLIC_KEY);
+    PEM_Base64Decode(t2, t3);
+    PEM_LoadPublicKey(t3, key, type == PEM_PUBLIC_KEY);
 }
 
 void PEM_Load(BufferedTransformation& bt, ElGamal::PrivateKey& key)
@@ -1048,27 +1030,26 @@ void PEM_Load(BufferedTransformation& bt, ElGamal::PrivateKey& key)
 
 void PEM_Load(BufferedTransformation& bt, ElGamal::PrivateKey& key, const char* password, size_t length)
 {
-    ByteQueue obj;
-    if (PEM_NextObject(bt, obj) == false)
+    ByteQueue t1, t2, t3;
+    if (PEM_NextObject(bt, t1) == false)
         throw InvalidArgument("PEM_Load: PEM object not available");
 
-    PEM_Type type = PEM_GetType(obj);
+    PEM_Type type = PEM_GetType(t1);
     if (type == PEM_PRIVATE_KEY)
-        PEM_StripEncapsulatedBoundary(obj, PRIVATE_BEGIN, PRIVATE_END);
+        PEM_StripEncapsulatedBoundary(t1, t2, PRIVATE_BEGIN, PRIVATE_END);
     else if (type == PEM_ELGAMAL_PRIVATE_KEY || (type == PEM_ELGAMAL_ENC_PRIVATE_KEY && password != NULL))
-        PEM_StripEncapsulatedBoundary(obj, ELGAMAL_PRIVATE_BEGIN, ELGAMAL_PRIVATE_END);
+        PEM_StripEncapsulatedBoundary(t1, t2, ELGAMAL_PRIVATE_BEGIN, ELGAMAL_PRIVATE_END);
     else if (type == PEM_ELGAMAL_ENC_PRIVATE_KEY && password == NULL)
         throw InvalidArgument("PEM_Load: ElGamal private key is encrypted");
     else
         throw InvalidDataFormat("PEM_Load: not a ElGamal private key");
 
-    ByteQueue temp;
     if (type == PEM_ELGAMAL_ENC_PRIVATE_KEY)
-        PEM_DecodeAndDecrypt(obj, temp, password, length);
+        PEM_Base64DecodeAndDecrypt(t2, t3, password, length);
     else
-        PEM_Base64Decode(obj, temp);
+        PEM_Base64Decode(t2, t3);
 
-    PEM_LoadPrivateKey(temp, key, type == PEM_PRIVATE_KEY);
+    PEM_LoadPrivateKey(t3, key, type == PEM_PRIVATE_KEY);
 }
 
 void PEM_Load(BufferedTransformation& bt, DL_GroupParameters_EC<ECP>& params)
@@ -1083,22 +1064,20 @@ void PEM_Load(BufferedTransformation& bt, DL_GroupParameters_EC<EC2N>& params)
 
 void PEM_Load(BufferedTransformation& bt, DL_PublicKey_EC<ECP>& ec)
 {
-    ByteQueue obj;
-    if (PEM_NextObject(bt, obj) == false)
+    ByteQueue t1, t2, t3;
+    if (PEM_NextObject(bt, t1) == false)
         throw InvalidArgument("PEM_Load: PEM object not available");
 
-    PEM_Type type = PEM_GetType(obj);
+    PEM_Type type = PEM_GetType(t1);
     if (type == PEM_PUBLIC_KEY)
-        PEM_StripEncapsulatedBoundary(obj, PUBLIC_BEGIN, PUBLIC_END);
+        PEM_StripEncapsulatedBoundary(t1, t2, PUBLIC_BEGIN, PUBLIC_END);
     else if (type == PEM_EC_PUBLIC_KEY)
-        PEM_StripEncapsulatedBoundary(obj, EC_PUBLIC_BEGIN, EC_PUBLIC_END);
+        PEM_StripEncapsulatedBoundary(t1, t2, EC_PUBLIC_BEGIN, EC_PUBLIC_END);
     else
         throw InvalidDataFormat("PEM_Load: not a public EC key");
 
-    ByteQueue temp;
-    PEM_Base64Decode(obj, temp);
-
-    PEM_LoadPublicKey(temp, ec, type == PEM_PUBLIC_KEY);
+    PEM_Base64Decode(t2, t3);
+    PEM_LoadPublicKey(t3, ec, type == PEM_PUBLIC_KEY);
 }
 
 void PEM_Load(BufferedTransformation& bt, DL_PrivateKey_EC<ECP>& ec)
@@ -1108,47 +1087,44 @@ void PEM_Load(BufferedTransformation& bt, DL_PrivateKey_EC<ECP>& ec)
 
 void PEM_Load(BufferedTransformation& bt, DL_PrivateKey_EC<ECP>& ec, const char* password, size_t length)
 {
-    ByteQueue obj;
-    if (PEM_NextObject(bt, obj) == false)
+    ByteQueue t1, t2, t3;
+    if (PEM_NextObject(bt, t1) == false)
         throw InvalidArgument("PEM_Load: PEM object not available");
 
-    PEM_Type type = PEM_GetType(obj);
+    PEM_Type type = PEM_GetType(t1);
     if (type == PEM_PRIVATE_KEY)
-        PEM_StripEncapsulatedBoundary(obj, PRIVATE_BEGIN, PRIVATE_END);
+        PEM_StripEncapsulatedBoundary(t1, t2, PRIVATE_BEGIN, PRIVATE_END);
     else if (type == PEM_EC_PRIVATE_KEY || (type == PEM_EC_ENC_PRIVATE_KEY && password != NULL))
-        PEM_StripEncapsulatedBoundary(obj, EC_PRIVATE_BEGIN, EC_PRIVATE_END);
+        PEM_StripEncapsulatedBoundary(t1, t2, EC_PRIVATE_BEGIN, EC_PRIVATE_END);
     else if (type == PEM_EC_ENC_PRIVATE_KEY && password == NULL)
         throw InvalidArgument("PEM_Load: EC private key is encrypted");
     else
         throw InvalidDataFormat("PEM_Load: not a private EC key");
 
-    ByteQueue temp;
     if (type == PEM_EC_ENC_PRIVATE_KEY)
-        PEM_DecodeAndDecrypt(obj, temp, password, length);
+        PEM_Base64DecodeAndDecrypt(t2, t3, password, length);
     else
-        PEM_Base64Decode(obj, temp);
+        PEM_Base64Decode(t2, t3);
 
-    PEM_LoadPrivateKey(temp, ec, type == PEM_PRIVATE_KEY);
+    PEM_LoadPrivateKey(t3, ec, type == PEM_PRIVATE_KEY);
 }
 
 void PEM_Load(BufferedTransformation& bt, DL_PublicKey_EC<EC2N>& ec)
 {
-    ByteQueue obj;
-    if (PEM_NextObject(bt, obj) == false)
+    ByteQueue t1, t2, t3;
+    if (PEM_NextObject(bt, t1) == false)
         throw InvalidArgument("PEM_Load: PEM object not available");
 
-    PEM_Type type = PEM_GetType(obj);
+    PEM_Type type = PEM_GetType(t1);
     if (type == PEM_PUBLIC_KEY)
-        PEM_StripEncapsulatedBoundary(obj, PUBLIC_BEGIN, PUBLIC_END);
+        PEM_StripEncapsulatedBoundary(t1, t2, PUBLIC_BEGIN, PUBLIC_END);
     else if (type == PEM_EC_PUBLIC_KEY)
-        PEM_StripEncapsulatedBoundary(obj, EC_PUBLIC_BEGIN, EC_PUBLIC_END);
+        PEM_StripEncapsulatedBoundary(t1, t2, EC_PUBLIC_BEGIN, EC_PUBLIC_END);
     else
         throw InvalidDataFormat("PEM_Load: not a public EC key");
 
-    ByteQueue temp;
-    PEM_Base64Decode(obj, temp);
-
-    PEM_LoadPublicKey(temp, ec, type == PEM_PUBLIC_KEY);
+    PEM_Base64Decode(t2, t3);
+    PEM_LoadPublicKey(t3, ec, type == PEM_PUBLIC_KEY);
 }
 
 void PEM_Load(BufferedTransformation& bt, DL_PrivateKey_EC<EC2N>& ec)
@@ -1158,15 +1134,15 @@ void PEM_Load(BufferedTransformation& bt, DL_PrivateKey_EC<EC2N>& ec)
 
 void PEM_Load(BufferedTransformation& bt, DL_PrivateKey_EC<EC2N>& ec, const char* password, size_t length)
 {
-    ByteQueue obj;
-    if (PEM_NextObject(bt, obj) == false)
+    ByteQueue t1, t2, t3;
+    if (PEM_NextObject(bt, t1) == false)
         throw InvalidArgument("PEM_Load: PEM object not available");
 
-    PEM_Type type = PEM_GetType(obj);
+    PEM_Type type = PEM_GetType(t1);
     if (type == PEM_PRIVATE_KEY)
-        PEM_StripEncapsulatedBoundary(obj, PRIVATE_BEGIN, PRIVATE_END);
+        PEM_StripEncapsulatedBoundary(t1, t2, PRIVATE_BEGIN, PRIVATE_END);
     else if (type == PEM_EC_PRIVATE_KEY || (type == PEM_EC_ENC_PRIVATE_KEY && password != NULL))
-        PEM_StripEncapsulatedBoundary(obj, EC_PRIVATE_BEGIN, EC_PRIVATE_END);
+        PEM_StripEncapsulatedBoundary(t1, t2, EC_PRIVATE_BEGIN, EC_PRIVATE_END);
     else if (type == PEM_EC_ENC_PRIVATE_KEY && password == NULL)
         throw InvalidArgument("PEM_Load: EC private key is encrypted");
     else
@@ -1174,11 +1150,11 @@ void PEM_Load(BufferedTransformation& bt, DL_PrivateKey_EC<EC2N>& ec, const char
 
     ByteQueue temp;
     if (type == PEM_EC_ENC_PRIVATE_KEY)
-        PEM_DecodeAndDecrypt(obj, temp, password, length);
+        PEM_Base64DecodeAndDecrypt(t2, t3, password, length);
     else
-        PEM_Base64Decode(obj, temp);
+        PEM_Base64Decode(t2, t3);
 
-    PEM_LoadPrivateKey(temp, ec, type == PEM_PRIVATE_KEY);
+    PEM_LoadPrivateKey(t3, ec, type == PEM_PRIVATE_KEY);
 }
 
 void PEM_Load(BufferedTransformation& bt, DL_Keys_ECDSA<ECP>::PrivateKey& ecdsa)
@@ -1203,26 +1179,24 @@ void PEM_Load(BufferedTransformation& bt, DL_Keys_ECDSA<EC2N>::PrivateKey& ecdsa
 
 void PEM_Load(BufferedTransformation& bt, DL_GroupParameters_DSA& params)
 {
-    ByteQueue obj;
-    if (PEM_NextObject(bt, obj) == false)
+    ByteQueue t1, t2, t3;
+    if (PEM_NextObject(bt, t1) == false)
         throw InvalidArgument("PEM_Load: PEM object not available");
 
-    PEM_Type type = PEM_GetType(obj);
+    PEM_Type type = PEM_GetType(t1);
     if (type == PEM_DSA_PARAMETERS)
-        PEM_StripEncapsulatedBoundary(obj, DSA_PARAMETERS_BEGIN, DSA_PARAMETERS_END);
+        PEM_StripEncapsulatedBoundary(t1, t2, DSA_PARAMETERS_BEGIN, DSA_PARAMETERS_END);
     else
         throw InvalidDataFormat("PEM_Read: invalid DSA parameters");
 
-    ByteQueue temp;
-    PEM_Base64Decode(obj, temp);
-
-    params.Load(temp);
+    PEM_Base64Decode(t2, t3);
+    params.Load(t3);
 }
 
 void PEM_Load(BufferedTransformation& bt, X509Certificate& cert)
 {
-    ByteQueue obj;
-    if (PEM_NextObject(bt, obj) == false)
+    ByteQueue t1;
+    if (PEM_NextObject(bt, t1) == false)
         throw InvalidArgument("PEM_Load: PEM object not available");
 
     throw NotImplemented("PEM_Load: X.509 certificate is not implemented");
@@ -1230,20 +1204,19 @@ void PEM_Load(BufferedTransformation& bt, X509Certificate& cert)
 
 void PEM_DH_Load(BufferedTransformation& bt, Integer& p, Integer& g)
 {
-    ByteQueue obj;
-    if (PEM_NextObject(bt, obj) == false)
+    ByteQueue t1, t2;
+    if (PEM_NextObject(bt, t1) == false)
         throw InvalidArgument("PEM_Load: PEM object not available");
 
-    PEM_Type type = PEM_GetType(obj);
+    PEM_Type type = PEM_GetType(t1);
     if (type == PEM_DH_PARAMETERS)
-        PEM_StripEncapsulatedBoundary(obj, DH_PARAMETERS_BEGIN, DH_PARAMETERS_END);
+        PEM_StripEncapsulatedBoundary(t1, t2, DH_PARAMETERS_BEGIN, DH_PARAMETERS_END);
     else
         throw InvalidDataFormat("PEM_DH_Load: invalid DH parameters");
 
-    ByteQueue temp;
-    PEM_Base64Decode(obj, temp);
+    PEM_Base64Decode(t1, t2);
 
-    BERSequenceDecoder dh(temp);
+    BERSequenceDecoder dh(t2);
         p.BERDecode(dh);
         g.BERDecode(dh);
     dh.MessageEnd();
@@ -1262,20 +1235,19 @@ void PEM_DH_Load(BufferedTransformation& bt, Integer& p, Integer& g)
 
 void PEM_DH_Load(BufferedTransformation& bt, Integer& p, Integer& q, Integer& g)
 {
-    ByteQueue obj;
-    if (PEM_NextObject(bt, obj) == false)
+    ByteQueue t1, t2, t3;
+    if (PEM_NextObject(bt, t1) == false)
         throw InvalidArgument("PEM_Load: PEM object not available");
 
-    PEM_Type type = PEM_GetType(obj);
+    PEM_Type type = PEM_GetType(t1);
     if (type == PEM_DH_PARAMETERS)
-        PEM_StripEncapsulatedBoundary(obj, DH_PARAMETERS_BEGIN, DH_PARAMETERS_END);
+        PEM_StripEncapsulatedBoundary(t1, t2, DH_PARAMETERS_BEGIN, DH_PARAMETERS_END);
     else
         throw InvalidDataFormat("PEM_DH_Load: invalid DH parameters");
 
-    ByteQueue temp;
-    PEM_Base64Decode(obj, temp);
+    PEM_Base64Decode(t2, t3);
 
-    BERSequenceDecoder dh(temp);
+    BERSequenceDecoder dh(t3);
         p.BERDecode(dh);
         q.BERDecode(dh);
         g.BERDecode(dh);
