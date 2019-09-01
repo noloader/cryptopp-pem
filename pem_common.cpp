@@ -128,7 +128,7 @@ secure_string GetControlField(const secure_string& line)
     secure_string::const_iterator it = std::search(line.begin(), line.end(), COLON.begin(), COLON.end());
     if (it != line.end())
     {
-        size_t len = it - line.begin();
+        const size_t len = it - line.begin();
         return secure_string(line.data(), len);
     }
 
@@ -141,7 +141,7 @@ secure_string GetControlFieldData(const secure_string& line)
     if (it != line.end() && ++it != line.end())
     {
         const size_t len = line.end() - it;
-        return secure_string(it, it+len);
+        return secure_string(it, it + len);
     }
 
     return secure_string();
