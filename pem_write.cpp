@@ -82,7 +82,7 @@ OID_State<DL_GroupParameters_EC<EC2N> >::~OID_State() {
 // Returns a keyed StreamTransformation ready to use to encrypt a DER encoded key
 void PEM_CipherForAlgorithm(RandomNumberGenerator& rng, std::string algorithm,
                             member_ptr<StreamTransformation>& stream,
-                            SecByteBlock& key, SecByteBlock& iv,
+                            secure_string& key, secure_string& iv,
                             const char* password, size_t length);
 
 void PEM_DEREncode(BufferedTransformation& bt, const PKCS8PrivateKey& key);
@@ -107,32 +107,32 @@ void PEM_EncryptAndEncode(BufferedTransformation& src, BufferedTransformation& d
 
 template <class EC>
 void PEM_SaveParams(BufferedTransformation& bt, const DL_GroupParameters_EC< EC >& params,
-                    const SecByteBlock& pre, const SecByteBlock& post);
+                    const secure_string& pre, const secure_string& post);
 
 template <class KEY>
 void PEM_SaveKey(BufferedTransformation& bt, const KEY& key,
-                 const SecByteBlock& pre, const SecByteBlock& post);
+                 const secure_string& pre, const secure_string& post);
 
 template <class PUBLIC_KEY>
 void PEM_SavePublicKey(BufferedTransformation& bt, const PUBLIC_KEY& key,
-                       const SecByteBlock& pre, const SecByteBlock& post);
+                       const secure_string& pre, const secure_string& post);
 
 template <class PRIVATE_KEY>
 void PEM_SavePrivateKey(BufferedTransformation& bt, const PRIVATE_KEY& key,
-                        const SecByteBlock& pre, const SecByteBlock& post);
+                        const secure_string& pre, const secure_string& post);
 
 template <class PRIVATE_KEY>
 void PEM_SavePrivateKey(BufferedTransformation& bt, const PRIVATE_KEY& key,
                         RandomNumberGenerator& rng, const std::string& algorithm,
                         const char* password, size_t length,
-                        const SecByteBlock& pre, const SecByteBlock& post);
+                        const secure_string& pre, const secure_string& post);
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
 template <class EC>
 void PEM_SaveParams(BufferedTransformation& bt, const DL_GroupParameters_EC< EC >& params,
-                    const SecByteBlock& pre, const SecByteBlock& post)
+                    const secure_string& pre, const secure_string& post)
 {
     PEM_WriteLine(bt, pre);
 
@@ -148,7 +148,7 @@ void PEM_SaveParams(BufferedTransformation& bt, const DL_GroupParameters_EC< EC 
 
 template <class EC>
 void PEM_SavePrivateKey(BufferedTransformation& bt, const DL_PrivateKey_EC<EC>& key,
-                        const SecByteBlock& pre, const SecByteBlock& post)
+                        const secure_string& pre, const secure_string& post)
 {
     PEM_WriteLine(bt, pre);
 
@@ -238,21 +238,21 @@ void PEM_DEREncode(BufferedTransformation& bt, const RSA::PrivateKey& key)
 
 template <class PUBLIC_KEY>
 void PEM_SavePublicKey(BufferedTransformation& bt, const PUBLIC_KEY& key,
-                       const SecByteBlock& pre, const SecByteBlock& post)
+                       const secure_string& pre, const secure_string& post)
 {
     PEM_SaveKey(bt, key, pre, post);
 }
 
 template <class PRIVATE_KEY>
 void PEM_SavePrivateKey(BufferedTransformation& bt, const PRIVATE_KEY& key,
-                        const SecByteBlock& pre, const SecByteBlock& post)
+                        const secure_string& pre, const secure_string& post)
 {
     PEM_SaveKey(bt, key, pre, post);
 }
 
 template <class KEY>
 void PEM_SaveKey(BufferedTransformation& bt, const KEY& key,
-                 const SecByteBlock& pre, const SecByteBlock& post)
+                 const secure_string& pre, const secure_string& post)
 {
     PEM_WriteLine(bt, pre);
 
@@ -270,7 +270,7 @@ template<class PRIVATE_KEY>
 void PEM_SavePrivateKey(BufferedTransformation& bt, const PRIVATE_KEY& key,
                         RandomNumberGenerator& rng, const std::string& algorithm,
                         const char* password, size_t length,
-                        const SecByteBlock& pre, const SecByteBlock& post)
+                        const secure_string& pre, const secure_string& post)
 {
     ByteQueue queue;
 
@@ -279,7 +279,7 @@ void PEM_SavePrivateKey(BufferedTransformation& bt, const PRIVATE_KEY& key,
     // Proc-Type: 4,ENCRYPTED
     PEM_WriteLine(queue, PROC_TYPE_ENC);
 
-    SecByteBlock _key, _iv;
+    secure_string _key, _iv;
     member_ptr<StreamTransformation> stream;
 
     // After this executes, we have a StreamTransformation keyed and ready to go.
@@ -288,7 +288,7 @@ void PEM_SavePrivateKey(BufferedTransformation& bt, const PRIVATE_KEY& key,
     // Encode the IV. It gets written to the encapsulated header.
     std::string encoded;
     HexEncoder hex(new StringSink(encoded));
-    hex.Put(_iv.data(), _iv.size());
+    hex.Put(byte_ptr(_iv), _iv.size());
     hex.MessageEnd();
 
     // e.g., DEK-Info: AES-128-CBC,5E537774BCCD88B3E2F47FE294C93253
@@ -299,7 +299,7 @@ void PEM_SavePrivateKey(BufferedTransformation& bt, const PRIVATE_KEY& key,
     // The extra newline separates the control fields from the encapsulated
     //   text (i.e, header from body). Its required by RFC 1421.
     PEM_WriteLine(queue, line);
-    queue.Put(reinterpret_cast<const byte*>(EOL.data()), EOL.size());
+    queue.Put(byte_ptr(EOL), EOL.size());
 
     ByteQueue temp;
     PEM_DEREncode(temp, key);
@@ -314,7 +314,7 @@ void PEM_SavePrivateKey(BufferedTransformation& bt, const PRIVATE_KEY& key,
 
 void PEM_CipherForAlgorithm(RandomNumberGenerator& rng, std::string algorithm,
                             member_ptr<StreamTransformation>& stream,
-                            SecByteBlock& key, SecByteBlock& iv,
+                            secure_string& key, secure_string& iv,
                             const char* password, size_t length)
 {
     unsigned int ksize, vsize;
@@ -398,24 +398,25 @@ void PEM_CipherForAlgorithm(RandomNumberGenerator& rng, std::string algorithm,
     const unsigned char* _pword = reinterpret_cast<const unsigned char*>(password);
     const size_t _plen = length;
 
-    SecByteBlock _key(ksize), _iv(vsize), _salt(vsize);
+    secure_string _key(ksize, '\0'), _iv(vsize, '\0'), _salt(vsize, '\0');
 
     // The IV pulls double duty. First, the first PKCS5_SALT_LEN bytes are used
     //   as the Salt in EVP_BytesToKey. Second, its used as the IV in the cipher.
 
-    rng.GenerateBlock(_iv.data(), _iv.size());
+    rng.GenerateBlock(byte_ptr(_iv), _iv.size());
     _salt = _iv;
 
     // MD5 is engrained OpenSSL goodness. MD5, IV and Password are IN; KEY is OUT.
     //   {NULL,0} parameters are the OUT IV. However, the original IV in the PEM
     //   header is used; and not the derived IV.
     Weak::MD5 md5;
-    int ret = OPENSSL_EVP_BytesToKey(md5, _salt.data(), _pword, _plen, 1, _key.data(), _key.size(), NULL, 0);
+    int ret = OPENSSL_EVP_BytesToKey(md5, byte_ptr(_salt),
+                  _pword, _plen, 1, byte_ptr(_key), _key.size(), NULL, 0);
     if (ret != static_cast<int>(ksize))
         throw Exception(Exception::OTHER_ERROR, "PEM_CipherForAlgorithm: EVP_BytesToKey failed");
 
     SymmetricCipher* cipher = dynamic_cast<SymmetricCipher*>(stream.get());
-    cipher->SetKeyWithIV(_key.data(), _key.size(), _iv.data(), _iv.size());
+    cipher->SetKeyWithIV(byte_ptr(_key), _key.size(), byte_ptr(_iv), _iv.size());
 
     _key.swap(key);
     _iv.swap(iv);

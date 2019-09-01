@@ -43,20 +43,20 @@ using namespace CryptoPP::PEM;
 // Info from the encapsulated header
 struct EncapsulatedHeader
 {
-    std::string m_version;
-    std::string m_operation;
-    std::string m_algorithm;
+    secure_string m_version;
+    secure_string m_operation;
+    secure_string m_algorithm;
 
-    std::string m_iv;
+    secure_string m_iv;
 };
 
 // GCC 9 compile error using overload PEM_GetType
-PEM_Type PEM_GetTypeFromBlock(const SecByteBlock& sb);
+PEM_Type PEM_GetTypeFromBlock(const secure_string& sb);
 
-size_t PEM_ReadLine(BufferedTransformation& source, SecByteBlock& line, SecByteBlock& ending);
+size_t PEM_ReadLine(BufferedTransformation& source, secure_string& line, secure_string& ending);
 
-void PEM_StripEncapsulatedBoundary(BufferedTransformation& bt, const SecByteBlock& pre, const SecByteBlock& post);
-void PEM_StripEncapsulatedBoundary(SecByteBlock& sb, const SecByteBlock& pre, const SecByteBlock& post);
+void PEM_StripEncapsulatedBoundary(BufferedTransformation& bt, const secure_string& pre, const secure_string& post);
+void PEM_StripEncapsulatedBoundary(secure_string& sb, const secure_string& pre, const secure_string& post);
 
 void PEM_StripEncapsulatedHeader(BufferedTransformation& src, BufferedTransformation& dest, EncapsulatedHeader& header);
 
@@ -69,16 +69,16 @@ void PEM_DecodeAndDecrypt(BufferedTransformation& src, BufferedTransformation& d
 void PEM_Decrypt(BufferedTransformation& src, BufferedTransformation& dest,
                  member_ptr<StreamTransformation>& stream);
 
-bool PEM_IsEncrypted(SecByteBlock& sb);
+bool PEM_IsEncrypted(secure_string& sb);
 bool PEM_IsEncrypted(BufferedTransformation& bt);
 
-void PEM_ParseVersion(const std::string& proctype, std::string& version);
-void PEM_ParseOperation(const std::string& proctype, std::string& operation);
+void PEM_ParseVersion(const secure_string& proctype, secure_string& version);
+void PEM_ParseOperation(const secure_string& proctype, secure_string& operation);
 
-void PEM_ParseAlgorithm(const std::string& dekinfo, std::string& algorithm);
-void PEM_ParseIV(const std::string& dekinfo, std::string& iv);
+void PEM_ParseAlgorithm(const secure_string& dekinfo, secure_string& algorithm);
+void PEM_ParseIV(const secure_string& dekinfo, secure_string& iv);
 
-inline SecByteBlock::const_iterator Search(const SecByteBlock& source, const SecByteBlock& target);
+inline secure_string::const_iterator Search(const secure_string& source, const secure_string& target);
 
 template <class EC>
 void PEM_LoadParams(BufferedTransformation& bt, DL_GroupParameters_EC<EC>& params);
@@ -92,14 +92,14 @@ void PEM_LoadPrivateKey(BufferedTransformation& bt, DSA::PrivateKey& key);
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-SecByteBlock::const_iterator Search(const SecByteBlock& source, const SecByteBlock& target)
+secure_string::const_iterator Search(const secure_string& source, const secure_string& target)
 {
     return std::search(source.begin(), source.end(), target.begin(), target.end());
 }
 
-PEM_Type PEM_GetTypeFromBlock(const SecByteBlock& sb)
+PEM_Type PEM_GetTypeFromBlock(const secure_string& sb)
 {
-    SecByteBlock::const_iterator it;
+    secure_string::const_iterator it;
 
     // Uses an OID to identify the public key type
     it = Search(sb, PUBLIC_BEGIN);
@@ -282,9 +282,9 @@ void PEM_LoadParams(BufferedTransformation& bt, DL_GroupParameters_EC<EC>& param
     params.BERDecode(temp);
 }
 
-bool PEM_IsEncrypted(SecByteBlock& sb)
+bool PEM_IsEncrypted(secure_string& sb)
 {
-    SecByteBlock::iterator it = std::search(sb.begin(), sb.end(), PROC_TYPE.begin(), PROC_TYPE.end());
+    secure_string::iterator it = std::search(sb.begin(), sb.end(), PROC_TYPE.begin(), PROC_TYPE.end());
     if (it == sb.end()) return false;
 
     it = std::search(it + PROC_TYPE.size(), sb.end(), ENCRYPTED.begin(), ENCRYPTED.end());
@@ -294,10 +294,10 @@ bool PEM_IsEncrypted(SecByteBlock& sb)
 bool PEM_IsEncrypted(BufferedTransformation& bt)
 {
     const size_t size = bt.MaxRetrievable();
-    SecByteBlock sb(size);
-    bt.Peek(sb.data(), sb.size());
+    secure_string str(size, '\0');
+    bt.Peek(byte_ptr(str), str.size());
 
-    return PEM_IsEncrypted(sb);
+    return PEM_IsEncrypted(str);
 }
 
 void PEM_CipherForAlgorithm(const EncapsulatedHeader& header,
@@ -306,7 +306,7 @@ void PEM_CipherForAlgorithm(const EncapsulatedHeader& header,
 {
     unsigned int ksize, vsize;
 
-    std::string algorithm(header.m_algorithm);
+    secure_string algorithm(header.m_algorithm);
     std::transform(algorithm.begin(), algorithm.end(), algorithm.begin(),  (int(*)(int))std::toupper);
 
     if (algorithm == "AES-256-CBC")
@@ -381,7 +381,8 @@ void PEM_CipherForAlgorithm(const EncapsulatedHeader& header,
     }
     else
     {
-        throw NotImplemented("PEM_CipherForAlgorithm: '" + header.m_algorithm + "' is not implemented");
+        throw NotImplemented(std::string("PEM_CipherForAlgorithm: '")
+                             + header.m_algorithm.c_str() + "' is not implemented");
     }
 
     // Decode the IV. It used as the Salt in EVP_BytesToKey,
@@ -394,11 +395,11 @@ void PEM_CipherForAlgorithm(const EncapsulatedHeader& header,
     size_t size = hex.MaxRetrievable();
     size = (std::min)(size, static_cast<size_t>(vsize));
 
-    SecByteBlock _key(ksize);
-    SecByteBlock _iv(size);
-    SecByteBlock _salt(size);
+    secure_string _key(ksize, '\0');
+    secure_string _iv(size, '\0');
+    secure_string _salt(size, '\0');
 
-    hex.Get(_iv.data(), _iv.size());
+    hex.Get(byte_ptr(_iv), _iv.size());
 
     // The IV pulls double duty. First, the first PKCS5_SALT_LEN bytes are used
     //   as the Salt in EVP_BytesToKey. Second, its used as the IV in the cipher.
@@ -408,12 +409,13 @@ void PEM_CipherForAlgorithm(const EncapsulatedHeader& header,
     //   {NULL,0} parameters are the OUT IV. However, the original IV in the PEM
     //   header is used; and not the derived IV.
     Weak::MD5 md5;
-    int ret = OPENSSL_EVP_BytesToKey(md5, _iv.data(), (const byte*)password, length, 1, _key.data(), _key.size(), NULL, 0);
+    int ret = OPENSSL_EVP_BytesToKey(md5, byte_ptr(_iv),
+                 (const byte*)password, length, 1, byte_ptr(_key), _key.size(), NULL, 0);
     if (ret != static_cast<int>(ksize))
         throw Exception(Exception::OTHER_ERROR, "PEM_CipherForAlgorithm: EVP_BytesToKey failed");
 
     SymmetricCipher* cipher = dynamic_cast<SymmetricCipher*>(stream.get());
-    cipher->SetKeyWithIV(_key.data(), _key.size(), _iv.data(), _iv.size());
+    cipher->SetKeyWithIV(byte_ptr(_key), _key.size(), byte_ptr(_iv), _iv.size());
 }
 
 void PEM_DecodeAndDecrypt(BufferedTransformation& src, BufferedTransformation& dest,
@@ -452,15 +454,15 @@ void PEM_Decrypt(BufferedTransformation& src, BufferedTransformation& dest,
     }
 }
 
-void PEM_StripEncapsulatedBoundary(BufferedTransformation& bt, const SecByteBlock& pre, const SecByteBlock& post)
+void PEM_StripEncapsulatedBoundary(BufferedTransformation& bt, const secure_string& pre, const secure_string& post)
 {
     ByteQueue temp;
-    SecByteBlock::const_iterator it;
+    secure_string::const_iterator it;
     int n = 1, prePos = -1, postPos = -1;
 
     while (bt.AnyRetrievable() && n++)
     {
-        SecByteBlock line, unused;
+        secure_string line, unused;
         PEM_ReadLine(bt, line, unused);
 
         // The write associated with an empty line must occur. Otherwise, we loose the CR or LF
@@ -486,16 +488,14 @@ void PEM_StripEncapsulatedBoundary(BufferedTransformation& bt, const SecByteBloc
 
     if (prePos == -1)
     {
-        std::string msg = "PEM_StripEncapsulatedBoundary: '";
-        msg += std::string((char*)pre.data(), pre.size()) + "' not found";
-        throw InvalidDataFormat(msg);
+        throw InvalidDataFormat(std::string("PEM_StripEncapsulatedBoundary: '")
+                                + pre.c_str() + "' not found");
     }
 
     if (postPos == -1)
     {
-        std::string msg = "PEM_StripEncapsulatedBoundary: '";
-        msg += std::string((char*)post.data(), post.size()) + "' not found";
-        throw InvalidDataFormat(msg);
+        throw InvalidDataFormat(std::string("PEM_StripEncapsulatedBoundary: '")
+                                + post.c_str() + "' not found");
     }
 
     if (prePos > postPos)
@@ -509,7 +509,7 @@ void PEM_StripEncapsulatedHeader(BufferedTransformation& src, BufferedTransforma
     if (!src.AnyRetrievable())
         return;
 
-    SecByteBlock line, ending;
+    secure_string line, ending;
     size_t size = 0;
 
     // The first line *must* be Proc-Type. Ensure we read it before dropping into the loop.
@@ -517,7 +517,7 @@ void PEM_StripEncapsulatedHeader(BufferedTransformation& src, BufferedTransforma
     if (size == 0 || line.empty())
         throw InvalidDataFormat("PEM_StripEncapsulatedHeader: failed to locate Proc-Type");
 
-    SecByteBlock field = GetControlField(line);
+    secure_string field = GetControlField(line);
     if (field.empty())
         throw InvalidDataFormat("PEM_StripEncapsulatedHeader: failed to locate Proc-Type");
 
@@ -525,15 +525,17 @@ void PEM_StripEncapsulatedHeader(BufferedTransformation& src, BufferedTransforma
         throw InvalidDataFormat("PEM_StripEncapsulatedHeader: failed to locate Proc-Type");
 
     line = GetControlFieldData(line);
-    std::string tline(reinterpret_cast<const char*>(line.data()),line.size());
+    secure_string tline(line);
 
     PEM_ParseVersion(tline, header.m_version);
     if (header.m_version != "4")
-        throw NotImplemented("PEM_StripEncapsulatedHeader: encryption version " + header.m_version + " not supported");
+        throw NotImplemented(std::string("PEM_StripEncapsulatedHeader: encryption version ")
+                             + header.m_version.c_str() + " not supported");
 
     PEM_ParseOperation(tline, header.m_operation);
     if (header.m_operation != "ENCRYPTED")
-        throw NotImplemented("PEM_StripEncapsulatedHeader: operation " + header.m_operation + " not supported");
+        throw NotImplemented(std::string("PEM_StripEncapsulatedHeader: operation ")
+                             + header.m_operation.c_str() + " not supported");
 
     // Next, we have to read until the first empty line
     while (true)
@@ -548,7 +550,7 @@ void PEM_StripEncapsulatedHeader(BufferedTransformation& src, BufferedTransforma
         if (0 == CompareNoCase(field, DEK_INFO))
         {
             line = GetControlFieldData(line);
-            tline = std::string(reinterpret_cast<const char*>(line.data()),line.size());
+            tline = line;
 
             PEM_ParseAlgorithm(tline, header.m_algorithm);
             PEM_ParseIV(tline, header.m_iv);
@@ -564,13 +566,8 @@ void PEM_StripEncapsulatedHeader(BufferedTransformation& src, BufferedTransforma
         }
 
         if (!field.empty())
-        {
-            const char* ptr = (char*)field.begin();
-            size_t len = field.size();
-
-            std::string m(ptr, len);
-            throw NotImplemented("PEM_StripEncapsulatedHeader: " + m + " not supported");
-        }
+            throw NotImplemented(std::string("PEM_StripEncapsulatedHeader: ")
+                                 + field.c_str() + " not supported");
     }
 
     if (header.m_algorithm.empty())
@@ -583,42 +580,42 @@ void PEM_StripEncapsulatedHeader(BufferedTransformation& src, BufferedTransforma
     src.TransferTo(dest);
 }
 
-// The std::string will be similar to " 4, ENCRYPTED"
-void PEM_ParseVersion(const std::string& proctype, std::string& version)
+// The string will be similar to " 4, ENCRYPTED"
+void PEM_ParseVersion(const secure_string& proctype, secure_string& version)
 {
     size_t pos1 = 0;
     while (pos1 < proctype.size() && std::isspace(proctype[pos1])) pos1++;
 
     size_t pos2 = proctype.find(",");
-    if (pos2 == std::string::npos)
+    if (pos2 == secure_string::npos)
         throw InvalidDataFormat("PEM_ParseVersion: failed to locate version");
 
     while (pos2 > pos1 && std::isspace(proctype[pos2])) pos2--;
     version = proctype.substr(pos1, pos2 - pos1);
 }
 
-// The std::string will be similar to " 4, ENCRYPTED"
-void PEM_ParseOperation(const std::string& proctype, std::string& operation)
+// The string will be similar to " 4, ENCRYPTED"
+void PEM_ParseOperation(const secure_string& proctype, secure_string& operation)
 {
     size_t pos1 = proctype.find(",");
-    if (pos1 == std::string::npos)
+    if (pos1 == secure_string::npos)
         throw InvalidDataFormat("PEM_ParseOperation: failed to locate operation");
 
     pos1++;
     while (pos1 < proctype.size() && std::isspace(proctype[pos1])) pos1++;
 
-    operation = proctype.substr(pos1, std::string::npos);
+    operation = proctype.substr(pos1, secure_string::npos);
     std::transform(operation.begin(), operation.end(), operation.begin(), (int(*)(int))std::toupper);
 }
 
-// The std::string will be similar to " AES-128-CBC, XXXXXXXXXXXXXXXX"
-void PEM_ParseAlgorithm(const std::string& dekinfo, std::string& algorithm)
+// The string will be similar to " AES-128-CBC, XXXXXXXXXXXXXXXX"
+void PEM_ParseAlgorithm(const secure_string& dekinfo, secure_string& algorithm)
 {
     size_t pos1 = 0;
     while (pos1 < dekinfo.size() && std::isspace(dekinfo[pos1])) pos1++;
 
     size_t pos2 = dekinfo.find(",");
-    if (pos2 == std::string::npos)
+    if (pos2 == secure_string::npos)
         throw InvalidDataFormat("PEM_ParseVersion: failed to locate algorithm");
 
     while (pos2 > pos1 && std::isspace(dekinfo[pos2])) pos2--;
@@ -627,26 +624,26 @@ void PEM_ParseAlgorithm(const std::string& dekinfo, std::string& algorithm)
     std::transform(algorithm.begin(), algorithm.end(), algorithm.begin(),  (int(*)(int))std::toupper);
 }
 
-// The std::string will be similar to " AES-128-CBC, XXXXXXXXXXXXXXXX"
-void PEM_ParseIV(const std::string& dekinfo, std::string& iv)
+// The string will be similar to " AES-128-CBC, XXXXXXXXXXXXXXXX"
+void PEM_ParseIV(const secure_string& dekinfo, secure_string& iv)
 {
     size_t pos1 = dekinfo.find(",");
-    if (pos1 == std::string::npos)
+    if (pos1 == secure_string::npos)
         throw InvalidDataFormat("PEM_ParseIV: failed to locate initialization vector");
 
     pos1++;
     while (pos1 < dekinfo.size() && std::isspace(dekinfo[pos1])) pos1++;
 
-    iv = dekinfo.substr(pos1, std::string::npos);
+    iv = dekinfo.substr(pos1, secure_string::npos);
     std::transform(iv.begin(), iv.end(), iv.begin(), (int(*)(int))std::toupper);
 }
 
-size_t PEM_ReadLine(BufferedTransformation& source, SecByteBlock& line, SecByteBlock& ending)
+size_t PEM_ReadLine(BufferedTransformation& source, secure_string& line, secure_string& ending)
 {
     if (!source.AnyRetrievable())
     {
-        line.New(0);
-        ending.New(0);
+        line.clear();
+        ending.clear();
 
         return 0;
     }
@@ -690,13 +687,13 @@ size_t PEM_ReadLine(BufferedTransformation& source, SecByteBlock& line, SecByteB
 
     if (temp.AnyRetrievable())
     {
-        line.Grow(temp.MaxRetrievable());
-        temp.Get(line.data(), line.size());
+        line.resize(temp.MaxRetrievable());
+        temp.Get(byte_ptr(line), line.size());
     }
     else
     {
-        line.New(0);
-        ending.New(0);
+        line.clear();
+        ending.clear();
     }
 
     // We return a line stripped of CRs and LFs. However, we return the actual number of
@@ -727,9 +724,9 @@ using namespace CryptoPP::PEM;
 PEM_Type PEM_GetType(const BufferedTransformation& bt)
 {
     lword size = (std::min)(bt.MaxRetrievable(), lword(128));
-    SecByteBlock temp(size);
-    bt.Peek(temp, temp.size());
-    return PEM_GetTypeFromBlock(temp);
+    secure_string str(size, '\0');
+    bt.Peek(byte_ptr(str), str.size());
+    return PEM_GetTypeFromBlock(str);
 }
 
 bool PEM_NextObject(BufferedTransformation& src, BufferedTransformation& dest, bool trimTrailing)
@@ -758,7 +755,7 @@ bool PEM_NextObject(BufferedTransformation& src, BufferedTransformation& dest, b
     //  after each insert that grows the container. So we save indexes
     //  from begin() to speed up searching. On each iteration, we simply
     //  reinitialize them.
-    SecByteBlock::const_iterator it;
+    secure_string::const_iterator it;
     size_t idx1 = BAD_IDX, idx2 = BAD_IDX, idx3 = BAD_IDX, idx4 = BAD_IDX;
 
     // The idea is to read chunks in case there are multiple keys or
@@ -777,7 +774,7 @@ bool PEM_NextObject(BufferedTransformation& src, BufferedTransformation& dest, b
     const size_t READ_SIZE = (PEM_LINE_BREAK + 1) * 10;
     const size_t REWIND_SIZE = (std::max)(PEM_BEGIN.size(), PEM_END.size()) + 2;
 
-    SecByteBlock accum;
+    secure_string accum;
     size_t idx = 0, next = 0;
 
     size_t available = src.MaxRetrievable();
@@ -803,8 +800,8 @@ bool PEM_NextObject(BufferedTransformation& src, BufferedTransformation& dest, b
         src.CopyRangeTo(tq, static_cast<lword>(idx), static_cast<lword>(size));
 
         const size_t offset = accum.size();
-        accum.Grow(offset + size);
-        tq.Get(accum.data() + offset, size);
+        accum.resize(offset + size);
+        tq.Get(byte_ptr(accum) + offset, size);
 
         // Adjust sizes
         idx += size;
@@ -871,8 +868,8 @@ bool PEM_NextObject(BufferedTransformation& src, BufferedTransformation& dest, b
         src.CopyRangeTo(tq, static_cast<lword>(idx), static_cast<lword>(2));
 
         const size_t offset = accum.size();
-        accum.Grow(offset + 2);
-        tq.Get(accum.data() + offset, 2);
+        accum.resize(offset + 2);
+        tq.Get(byte_ptr(accum) + offset, 2);
     }
     else if (available == 1)
     {
@@ -880,12 +877,12 @@ bool PEM_NextObject(BufferedTransformation& src, BufferedTransformation& dest, b
         src.CopyRangeTo(tq, static_cast<lword>(idx), static_cast<lword>(1));
 
         const size_t offset = accum.size();
-        accum.Grow(offset + 1);
-        tq.Get(accum.data() + offset, 1);
+        accum.resize(offset + 1);
+        tq.Get(byte_ptr(accum) + offset, 1);
     }
 
     // Final book keeping
-    const byte* ptr = accum.begin() + idx1;
+    const char* ptr = accum.data() + idx1;
     const size_t used = idx4 + PEM_TAIL.size();
     const size_t len = used - idx1;
 
@@ -907,7 +904,7 @@ bool PEM_NextObject(BufferedTransformation& src, BufferedTransformation& dest, b
             adjust = 1;
     }
 
-    dest.Put(ptr, len + adjust);
+    dest.Put(byte_ptr(ptr), len + adjust);
     dest.MessageEnd();
 
     src.Skip(used + adjust);

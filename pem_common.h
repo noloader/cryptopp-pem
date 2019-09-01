@@ -37,14 +37,44 @@ NAMESPACE_BEGIN(PEM)
 
 typedef std::basic_string<char, std::char_traits<char>, AllocatorWithCleanup<char> > secure_string;
 
+inline const byte* byte_ptr(const char* cstr)
+{
+    return reinterpret_cast<const byte*>(cstr);
+}
+
+inline byte* byte_ptr(char* cstr)
+{
+    return reinterpret_cast<byte*>(cstr);
+}
+
+inline const byte* byte_ptr(const secure_string& str)
+{
+    return reinterpret_cast<const byte*>(&str[0]);
+}
+
+inline byte* byte_ptr(secure_string& str)
+{
+    return reinterpret_cast<byte*>(&str[0]);
+}
+
+inline const byte* byte_ptr(const std::string& str)
+{
+    return reinterpret_cast<const byte*>(&str[0]);
+}
+
+inline byte* byte_ptr(std::string& str)
+{
+    return reinterpret_cast<byte*>(&str[0]);
+}
+
 // Attempts to locate a control field in a line
-SecByteBlock GetControlField(const SecByteBlock& line);
+secure_string GetControlField(const secure_string& line);
 
 // Attempts to fetch the data from a control line
-SecByteBlock GetControlFieldData(const SecByteBlock& line);
+secure_string GetControlFieldData(const secure_string& line);
 
 // Returns 0 if a match, non-0 otherwise
-int CompareNoCase(const SecByteBlock& first, const SecByteBlock& second);
+int CompareNoCase(const secure_string& first, const secure_string& second);
 
 // Base64 Encode
 void PEM_Base64Encode(BufferedTransformation& source, BufferedTransformation& dest);
@@ -53,8 +83,9 @@ void PEM_Base64Encode(BufferedTransformation& source, BufferedTransformation& de
 void PEM_Base64Decode(BufferedTransformation& source, BufferedTransformation& dest);
 
 // Write to a BufferedTransformation
-void PEM_WriteLine(BufferedTransformation& bt, const std::string& line);
 void PEM_WriteLine(BufferedTransformation& bt, const SecByteBlock& line);
+void PEM_WriteLine(BufferedTransformation& bt, const std::string& line);
+void PEM_WriteLine(BufferedTransformation& bt, const secure_string& line);
 
 // Signature changed a bit to match Crypto++. Salt must be PKCS5_SALT_LEN in length.
 //  Salt, Data and Count are IN; Key and IV are OUT.
@@ -72,75 +103,75 @@ static const size_t PEM_INVALID = static_cast<size_t>(-1);
 // 64-character line length is required by RFC 1421.
 static const unsigned int PEM_LINE_BREAK = 64;
 
-extern const SecByteBlock CR;
-extern const SecByteBlock LF;
-extern const SecByteBlock EOL;
-extern const SecByteBlock CRLF;
+extern const secure_string CR;
+extern const secure_string LF;
+extern const secure_string EOL;
+extern const secure_string CRLF;
 
-extern const SecByteBlock COMMA;
-extern const SecByteBlock SPACE;
-extern const SecByteBlock COLON;
+extern const secure_string COMMA;
+extern const secure_string SPACE;
+extern const secure_string COLON;
 
-extern const SecByteBlock PEM_BEGIN;
-extern const SecByteBlock PEM_TAIL;
-extern const SecByteBlock PEM_END;
+extern const secure_string PEM_BEGIN;
+extern const secure_string PEM_TAIL;
+extern const secure_string PEM_END;
 
-extern const SecByteBlock PUBLIC_BEGIN;
-extern const SecByteBlock PUBLIC_END;
+extern const secure_string PUBLIC_BEGIN;
+extern const secure_string PUBLIC_END;
 
-extern const SecByteBlock PRIVATE_BEGIN;
-extern const SecByteBlock PRIVATE_END;
+extern const secure_string PRIVATE_BEGIN;
+extern const secure_string PRIVATE_END;
 
-extern const SecByteBlock RSA_PUBLIC_BEGIN;
-extern const SecByteBlock RSA_PUBLIC_END;
+extern const secure_string RSA_PUBLIC_BEGIN;
+extern const secure_string RSA_PUBLIC_END;
 
-extern const SecByteBlock RSA_PRIVATE_BEGIN;
-extern const SecByteBlock RSA_PRIVATE_END;
+extern const secure_string RSA_PRIVATE_BEGIN;
+extern const secure_string RSA_PRIVATE_END;
 
-extern const SecByteBlock DSA_PUBLIC_BEGIN;
-extern const SecByteBlock DSA_PUBLIC_END;
+extern const secure_string DSA_PUBLIC_BEGIN;
+extern const secure_string DSA_PUBLIC_END;
 
-extern const SecByteBlock DSA_PRIVATE_BEGIN;
-extern const SecByteBlock DSA_PRIVATE_END;
+extern const secure_string DSA_PRIVATE_BEGIN;
+extern const secure_string DSA_PRIVATE_END;
 
-extern const SecByteBlock ELGAMAL_PUBLIC_BEGIN;
-extern const SecByteBlock ELGAMAL_PUBLIC_END;
+extern const secure_string ELGAMAL_PUBLIC_BEGIN;
+extern const secure_string ELGAMAL_PUBLIC_END;
 
-extern const SecByteBlock ELGAMAL_PRIVATE_BEGIN;
-extern const SecByteBlock ELGAMAL_PRIVATE_END;
+extern const secure_string ELGAMAL_PRIVATE_BEGIN;
+extern const secure_string ELGAMAL_PRIVATE_END;
 
-extern const SecByteBlock EC_PUBLIC_BEGIN;
-extern const SecByteBlock EC_PUBLIC_END;
+extern const secure_string EC_PUBLIC_BEGIN;
+extern const secure_string EC_PUBLIC_END;
 
-extern const SecByteBlock ECDSA_PUBLIC_BEGIN;
-extern const SecByteBlock ECDSA_PUBLIC_END;
+extern const secure_string ECDSA_PUBLIC_BEGIN;
+extern const secure_string ECDSA_PUBLIC_END;
 
-extern const SecByteBlock EC_PRIVATE_BEGIN;
-extern const SecByteBlock EC_PRIVATE_END;
+extern const secure_string EC_PRIVATE_BEGIN;
+extern const secure_string EC_PRIVATE_END;
 
-extern const SecByteBlock EC_PARAMETERS_BEGIN;
-extern const SecByteBlock EC_PARAMETERS_END;
+extern const secure_string EC_PARAMETERS_BEGIN;
+extern const secure_string EC_PARAMETERS_END;
 
-extern const SecByteBlock DH_PARAMETERS_BEGIN;
-extern const SecByteBlock DH_PARAMETERS_END;
+extern const secure_string DH_PARAMETERS_BEGIN;
+extern const secure_string DH_PARAMETERS_END;
 
-extern const SecByteBlock DSA_PARAMETERS_BEGIN;
-extern const SecByteBlock DSA_PARAMETERS_END;
+extern const secure_string DSA_PARAMETERS_BEGIN;
+extern const secure_string DSA_PARAMETERS_END;
 
-extern const SecByteBlock CERTIFICATE_BEGIN;
-extern const SecByteBlock CERTIFICATE_END;
+extern const secure_string CERTIFICATE_BEGIN;
+extern const secure_string CERTIFICATE_END;
 
-extern const SecByteBlock X509_CERTIFICATE_BEGIN;
-extern const SecByteBlock X509_CERTIFICATE_END;
+extern const secure_string X509_CERTIFICATE_BEGIN;
+extern const secure_string X509_CERTIFICATE_END;
 
-extern const SecByteBlock REQ_CERTIFICATE_BEGIN;
-extern const SecByteBlock REQ_CERTIFICATE_END;
+extern const secure_string REQ_CERTIFICATE_BEGIN;
+extern const secure_string REQ_CERTIFICATE_END;
 
-extern const SecByteBlock PROC_TYPE;
-extern const SecByteBlock PROC_TYPE_ENC;
-extern const SecByteBlock ENCRYPTED;
-extern const SecByteBlock DEK_INFO;
-extern const SecByteBlock CONTENT_DOMAIN;
+extern const secure_string PROC_TYPE;
+extern const secure_string PROC_TYPE_ENC;
+extern const secure_string ENCRYPTED;
+extern const secure_string DEK_INFO;
+extern const secure_string CONTENT_DOMAIN;
 
 NAMESPACE_END  // PEM
 NAMESPACE_END  // CryptoPP

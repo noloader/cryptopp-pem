@@ -20,103 +20,97 @@
 
 ANONYMOUS_NAMESPACE_BEGIN
 
-using CryptoPP::byte;
-
-inline const byte* BYTE_PTR(const char* cstr)
-{
-    return reinterpret_cast<const byte*>(cstr);
-}
-
-inline byte* BYTE_PTR(char* cstr)
-{
-    return reinterpret_cast<byte*>(cstr);
-}
-
 ANONYMOUS_NAMESPACE_END
 
 NAMESPACE_BEGIN(CryptoPP)
 NAMESPACE_BEGIN(PEM)
 
-const SecByteBlock CR(BYTE_PTR("\r"), 1);
-const SecByteBlock LF(BYTE_PTR("\n"), 1);
-const SecByteBlock EOL(BYTE_PTR("\r\n"), 2);
-const SecByteBlock CRLF(BYTE_PTR("\r\n"), 2);
+const secure_string CR("\r");
+const secure_string LF("\n");
+const secure_string EOL("\r\n");
+const secure_string CRLF("\r\n");
 
-const SecByteBlock COMMA(BYTE_PTR(","), 1);
-const SecByteBlock SPACE(BYTE_PTR(" "), 1);
-const SecByteBlock COLON(BYTE_PTR(":"), 1);
+const secure_string COMMA(",");
+const secure_string SPACE(" ");
+const secure_string COLON(":");
 
-const SecByteBlock PEM_BEGIN(BYTE_PTR("-----BEGIN"), 10);
-const SecByteBlock PEM_TAIL(BYTE_PTR("-----"), 5);
-const SecByteBlock PEM_END(BYTE_PTR("-----END"), 8);
+const secure_string PEM_BEGIN("-----BEGIN");
+const secure_string PEM_TAIL("-----");
+const secure_string PEM_END("-----END");
 
-const SecByteBlock PUBLIC_BEGIN(BYTE_PTR("-----BEGIN PUBLIC KEY-----"), 26);
-const SecByteBlock PUBLIC_END(BYTE_PTR("-----END PUBLIC KEY-----"), 24);
+const secure_string PUBLIC_BEGIN("-----BEGIN PUBLIC KEY-----");
+const secure_string PUBLIC_END("-----END PUBLIC KEY-----");
 
-const SecByteBlock PRIVATE_BEGIN(BYTE_PTR("-----BEGIN PRIVATE KEY-----"), 27);
-const SecByteBlock PRIVATE_END(BYTE_PTR("-----END PRIVATE KEY-----"), 25);
+const secure_string PRIVATE_BEGIN("-----BEGIN PRIVATE KEY-----");
+const secure_string PRIVATE_END("-----END PRIVATE KEY-----");
 
-const SecByteBlock RSA_PUBLIC_BEGIN(BYTE_PTR("-----BEGIN RSA PUBLIC KEY-----"), 30);
-const SecByteBlock RSA_PUBLIC_END(BYTE_PTR("-----END RSA PUBLIC KEY-----"), 28);
+const secure_string RSA_PUBLIC_BEGIN("-----BEGIN RSA PUBLIC KEY-----");
+const secure_string RSA_PUBLIC_END("-----END RSA PUBLIC KEY-----");
 
-const SecByteBlock RSA_PRIVATE_BEGIN(BYTE_PTR("-----BEGIN RSA PRIVATE KEY-----"), 31);
-const SecByteBlock RSA_PRIVATE_END(BYTE_PTR("-----END RSA PRIVATE KEY-----"), 29);
+const secure_string RSA_PRIVATE_BEGIN("-----BEGIN RSA PRIVATE KEY-----");
+const secure_string RSA_PRIVATE_END("-----END RSA PRIVATE KEY-----");
 
-const SecByteBlock DSA_PUBLIC_BEGIN(BYTE_PTR("-----BEGIN DSA PUBLIC KEY-----"), 30);
-const SecByteBlock DSA_PUBLIC_END(BYTE_PTR("-----END DSA PUBLIC KEY-----"), 28);
+const secure_string DSA_PUBLIC_BEGIN("-----BEGIN DSA PUBLIC KEY-----");
+const secure_string DSA_PUBLIC_END("-----END DSA PUBLIC KEY-----");
 
-const SecByteBlock DSA_PRIVATE_BEGIN(BYTE_PTR("-----BEGIN DSA PRIVATE KEY-----"), 31);
-const SecByteBlock DSA_PRIVATE_END(BYTE_PTR("-----END DSA PRIVATE KEY-----"), 29);
+const secure_string DSA_PRIVATE_BEGIN("-----BEGIN DSA PRIVATE KEY-----");
+const secure_string DSA_PRIVATE_END("-----END DSA PRIVATE KEY-----");
 
-const SecByteBlock ELGAMAL_PUBLIC_BEGIN(BYTE_PTR("-----BEGIN ELGAMAL PUBLIC KEY-----"), 34);
-const SecByteBlock ELGAMAL_PUBLIC_END(BYTE_PTR("-----END ELGAMAL PUBLIC KEY-----"), 32);
+const secure_string ELGAMAL_PUBLIC_BEGIN("-----BEGIN ELGAMAL PUBLIC KEY-----");
+const secure_string ELGAMAL_PUBLIC_END("-----END ELGAMAL PUBLIC KEY-----");
 
-const SecByteBlock ELGAMAL_PRIVATE_BEGIN(BYTE_PTR("-----BEGIN ELGAMAL PRIVATE KEY-----"), 35);
-const SecByteBlock ELGAMAL_PRIVATE_END(BYTE_PTR("-----END ELGAMAL PRIVATE KEY-----"), 33);
+const secure_string ELGAMAL_PRIVATE_BEGIN("-----BEGIN ELGAMAL PRIVATE KEY-----");
+const secure_string ELGAMAL_PRIVATE_END("-----END ELGAMAL PRIVATE KEY-----");
 
-const SecByteBlock EC_PUBLIC_BEGIN(BYTE_PTR("-----BEGIN EC PUBLIC KEY-----"), 29);
-const SecByteBlock EC_PUBLIC_END(BYTE_PTR("-----END EC PUBLIC KEY-----"), 27);
+const secure_string EC_PUBLIC_BEGIN("-----BEGIN EC PUBLIC KEY-----");
+const secure_string EC_PUBLIC_END("-----END EC PUBLIC KEY-----");
 
-const SecByteBlock ECDSA_PUBLIC_BEGIN(BYTE_PTR("-----BEGIN ECDSA PUBLIC KEY-----"), 32);
-const SecByteBlock ECDSA_PUBLIC_END(BYTE_PTR("-----END ECDSA PUBLIC KEY-----"), 30);
+const secure_string ECDSA_PUBLIC_BEGIN("-----BEGIN ECDSA PUBLIC KEY-----");
+const secure_string ECDSA_PUBLIC_END("-----END ECDSA PUBLIC KEY-----");
 
-const SecByteBlock EC_PRIVATE_BEGIN(BYTE_PTR("-----BEGIN EC PRIVATE KEY-----"), 30);
-const SecByteBlock EC_PRIVATE_END(BYTE_PTR("-----END EC PRIVATE KEY-----"), 28);
+const secure_string EC_PRIVATE_BEGIN("-----BEGIN EC PRIVATE KEY-----");
+const secure_string EC_PRIVATE_END("-----END EC PRIVATE KEY-----");
 
-const SecByteBlock EC_PARAMETERS_BEGIN(BYTE_PTR("-----BEGIN EC PARAMETERS-----"), 29);
-const SecByteBlock EC_PARAMETERS_END(BYTE_PTR("-----END EC PARAMETERS-----"), 27);
+const secure_string EC_PARAMETERS_BEGIN("-----BEGIN EC PARAMETERS-----");
+const secure_string EC_PARAMETERS_END("-----END EC PARAMETERS-----");
 
-const SecByteBlock DH_PARAMETERS_BEGIN(BYTE_PTR("-----BEGIN DH PARAMETERS-----"), 29);
-const SecByteBlock DH_PARAMETERS_END(BYTE_PTR("-----END DH PARAMETERS-----"), 27);
+const secure_string DH_PARAMETERS_BEGIN("-----BEGIN DH PARAMETERS-----");
+const secure_string DH_PARAMETERS_END("-----END DH PARAMETERS-----");
 
-const SecByteBlock DSA_PARAMETERS_BEGIN(BYTE_PTR("-----BEGIN DSA PARAMETERS-----"), 30);
-const SecByteBlock DSA_PARAMETERS_END(BYTE_PTR("-----END DSA PARAMETERS-----"), 28);
+const secure_string DSA_PARAMETERS_BEGIN("-----BEGIN DSA PARAMETERS-----");
+const secure_string DSA_PARAMETERS_END("-----END DSA PARAMETERS-----");
 
-const SecByteBlock CERTIFICATE_BEGIN(BYTE_PTR("-----BEGIN CERTIFICATE-----"), 27);
-const SecByteBlock CERTIFICATE_END(BYTE_PTR("-----END CERTIFICATE-----"), 25);
+const secure_string CERTIFICATE_BEGIN("-----BEGIN CERTIFICATE-----");
+const secure_string CERTIFICATE_END("-----END CERTIFICATE-----");
 
-const SecByteBlock X509_CERTIFICATE_BEGIN(BYTE_PTR("-----BEGIN X509 CERTIFICATE-----"), 32);
-const SecByteBlock X509_CERTIFICATE_END(BYTE_PTR("-----END X509 CERTIFICATE-----"), 30);
+const secure_string X509_CERTIFICATE_BEGIN("-----BEGIN X509 CERTIFICATE-----");
+const secure_string X509_CERTIFICATE_END("-----END X509 CERTIFICATE-----");
 
-const SecByteBlock REQ_CERTIFICATE_BEGIN(BYTE_PTR("-----BEGIN CERTIFICATE REQUEST-----"), 35);
-const SecByteBlock REQ_CERTIFICATE_END(BYTE_PTR("-----END CERTIFICATE REQUEST-----"), 33);
+const secure_string REQ_CERTIFICATE_BEGIN("-----BEGIN CERTIFICATE REQUEST-----");
+const secure_string REQ_CERTIFICATE_END("-----END CERTIFICATE REQUEST-----");
 
-const SecByteBlock PROC_TYPE(BYTE_PTR("Proc-Type"), 9);
-const SecByteBlock PROC_TYPE_ENC(BYTE_PTR("Proc-Type: 4,ENCRYPTED"), 22);
-const SecByteBlock ENCRYPTED(BYTE_PTR("ENCRYPTED"), 9);
-const SecByteBlock DEK_INFO(BYTE_PTR("DEK-Info"), 8);
-const SecByteBlock CONTENT_DOMAIN(BYTE_PTR("Content-Domain"), 14);
+const secure_string PROC_TYPE("Proc-Type");
+const secure_string PROC_TYPE_ENC("Proc-Type: 4,ENCRYPTED");
+const secure_string ENCRYPTED("ENCRYPTED");
+const secure_string DEK_INFO("DEK-Info");
+const secure_string CONTENT_DOMAIN("Content-Domain");
 
 void PEM_WriteLine(BufferedTransformation& bt, const SecByteBlock& line)
 {
     bt.Put(line.data(), line.size());
-    bt.Put(EOL.data(), EOL.size());
+    bt.Put(byte_ptr(EOL), EOL.size());
+}
+
+void PEM_WriteLine(BufferedTransformation& bt, const secure_string& line)
+{
+    bt.Put(byte_ptr(line), line.size());
+    bt.Put(byte_ptr(EOL), EOL.size());
 }
 
 void PEM_WriteLine(BufferedTransformation& bt, const std::string& line)
 {
-    bt.Put(reinterpret_cast<const byte*>(line.data()), line.size());
-    bt.Put(EOL.data(), EOL.size());
+    bt.Put(byte_ptr(line), line.size());
+    bt.Put(byte_ptr(EOL), EOL.size());
 }
 
 void PEM_Base64Decode(BufferedTransformation& source, BufferedTransformation& dest)
@@ -133,28 +127,28 @@ void PEM_Base64Encode(BufferedTransformation& source, BufferedTransformation& de
     encoder.MessageEnd();
 }
 
-SecByteBlock GetControlField(const SecByteBlock& line)
+secure_string GetControlField(const secure_string& line)
 {
-    SecByteBlock::const_iterator it = std::search(line.begin(), line.end(), COLON.begin(), COLON.end());
+    secure_string::const_iterator it = std::search(line.begin(), line.end(), COLON.begin(), COLON.end());
     if (it != line.end())
     {
         size_t len = it - line.begin();
-        return SecByteBlock(line.data(), len);
+        return secure_string(line.data(), len);
     }
 
-    return SecByteBlock();
+    return secure_string();
 }
 
-SecByteBlock GetControlFieldData(const SecByteBlock& line)
+secure_string GetControlFieldData(const secure_string& line)
 {
-    SecByteBlock::const_iterator it = std::search(line.begin(), line.end(), COLON.begin(), COLON.end());
+    secure_string::const_iterator it = std::search(line.begin(), line.end(), COLON.begin(), COLON.end());
     if (it != line.end() && ++it != line.end())
     {
-        size_t len = line.end() - it;
-        return SecByteBlock(it, len);
+        const size_t len = line.end() - it;
+        return secure_string(it, it+len);
     }
 
-    return SecByteBlock();
+    return secure_string();
 }
 
 struct ByteToLower {
@@ -164,7 +158,7 @@ struct ByteToLower {
 };
 
 // Returns 0 if a match, non-0 otherwise
-int CompareNoCase(const SecByteBlock& first, const SecByteBlock& second)
+int CompareNoCase(const secure_string& first, const secure_string& second)
 {
     if (first.size() < second.size())
         return -1;
@@ -173,17 +167,17 @@ int CompareNoCase(const SecByteBlock& first, const SecByteBlock& second)
 
     // Same size... compare them....
 #if (_MSC_VER >= 1500)
-    SecByteBlock t1(first), t2(second);
+    secure_string t1(first), t2(second);
     std::transform(t1.begin(), t1.end(), stdext::make_checked_array_iterator(t1.begin(), t1.size()), ByteToLower());
     std::transform(t2.begin(), t2.end(), stdext::make_checked_array_iterator(t2.begin(), t2.size()), ByteToLower());
 #else
-    SecByteBlock t1(first), t2(second);
+    secure_string t1(first), t2(second);
     std::transform(t1.begin(), t1.end(), t1.begin(), ByteToLower());
     std::transform(t2.begin(), t2.end(), t2.begin(), ByteToLower());
 #endif
 
     // Strings are the same length
-    return std::memcmp(t1.begin(), t2.begin(), t2.size());
+    return std::memcmp(t1.data(), t2.data(), t2.size());
 }
 
 // From crypto/evp/evp_key.h. Signature changed a bit to match Crypto++.
@@ -195,11 +189,11 @@ int OPENSSL_EVP_BytesToKey(HashTransformation& hash,
     unsigned int niv,nkey,nhash;
     unsigned int addmd=0,i;
 
-    nkey=static_cast<unsigned int>(ksize);
+    nkey = static_cast<unsigned int>(ksize);
     niv = static_cast<unsigned int>(vsize);
     nhash = static_cast<unsigned int>(hash.DigestSize());
 
-    SecByteBlock digest(hash.DigestSize());
+    secure_string digest(hash.DigestSize(), '\0');
 
     if (data == NULL) return (0);
 
@@ -208,20 +202,20 @@ int OPENSSL_EVP_BytesToKey(HashTransformation& hash,
         hash.Restart();
 
         if (addmd++)
-            hash.Update(digest.data(), digest.size());
+            hash.Update(byte_ptr(digest), digest.size());
 
         hash.Update(data, dlen);
 
         if (salt != NULL)
             hash.Update(salt, OPENSSL_PKCS5_SALT_LEN);
 
-        hash.TruncatedFinal(digest.data(), digest.size());
+        hash.TruncatedFinal(byte_ptr(digest), digest.size());
 
         for (i=1; i<count; i++)
         {
             hash.Restart();
-            hash.Update(digest.data(), digest.size());
-            hash.TruncatedFinal(digest.data(), digest.size());
+            hash.Update(byte_ptr(digest), digest.size());
+            hash.TruncatedFinal(byte_ptr(digest), digest.size());
         }
 
         i=0;
