@@ -525,14 +525,13 @@ void PEM_StripEncapsulatedHeader(BufferedTransformation& src, BufferedTransforma
         throw InvalidDataFormat("PEM_StripEncapsulatedHeader: failed to locate Proc-Type");
 
     line = GetControlFieldData(line);
-    secure_string tline(line);
 
-    PEM_ParseVersion(tline, header.m_version);
+    PEM_ParseVersion(line, header.m_version);
     if (header.m_version != "4")
         throw NotImplemented(std::string("PEM_StripEncapsulatedHeader: encryption version ")
                              + header.m_version.c_str() + " not supported");
 
-    PEM_ParseOperation(tline, header.m_operation);
+    PEM_ParseOperation(line, header.m_operation);
     if (header.m_operation != "ENCRYPTED")
         throw NotImplemented(std::string("PEM_StripEncapsulatedHeader: operation ")
                              + header.m_operation.c_str() + " not supported");
@@ -550,10 +549,9 @@ void PEM_StripEncapsulatedHeader(BufferedTransformation& src, BufferedTransforma
         if (0 == CompareNoCase(field, DEK_INFO))
         {
             line = GetControlFieldData(line);
-            tline = line;
 
-            PEM_ParseAlgorithm(tline, header.m_algorithm);
-            PEM_ParseIV(tline, header.m_iv);
+            PEM_ParseAlgorithm(line, header.m_algorithm);
+            PEM_ParseIV(line, header.m_iv);
 
             continue;
         }
