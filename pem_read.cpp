@@ -69,7 +69,7 @@ void PEM_DecodeAndDecrypt(BufferedTransformation& src, BufferedTransformation& d
 void PEM_Decrypt(BufferedTransformation& src, BufferedTransformation& dest,
                  member_ptr<StreamTransformation>& stream);
 
-bool PEM_IsEncrypted(secure_string& sb);
+bool PEM_IsEncrypted(const secure_string& sb);
 bool PEM_IsEncrypted(BufferedTransformation& bt);
 
 void PEM_ParseVersion(const secure_string& proctype, secure_string& version);
@@ -282,18 +282,18 @@ void PEM_LoadParams(BufferedTransformation& bt, DL_GroupParameters_EC<EC>& param
     params.BERDecode(temp);
 }
 
-bool PEM_IsEncrypted(secure_string& sb)
+bool PEM_IsEncrypted(const secure_string& str)
 {
-    secure_string::iterator it = std::search(sb.begin(), sb.end(), PROC_TYPE.begin(), PROC_TYPE.end());
-    if (it == sb.end()) return false;
+    secure_string::const_iterator it = std::search(str.begin(), str.end(), PROC_TYPE.begin(), PROC_TYPE.end());
+    if (it == str.end()) return false;
 
-    it = std::search(it + PROC_TYPE.size(), sb.end(), ENCRYPTED.begin(), ENCRYPTED.end());
-    return it != sb.end();
+    it = std::search(it + PROC_TYPE.size(), str.end(), ENCRYPTED.begin(), ENCRYPTED.end());
+    return it != str.end();
 }
 
 bool PEM_IsEncrypted(BufferedTransformation& bt)
 {
-    const size_t size = bt.MaxRetrievable();
+    size_t size = (std::min)(bt.MaxRetrievable(), lword(256));
     secure_string str(size, '\0');
     bt.Peek(byte_ptr(str), str.size());
 
