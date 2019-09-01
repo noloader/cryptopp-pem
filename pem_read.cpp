@@ -727,7 +727,7 @@ using namespace CryptoPP::PEM;
 PEM_Type PEM_GetType(const BufferedTransformation& bt)
 {
     lword size = (std::min)(bt.MaxRetrievable(), lword(128));
-    SecByteBlock temp(size_t(size));
+    SecByteBlock temp(size);
     bt.Peek(temp, temp.size());
     return PEM_GetTypeFromBlock(temp);
 }

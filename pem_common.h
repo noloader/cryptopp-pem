@@ -35,6 +35,8 @@
 NAMESPACE_BEGIN(CryptoPP)
 NAMESPACE_BEGIN(PEM)
 
+typedef std::basic_string<char, std::char_traits<char>, AllocatorWithCleanup<char> > secure_string;
+
 // Attempts to locate a control field in a line
 SecByteBlock GetControlField(const SecByteBlock& line);
 

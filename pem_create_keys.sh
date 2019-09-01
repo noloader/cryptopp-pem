@@ -34,7 +34,7 @@ rm -rf pem_test.exe &>/dev/null
 CXXFLAGS="-DDEBUG -g3 -O0 -Wall"
 
 # Build crypto++ library if out of date.
-CXX="$CXX" make -j 4
+CXX="$CXX" CXXFLAGS="$CXXFLAGS" make -j 4
 
 # Build the test program
 if ! "$CXX" "$CXXFLAGS" pem_test.cxx ./libcryptopp.a -o pem_test.exe; then
