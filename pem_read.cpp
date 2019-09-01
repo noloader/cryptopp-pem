@@ -51,7 +51,7 @@ struct EncapsulatedHeader
 };
 
 // GCC 9 compile error using overload PEM_GetType
-PEM_Type PEM_GetTypeFromBlock(const secure_string& sb);
+PEM_Type PEM_GetTypeFromString(const secure_string& str);
 
 size_t PEM_ReadLine(BufferedTransformation& source, secure_string& line, secure_string& ending);
 
@@ -97,110 +97,110 @@ secure_string::const_iterator Search(const secure_string& source, const secure_s
     return std::search(source.begin(), source.end(), target.begin(), target.end());
 }
 
-PEM_Type PEM_GetTypeFromBlock(const secure_string& sb)
+PEM_Type PEM_GetTypeFromString(const secure_string& str)
 {
     secure_string::const_iterator it;
 
     // Uses an OID to identify the public key type
-    it = Search(sb, PUBLIC_BEGIN);
-    if (it != sb.end())
+    it = Search(str, PUBLIC_BEGIN);
+    if (it != str.end())
         return PEM_PUBLIC_KEY;
 
     // Uses an OID to identify the private key type
-    it = Search(sb, PRIVATE_BEGIN);
-    if (it != sb.end())
+    it = Search(str, PRIVATE_BEGIN);
+    if (it != str.end())
         return PEM_PRIVATE_KEY;
 
     // RSA key types
-    it = Search(sb, RSA_PUBLIC_BEGIN);
-    if (it != sb.end())
+    it = Search(str, RSA_PUBLIC_BEGIN);
+    if (it != str.end())
         return PEM_RSA_PUBLIC_KEY;
 
-    it = Search(sb, RSA_PRIVATE_BEGIN);
-    if (it != sb.end())
+    it = Search(str, RSA_PRIVATE_BEGIN);
+    if (it != str.end())
     {
-        it = Search(sb, PROC_TYPE_ENC);
-        if (it != sb.end())
+        it = Search(str, PROC_TYPE_ENC);
+        if (it != str.end())
             return PEM_RSA_ENC_PRIVATE_KEY;
 
         return PEM_RSA_PRIVATE_KEY;
     }
 
     // DSA key types
-    it = Search(sb, DSA_PUBLIC_BEGIN);
-    if (it != sb.end())
+    it = Search(str, DSA_PUBLIC_BEGIN);
+    if (it != str.end())
         return PEM_DSA_PUBLIC_KEY;
 
-    it = Search(sb, DSA_PRIVATE_BEGIN);
-    if (it != sb.end())
+    it = Search(str, DSA_PRIVATE_BEGIN);
+    if (it != str.end())
     {
-        it = Search(sb, PROC_TYPE_ENC);
-        if (it != sb.end())
+        it = Search(str, PROC_TYPE_ENC);
+        if (it != str.end())
             return PEM_DSA_ENC_PRIVATE_KEY;
 
         return PEM_DSA_PRIVATE_KEY;
     }
 
     // ElGamal key types
-    it = Search(sb, ELGAMAL_PUBLIC_BEGIN);
-    if (it != sb.end())
+    it = Search(str, ELGAMAL_PUBLIC_BEGIN);
+    if (it != str.end())
         return PEM_ELGAMAL_PUBLIC_KEY;
 
-    it = Search(sb, ELGAMAL_PRIVATE_BEGIN);
-    if (it != sb.end())
+    it = Search(str, ELGAMAL_PRIVATE_BEGIN);
+    if (it != str.end())
     {
-        it = Search(sb, PROC_TYPE_ENC);
-        if (it != sb.end())
+        it = Search(str, PROC_TYPE_ENC);
+        if (it != str.end())
             return PEM_ELGAMAL_ENC_PRIVATE_KEY;
 
         return PEM_ELGAMAL_PRIVATE_KEY;
     }
 
     // EC key types
-    it = Search(sb, EC_PUBLIC_BEGIN);
-    if (it != sb.end())
+    it = Search(str, EC_PUBLIC_BEGIN);
+    if (it != str.end())
         return PEM_EC_PUBLIC_KEY;
 
-    it = Search(sb, ECDSA_PUBLIC_BEGIN);
-    if (it != sb.end())
+    it = Search(str, ECDSA_PUBLIC_BEGIN);
+    if (it != str.end())
         return PEM_ECDSA_PUBLIC_KEY;
 
-    it = Search(sb, EC_PRIVATE_BEGIN);
-    if (it != sb.end())
+    it = Search(str, EC_PRIVATE_BEGIN);
+    if (it != str.end())
     {
-        it = Search(sb, PROC_TYPE_ENC);
-        if (it != sb.end())
+        it = Search(str, PROC_TYPE_ENC);
+        if (it != str.end())
             return PEM_EC_ENC_PRIVATE_KEY;
 
         return PEM_EC_PRIVATE_KEY;
     }
 
     // EC Parameters
-    it = Search(sb, EC_PARAMETERS_BEGIN);
-    if (it != sb.end())
+    it = Search(str, EC_PARAMETERS_BEGIN);
+    if (it != str.end())
         return PEM_EC_PARAMETERS;
 
     // DH Parameters
-    it = Search(sb, DH_PARAMETERS_BEGIN);
-    if (it != sb.end())
+    it = Search(str, DH_PARAMETERS_BEGIN);
+    if (it != str.end())
         return PEM_DH_PARAMETERS;
 
     // DSA Parameters
-    it = Search(sb, DSA_PARAMETERS_BEGIN);
-    if (it != sb.end())
+    it = Search(str, DSA_PARAMETERS_BEGIN);
+    if (it != str.end())
         return PEM_DSA_PARAMETERS;
 
     // Certificate
-    it = Search(sb, CERTIFICATE_BEGIN);
-    if (it != sb.end())
+    it = Search(str, CERTIFICATE_BEGIN);
+    if (it != str.end())
         return PEM_CERTIFICATE;
 
-    it = Search(sb, X509_CERTIFICATE_BEGIN);
-    if (it != sb.end())
+    it = Search(str, X509_CERTIFICATE_BEGIN);
+    if (it != str.end())
         return PEM_X509_CERTIFICATE;
 
-    it = Search(sb, REQ_CERTIFICATE_BEGIN);
-    if (it != sb.end())
+    it = Search(str, REQ_CERTIFICATE_BEGIN);
+    if (it != str.end())
         return PEM_REQ_CERTIFICATE;
 
     return PEM_UNSUPPORTED;
@@ -724,7 +724,7 @@ PEM_Type PEM_GetType(const BufferedTransformation& bt)
     lword size = (std::min)(bt.MaxRetrievable(), lword(128));
     secure_string str(size, '\0');
     bt.Peek(byte_ptr(str), str.size());
-    return PEM_GetTypeFromBlock(str);
+    return PEM_GetTypeFromString(str);
 }
 
 bool PEM_NextObject(BufferedTransformation& src, BufferedTransformation& dest, bool trimTrailing)
