@@ -280,6 +280,12 @@ void PEM_LoadParams(BufferedTransformation& bt, DL_GroupParameters_EC<EC>& param
     PEM_Base64Decode(obj, temp);
 
     params.BERDecode(temp);
+
+#if defined(PEM_KEY_OR_PARAMETER_VALIDATION) && !defined(NO_OS_DEPENDENCE)
+    AutoSeededRandomPool prng;
+    if (!params.Validate(prng, 2))
+        throw Exception(Exception::OTHER_ERROR, "PEM_LoadPublicKey: parameter validation failed");
+#endif
 }
 
 bool PEM_IsEncrypted(const secure_string& str)
@@ -307,7 +313,7 @@ void PEM_CipherForAlgorithm(const EncapsulatedHeader& header,
     unsigned int ksize, vsize;
 
     secure_string algorithm(header.m_algorithm);
-    std::transform(algorithm.begin(), algorithm.end(), algorithm.begin(),  (int(*)(int))std::toupper);
+    std::transform(algorithm.begin(), algorithm.end(), algorithm.begin(), (int(*)(int))std::toupper);
 
     if (algorithm == "AES-256-CBC")
     {
