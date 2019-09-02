@@ -50,19 +50,19 @@ echo "Generating OpenSSL keys"
 # RSA private key, public key, and encrypted private key
 openssl genrsa -out rsa-priv.pem 1024
 openssl rsa -in rsa-priv.pem -out rsa-pub.pem -pubout
-openssl rsa -in rsa-priv.pem -out rsa-enc-priv.pem -aes128 -passout pass:test
+openssl rsa -in rsa-priv.pem -out rsa-enc-priv.pem -aes128 -passout pass:abcdefghijklmnopqrstuvwxyz
 
 # DSA private key, public key, and encrypted private key
 openssl dsaparam -out dsa-params.pem 1024
 openssl gendsa -out dsa-priv.pem dsa-params.pem
 openssl dsa -in dsa-priv.pem -out dsa-pub.pem -pubout
-openssl dsa -in dsa-priv.pem -out dsa-enc-priv.pem -aes128 -passout pass:test
+openssl dsa -in dsa-priv.pem -out dsa-enc-priv.pem -aes128 -passout pass:abcdefghijklmnopqrstuvwxyz
 
 # EC private key, public key, and encrypted private key
 openssl ecparam -out ec-params.pem -name secp256k1 -genkey
 openssl ec -in ec-params.pem -out ec-priv.pem
 openssl ec -in ec-priv.pem -out ec-pub.pem -pubout
-openssl ec -in ec-priv.pem -out ec-enc-priv.pem -aes128 -passout pass:test
+openssl ec -in ec-priv.pem -out ec-enc-priv.pem -aes128 -passout pass:abcdefghijklmnopqrstuvwxyz
 
 openssl dhparam -out dh-params.pem 512
 

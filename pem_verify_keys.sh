@@ -23,30 +23,30 @@ fi
 echo
 echo "OpenSSL reading"
 
-if [[ -f rsa-pub.new.pem ]]; then
-	echo "rsa-pub.new.pem:"
-	if openssl rsa -in rsa-pub.new.pem -pubin -text -noout 1>/dev/null; then
+if [[ -f rsa-pub.cryptopp.pem ]]; then
+	echo "rsa-pub.cryptopp.pem:"
+	if openssl rsa -in rsa-pub.cryptopp.pem -pubin -text -noout 1>/dev/null; then
 		echo "  - OK"
 	else
-		echo "  - Failed to load rsa-pub.new.pem"
+		echo "  - Failed to load rsa-pub.cryptopp.pem"
 	fi
 fi
 
-if [[ -f rsa-pub.new.pem ]]; then
-	echo "rsa-priv.new.pem:"
-	if openssl rsa -in rsa-priv.new.pem -text -noout 1>/dev/null; then
+if [[ -f rsa-pub.cryptopp.pem ]]; then
+	echo "rsa-priv.cryptopp.pem:"
+	if openssl rsa -in rsa-priv.cryptopp.pem -text -noout 1>/dev/null; then
 		echo "  - OK"
 	else
-		echo "  - Failed to load rsa-priv.new.pem"
+		echo "  - Failed to load rsa-priv.cryptopp.pem"
 	fi
 fi
 
-if [[ -f rsa-enc-priv.new.pem ]]; then
-	echo "rsa-enc-priv.new.pem:"
-	if openssl rsa -in rsa-enc-priv.new.pem -passin pass:test -text -noout 1>/dev/null; then
+if [[ -f rsa-enc-priv.cryptopp.pem ]]; then
+	echo "rsa-enc-priv.cryptopp.pem:"
+	if openssl rsa -in rsa-enc-priv.cryptopp.pem -passin pass:abcdefghijklmnopqrstuvwxyz -text -noout 1>/dev/null; then
 		echo "  - OK"
 	else
-		echo "  - Failed to load rsa-enc-priv.new.pem"
+		echo "  - Failed to load rsa-enc-priv.cryptopp.pem"
 	fi
 fi
 
@@ -55,39 +55,39 @@ fi
 
 # The DSA command returns 0 on success
 
-if [[ -f dsa-params.new.pem ]]; then
-	echo "dsa-params.new.pem:"
-	if openssl dsaparam -in dsa-params.new.pem -text -noout 1>/dev/null; then
+if [[ -f dsa-params.cryptopp.pem ]]; then
+	echo "dsa-params.cryptopp.pem:"
+	if openssl dsaparam -in dsa-params.cryptopp.pem -text -noout 1>/dev/null; then
 		echo "  - OK"
 	else
-		echo "  - Failed to load dsa-params.new.pem (maybe false)"
+		echo "  - Failed to load dsa-params.cryptopp.pem (maybe false)"
 	fi
 fi
 
-if [[ -f dsa-pub.new.pem ]]; then
-	echo "dsa-pub.new.pem:"
-	if openssl dsa -in dsa-pub.new.pem -pubin -text -noout 1>/dev/null; then
+if [[ -f dsa-pub.cryptopp.pem ]]; then
+	echo "dsa-pub.cryptopp.pem:"
+	if openssl dsa -in dsa-pub.cryptopp.pem -pubin -text -noout 1>/dev/null; then
 		echo "  - OK"
 	else
-		echo "  - Failed to load dsa-pub.new.pem (maybe false)"
+		echo "  - Failed to load dsa-pub.cryptopp.pem (maybe false)"
 	fi
 fi
 
-if [[ -f dsa-priv.new.pem ]]; then
-	echo "dsa-priv.new.pem:"
-	if openssl dsa -in dsa-priv.new.pem -text -noout 1>/dev/null; then
+if [[ -f dsa-priv.cryptopp.pem ]]; then
+	echo "dsa-priv.cryptopp.pem:"
+	if openssl dsa -in dsa-priv.cryptopp.pem -text -noout 1>/dev/null; then
 		echo "  - OK"
 	else
-		echo "  - Failed to load dsa-priv.new.pem (maybe false)"
+		echo "  - Failed to load dsa-priv.cryptopp.pem (maybe false)"
 	fi
 fi
 
-if [[ -f dsa-enc-priv.new.pem ]]; then
-	echo "dsa-enc-priv.new.pem:"
-	if openssl dsa -in dsa-enc-priv.new.pem -passin pass:test -text -noout 1>/dev/null; then
+if [[ -f dsa-enc-priv.cryptopp.pem ]]; then
+	echo "dsa-enc-priv.cryptopp.pem:"
+	if openssl dsa -in dsa-enc-priv.cryptopp.pem -passin pass:abcdefghijklmnopqrstuvwxyz -text -noout 1>/dev/null; then
 		echo "  - OK"
 	else
-		echo "  - Failed to load dsa-enc-priv.new.pem (maybe false)"
+		echo "  - Failed to load dsa-enc-priv.cryptopp.pem (maybe false)"
 	fi
 fi
 
@@ -96,39 +96,39 @@ fi
 
 # The EC command returns 0 on success
 
-if [[ -f ec-params.new.pem ]]; then
-	echo "ec-params.new.pem:"
-	if openssl ecparam -in ec-params.new.pem -text -noout 1>/dev/null; then
+if [[ -f ec-params.cryptopp.pem ]]; then
+	echo "ec-params.cryptopp.pem:"
+	if openssl ecparam -in ec-params.cryptopp.pem -text -noout 1>/dev/null; then
 		echo "  - OK"
 	else
-		echo "  - Failed to load ec-params.new.pem"
+		echo "  - Failed to load ec-params.cryptopp.pem"
 	fi
 fi
 
-if [[ -f ec-pub.new.pem ]]; then
-	echo "ec-pub.new.pem:"
-	if openssl ec -in ec-pub.new.pem -pubin -text -noout 1>/dev/null; then
+if [[ -f ec-pub.cryptopp.pem ]]; then
+	echo "ec-pub.cryptopp.pem:"
+	if openssl ec -in ec-pub.cryptopp.pem -pubin -text -noout 1>/dev/null; then
 		echo "  - OK"
 	else
-		echo "  - Failed to load ec-pub.new.pem"
+		echo "  - Failed to load ec-pub.cryptopp.pem"
 	fi
 fi
 
-if [[ -f ec-priv.new.pem ]]; then
-	echo "ec-priv.new.pem:"
-	if openssl ec -in ec-priv.new.pem -text -noout 1>/dev/null; then
+if [[ -f ec-priv.cryptopp.pem ]]; then
+	echo "ec-priv.cryptopp.pem:"
+	if openssl ec -in ec-priv.cryptopp.pem -text -noout 1>/dev/null; then
 		echo "  - OK"
 	else
-		echo "  - Failed to load ec-priv.new.pem"
+		echo "  - Failed to load ec-priv.cryptopp.pem"
 	fi
 fi
 
-if [[ -f ec-enc-priv.new.pem ]]; then
-	echo "ec-enc-priv.new.pem:"
-	if openssl ec -in ec-enc-priv.new.pem -passin pass:test -text -noout 1>/dev/null; then
+if [[ -f ec-enc-priv.cryptopp.pem ]]; then
+	echo "ec-enc-priv.cryptopp.pem:"
+	if openssl ec -in ec-enc-priv.cryptopp.pem -passin pass:abcdefghijklmnopqrstuvwxyz -text -noout 1>/dev/null; then
 		echo "  - OK"
 	else
-		echo "  - Failed to load ec-enc-priv.new.pem"
+		echo "  - Failed to load ec-enc-priv.cryptopp.pem"
 	fi
 fi
 
