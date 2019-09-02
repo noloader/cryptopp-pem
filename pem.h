@@ -43,17 +43,13 @@ struct X509Certificate
 ///  InvalidDataFormat is thrown. The exception is used to distinguish
 ///  from an empty <tt>src</tt>, and the exception signals the caller to fix
 ///  <tt>src</tt>.
-/// \details If <tt>trimTrailing</tt> is true, then trailing whitespace is
-///  trimmed from the source BufferedTransformation. The destination
-///  BufferedTransformation will have one line ending if it was present in
-///  source.
 /// \details PEM_NextObject will parse an invalid object. For example, it
 ///  will parse a key or parameter with <tt>-----BEGIN FOO-----</tt> and
 ///  <tt>-----END BAR-----</tt>. The parser only looks for BEGIN and END
 ///  (and the dashes). The malformed input will be caught later when a
 ///  particular key or parameter is parsed.
 /// \throws InvalidDataFormat
-bool PEM_NextObject(BufferedTransformation& src, BufferedTransformation& dest, bool trimTrailing=true);
+bool PEM_NextObject(BufferedTransformation& src, BufferedTransformation& dest);
 
 /// \brief Recognized PEM types.
 /// \details Many PEM types can be read and write, but not all of them.

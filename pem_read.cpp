@@ -723,7 +723,7 @@ PEM_Type PEM_GetType(const BufferedTransformation& bt)
     return PEM_GetTypeFromString(str);
 }
 
-bool PEM_NextObject(BufferedTransformation& src, BufferedTransformation& dest, bool trimTrailing)
+bool PEM_NextObject(BufferedTransformation& src, BufferedTransformation& dest)
 {
     // Skip leading whitespace
     PEM_TrimLeadingWhitespace(src);
@@ -905,8 +905,7 @@ bool PEM_NextObject(BufferedTransformation& src, BufferedTransformation& dest, b
 
     // Trailing whitespace of former queue is now
     // leading whitespace of the new queue.
-    if (trimTrailing)
-        PEM_TrimLeadingWhitespace(src);
+    PEM_TrimLeadingWhitespace(src);
 
     return true;
 }
