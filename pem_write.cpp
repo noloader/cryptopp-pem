@@ -165,8 +165,6 @@ void PEM_SavePrivateKey(BufferedTransformation& bt, const DL_PrivateKey_EC<EC>& 
 void PEM_DEREncode(BufferedTransformation& bt, const DSA::PrivateKey& key)
 {
     // Crypto++ provides {version,x}, while OpenSSL expects {version,p,q,g,y,x}.
-    // PEM_SavePrivateKey(bt, key, DSA_PRIVATE_BEGIN, DSA_PRIVATE_END);
-
     const DL_GroupParameters_DSA& params = key.GetGroupParameters();
 
     DSA::PublicKey pkey;
@@ -186,19 +184,14 @@ template <class EC>
 void PEM_DEREncode(BufferedTransformation& bt, const DL_PrivateKey_EC<EC>& key)
 {
     // Crypto++ provides {version,x}, while OpenSSL expects {version,x,curve oid,y}.
-    // PEM_SavePrivateKey(bt, key, EC_PRIVATE_BEGIN, EC_PRIVATE_END);
-
-    // Need a public key to encode the public element.
-    DL_PublicKey_EC<EC> pkey;
-    key.MakePublicKey(pkey);
-
-    // Prefetch the group parameters
-    const DL_GroupParameters_EC<EC>& params = pkey.GetGroupParameters();
+    typedef typename DL_PrivateKey_EC<EC>::Element Element;
+    const DL_GroupParameters_EC<EC>& params = key.GetGroupParameters();
     const Integer& x = key.GetPrivateExponent();
+    const Element& y = params.ExponentiateBase(x);
 
     // Named curve
     OID oid;
-    if (!key.GetVoidValue(Name::GroupOID(), typeid(oid), &oid))
+    if (key.GetVoidValue(Name::GroupOID(), typeid(oid), &oid) == false)
         throw Exception(Exception::OTHER_ERROR, "PEM_DEREncode: failed to retrieve curve OID");
 
     DERSequenceEncoder seq(bt);
@@ -212,7 +205,7 @@ void PEM_DEREncode(BufferedTransformation& bt, const DL_PrivateKey_EC<EC>& key)
         DERGeneralEncoder cs2(seq, CONTEXT_SPECIFIC | CONSTRUCTED | 1);
             DERGeneralEncoder cs3(cs2, BIT_STRING);
                 cs3.Put(0x00);        // Unused bits
-                params.GetCurve().EncodePoint(cs3, pkey.GetPublicElement(), false);
+                params.GetCurve().EncodePoint(cs3, y, false);
             cs3.MessageEnd();
         cs2.MessageEnd();
     seq.MessageEnd();
