@@ -872,28 +872,11 @@ bool PEM_NextObject(BufferedTransformation& src, BufferedTransformation& dest)
     const size_t used = idx4 + PEM_TAIL.size();
     const size_t len = used - idx1;
 
-    // Include one CR/LF if its available in the accumulator
-    next = idx1 + len;
-    size_t adjust = 0;
-    if (next < accum.size())
-    {
-        byte c1 = accum[next];
-        byte c2 = 0;
-
-        if (next + 1 < accum.size())
-            c2 = accum[next + 1];
-
-        // Longest match first
-        if (c1 == '\r' && c2 == '\n')
-            adjust = 2;
-        else if (c1 == '\r' || c1 == '\n')
-            adjust = 1;
-    }
-
-    dest.Put(byte_ptr(ptr), len + adjust);
+    dest.Put(byte_ptr(ptr), len);
+    dest.Put(byte_ptr(EOL), EOL.size());
     dest.MessageEnd();
 
-    src.Skip(used + adjust);
+    src.Skip(used);
     PEM_TrimLeadingWhitespace(src);
 
     return true;
