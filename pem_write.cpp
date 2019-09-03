@@ -286,19 +286,22 @@ void PEM_SavePrivateKey(BufferedTransformation& bt, const PRIVATE_KEY& key,
     PEM_CipherForAlgorithm(rng, algorithm, stream, _key, _iv, password, length);
 
     // Encode the IV. It gets written to the encapsulated header.
-    std::string encoded;
-    HexEncoder hex(new StringSink(encoded));
+    HexEncoder hex;
     hex.Put(byte_ptr(_iv), _iv.size());
     hex.MessageEnd();
 
+    secure_string encoded;
+    encoded.resize(hex.MaxRetrievable());
+    hex.Get(byte_ptr(encoded), encoded.size());
+
     // e.g., DEK-Info: AES-128-CBC,5E537774BCCD88B3E2F47FE294C93253
-    std::string line;
-    line += "DEK-Info: ";
-    line += algorithm + "," + encoded;
+    secure_string dekinfo = "DEK-Info: ";
+    dekinfo += algorithm.c_str();
+    dekinfo += "," + encoded;
 
     // The extra newline separates the control fields from the encapsulated
     //   text (i.e, header from body). Its required by RFC 1421.
-    PEM_WriteLine(queue, line);
+    PEM_WriteLine(queue, dekinfo);
     queue.Put(byte_ptr(EOL), EOL.size());
 
     ByteQueue temp;
