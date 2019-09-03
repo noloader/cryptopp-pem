@@ -321,82 +321,88 @@ void PEM_CipherForAlgorithm(RandomNumberGenerator& rng, std::string algorithm,
                             const char* password, size_t length)
 {
     unsigned int ksize, vsize;
-    std::transform(algorithm.begin(), algorithm.end(), algorithm.begin(), (int(*)(int))std::toupper);
+    stream.release();
 
-    if (algorithm == "AES-256-CBC")
-    {
-        ksize = 32;
-        vsize = 16;
+    secure_string alg(algorithm.c_str(), algorithm.size());
+    std::transform(alg.begin(), alg.end(), alg.begin(), (int(*)(int))std::toupper);
 
-        stream.reset(new CBC_Mode<AES>::Encryption);
-    }
-    else if (algorithm == "AES-192-CBC")
+    if (alg[0] == 'A')
     {
-        ksize = 24;
-        vsize = 16;
+        if (alg == "AES-256-CBC")
+        {
+            ksize = 32;
+            vsize = 16;
+            stream.reset(new CBC_Mode<AES>::Encryption);
+        }
+        else if (alg == "AES-192-CBC")
+        {
+            ksize = 24;
+            vsize = 16;
+            stream.reset(new CBC_Mode<AES>::Encryption);
+        }
+        else if (alg == "AES-128-CBC")
+        {
+            ksize = 16;
+            vsize = 16;
+            stream.reset(new CBC_Mode<AES>::Encryption);
+        }
+    }
+    else if (alg[0] == 'C')
+    {
+        if (alg == "CAMELLIA-256-CBC")
+        {
+            ksize = 32;
+            vsize = 16;
+            stream.reset(new CBC_Mode<Camellia>::Encryption);
+        }
+        else if (alg == "CAMELLIA-192-CBC")
+        {
+            ksize = 24;
+            vsize = 16;
+            stream.reset(new CBC_Mode<Camellia>::Encryption);
+        }
+        else if (alg == "CAMELLIA-128-CBC")
+        {
+            ksize = 16;
+            vsize = 16;
+            stream.reset(new CBC_Mode<Camellia>::Encryption);
+        }
+    }
+    else if (alg[0] == 'D')
+    {
+        if (alg == "DES-EDE3-CBC")
+        {
+            ksize = 24;
+            vsize = 8;
+            stream.reset(new CBC_Mode<DES_EDE3>::Encryption);
+        }
+        else if (alg == "DES-EDE2-CBC")
+        {
+            ksize = 16;
+            vsize = 8;
+            stream.reset(new CBC_Mode<DES_EDE2>::Encryption);
+        }
+        else if (alg == "DES-CBC")
+        {
+            ksize = 8;
+            vsize = 8;
+            stream.reset(new CBC_Mode<DES>::Encryption);
+        }
+    }
+    else if (alg[0] == 'I')
+    {
+        if (alg == "IDEA-CBC")
+        {
+            ksize = 16;
+            vsize = 8;
+            stream.reset(new CBC_Mode<IDEA>::Encryption);
+        }
+    }
 
-        stream.reset(new CBC_Mode<AES>::Encryption);
-    }
-    else if (algorithm == "AES-128-CBC")
-    {
-        ksize = 16;
-        vsize = 16;
-
-        stream.reset(new CBC_Mode<AES>::Encryption);
-    }
-    else if (algorithm == "CAMELLIA-256-CBC")
-    {
-        ksize = 32;
-        vsize = 16;
-
-        stream.reset(new CBC_Mode<Camellia>::Encryption);
-    }
-    else if (algorithm == "CAMELLIA-192-CBC")
-    {
-        ksize = 24;
-        vsize = 16;
-
-        stream.reset(new CBC_Mode<Camellia>::Encryption);
-    }
-    else if (algorithm == "CAMELLIA-128-CBC")
-    {
-        ksize = 16;
-        vsize = 16;
-
-        stream.reset(new CBC_Mode<Camellia>::Encryption);
-    }
-    else if (algorithm == "DES-EDE3-CBC")
-    {
-        ksize = 24;
-        vsize = 8;
-
-        stream.reset(new CBC_Mode<DES_EDE3>::Encryption);
-    }
-    else if (algorithm == "DES-EDE2-CBC")
-    {
-        ksize = 16;
-        vsize = 8;
-
-        stream.reset(new CBC_Mode<DES_EDE2>::Encryption);
-    }
-    else if (algorithm == "DES-CBC")
-    {
-        ksize = 8;
-        vsize = 8;
-
-        stream.reset(new CBC_Mode<DES>::Encryption);
-    }
-    else if (algorithm == "IDEA-CBC")
-    {
-        ksize = 16;
-        vsize = 8;
-
-        stream.reset(new CBC_Mode<IDEA>::Encryption);
-    }
-    else
-    {
-        throw NotImplemented("PEM_CipherForAlgorithm: '" + algorithm + "' is not implemented");
-    }
+    // Verify a cipher was selected
+    if (stream.get() == NULLPTR)
+        throw NotImplemented(std::string("PEM_CipherForAlgorithm: '")
+                             + algorithm.c_str() + "' is not implemented");
 
     const unsigned char* _pword = reinterpret_cast<const unsigned char*>(password);
     const size_t _plen = length;
@@ -416,7 +422,7 @@ void PEM_CipherForAlgorithm(RandomNumberGenerator& rng, std::string algorithm,
     int ret = OPENSSL_EVP_BytesToKey(md5, byte_ptr(_salt),
                   _pword, _plen, 1, byte_ptr(_key), _key.size(), NULL, 0);
     if (ret != static_cast<int>(ksize))
-        throw Exception(Exception::OTHER_ERROR, "PEM_CipherForAlgorithm: EVP_BytesToKey failed");
+        throw Exception(Exception::OTHER_ERROR, "PEM_CipherForAlgorithm: OPENSSL_EVP_BytesToKey failed");
 
     SymmetricCipher* cipher = dynamic_cast<SymmetricCipher*>(stream.get());
     cipher->SetKeyWithIV(byte_ptr(_key), _key.size(), byte_ptr(_iv), _iv.size());
