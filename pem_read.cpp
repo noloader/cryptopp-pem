@@ -53,20 +53,21 @@ struct EncapsulatedHeader
 // GCC 9 compile error using overload PEM_GetType
 PEM_Type PEM_GetTypeFromString(const secure_string& str);
 
-size_t PEM_ReadLine(BufferedTransformation& source, secure_string& line, secure_string& ending);
+size_t PEM_ReadLine(BufferedTransformation& source, secure_string& line);
 
 void PEM_StripEncapsulatedBoundary(BufferedTransformation& src, BufferedTransformation& dest,
                                    const secure_string& pre, const secure_string& post);
-void PEM_StripEncapsulatedBoundary(secure_string& sb, const secure_string& pre, const secure_string& post);
+void PEM_StripEncapsulatedBoundary(secure_string& str, const secure_string& pre, const secure_string& post);
 
-void PEM_StripEncapsulatedHeader(BufferedTransformation& src, BufferedTransformation& dest, EncapsulatedHeader& header);
+void PEM_StripEncapsulatedHeader(BufferedTransformation& src, BufferedTransformation& dest,
+                                 EncapsulatedHeader& header);
 
 void PEM_CipherForAlgorithm(const EncapsulatedHeader& header,
                             const char* password, size_t length,
                             member_ptr<StreamTransformation>& stream);
 
 void PEM_Base64DecodeAndDecrypt(BufferedTransformation& src, BufferedTransformation& dest,
-                          const char* password, size_t length);
+                                const char* password, size_t length);
 void PEM_Decrypt(BufferedTransformation& src, BufferedTransformation& dest,
                  member_ptr<StreamTransformation>& stream);
 
@@ -239,20 +240,17 @@ void PEM_LoadPrivateKey(BufferedTransformation& src, PKCS8PrivateKey& key, bool 
 
 void PEM_LoadPrivateKey(BufferedTransformation& bt, DSA::PrivateKey& key)
 {
-    // Crypto++ expects {version,x}, while OpenSSL provides {version,p,q,g,y,x}.
-    BERSequenceDecoder seq(bt);
-
     word32 v;
-    BERDecodeUnsigned<word32>(seq, v, INTEGER, 0, 0);  // check version
-
     Integer p,q,g,y,x;
 
-    p.BERDecode(seq);
-    q.BERDecode(seq);
-    g.BERDecode(seq);
-    y.BERDecode(seq);
-    x.BERDecode(seq);
-
+    // Crypto++ expects {version,x}, while OpenSSL provides {version,p,q,g,y,x}
+    BERSequenceDecoder seq(bt);
+        BERDecodeUnsigned<word32>(seq, v, INTEGER, 0, 0);  // check version
+        p.BERDecode(seq);
+        q.BERDecode(seq);
+        g.BERDecode(seq);
+        y.BERDecode(seq);
+        x.BERDecode(seq);
     seq.MessageEnd();
 
     key.Initialize(p, q, g, x);
@@ -261,6 +259,10 @@ void PEM_LoadPrivateKey(BufferedTransformation& bt, DSA::PrivateKey& key)
     AutoSeededRandomPool prng;
     if (!key.Validate(prng, 2))
         throw Exception(Exception::OTHER_ERROR, "PEM_LoadPrivateKey: key validation failed");
+
+    Integer c = key.GetGroupParameters().ExponentiateBase(x);
+    if (y != c)
+        throw Exception(Exception::OTHER_ERROR, "PEM_LoadPrivateKey: public element validation failed");
 #endif
 }
 
@@ -396,13 +398,14 @@ void PEM_CipherForAlgorithm(const EncapsulatedHeader& header,
 
     hex.Get(byte_ptr(_iv), _iv.size());
 
-    // The IV pulls double duty. First, the first PKCS5_SALT_LEN bytes are used
-    //   as the Salt in EVP_BytesToKey. Second, its used as the IV in the cipher.
+    // The IV pulls double duty. First, the first PKCS5_SALT_LEN bytes are
+    // used as the Salt in EVP_BytesToKey. Second, its used as the IV in the
+    // cipher.
     _salt = _iv;
 
-    // MD5 is engrained OpenSSL goodness. MD5, IV and Password are IN; KEY is OUT.
-    //   {NULL,0} parameters are the OUT IV. However, the original IV in the PEM
-    //   header is used; and not the derived IV.
+    // MD5 is engrained OpenSSL goodness. MD5, IV and Password are IN; KEY is
+    // OUT. {NULL,0} parameters are the OUT IV. However, the original IV in
+    // the PEM header is used; and not the derived IV.
     Weak::MD5 md5;
     int ret = OPENSSL_EVP_BytesToKey(md5, byte_ptr(_iv),
                  (const byte*)password, length, 1, byte_ptr(_key), _key.size(), NULL, 0);
@@ -458,11 +461,12 @@ void PEM_StripEncapsulatedBoundary(BufferedTransformation& src, BufferedTransfor
 
     while (src.AnyRetrievable() && n++)
     {
-        secure_string line, unused;
-        PEM_ReadLine(src, line, unused);
+        secure_string line;
+        PEM_ReadLine(src, line);
 
-        // The write associated with an empty line must occur. Otherwise, we loose the CR or LF
-        //    in an ecrypted private key between the control fields and the encapsulated text.
+        // The write associated with an empty line must occur. Otherwise, we
+        // loose the CR or LF in an ecrypted private key between the control
+        // fields and the encapsulated text.
         //if (line.empty())
         //    continue;
 
@@ -508,8 +512,9 @@ void PEM_StripEncapsulatedHeader(BufferedTransformation& src, BufferedTransforma
     secure_string line, ending;
     size_t size = 0;
 
-    // The first line *must* be Proc-Type. Ensure we read it before dropping into the loop.
-    size = PEM_ReadLine(src, line, ending);
+    // The first line *must* be Proc-Type. Ensure we read it before dropping
+    // into the loop.
+    size = PEM_ReadLine(src, line);
     if (size == 0 || line.empty())
         throw InvalidDataFormat("PEM_StripEncapsulatedHeader: failed to locate Proc-Type");
 
@@ -537,7 +542,7 @@ void PEM_StripEncapsulatedHeader(BufferedTransformation& src, BufferedTransforma
     {
         if (!src.AnyRetrievable()) break; // End Of Buffer
 
-        size = PEM_ReadLine(src, line, ending);
+        size = PEM_ReadLine(src, line);
         if (size == 0) break;        // End Of Buffer
         if (line.size() == 0) break; // size is non-zero; empty line
 
@@ -570,7 +575,8 @@ void PEM_StripEncapsulatedHeader(BufferedTransformation& src, BufferedTransforma
     if (header.m_iv.empty())
         throw InvalidArgument("PEM_StripEncapsulatedHeader: no IV present");
 
-    // After the empty line is the encapsulated text. Transfer it to the destination.
+    // After the empty line is the encapsulated text. Transfer it to the
+    // destination.
     src.TransferTo(dest);
 }
 
@@ -632,27 +638,23 @@ void PEM_ParseIV(const secure_string& dekinfo, secure_string& iv)
     std::transform(iv.begin(), iv.end(), iv.begin(), (int(*)(int))std::toupper);
 }
 
-size_t PEM_ReadLine(BufferedTransformation& source, secure_string& line, secure_string& ending)
+size_t PEM_ReadLine(BufferedTransformation& source, secure_string& line)
 {
-    if (!source.AnyRetrievable())
-    {
-        line.clear();
-        ending.clear();
-
+    line.clear();
+    if (!source.AnyRetrievable()) {
         return 0;
     }
 
-    ByteQueue temp;
+    line.reserve(PEM_LINE_BREAK+2);
     while (source.AnyRetrievable())
     {
         byte b;
-        if (!source.Get(b))
-            throw Exception(Exception::OTHER_ERROR, "PEM_ReadLine: failed to read byte");
+        if (!source.Get(b)) {
+            break;
+        }
 
         // LF ?
-        if (b == '\n')
-        {
-            ending = LF;
+        if (b == '\n') {
             break;
         }
 
@@ -660,42 +662,17 @@ size_t PEM_ReadLine(BufferedTransformation& source, secure_string& line, secure_
         if (b == '\r')
         {
             // CRLF ?
-            if (source.AnyRetrievable() && source.Peek(b))
-            {
-                if (b == '\n')
-                {
-                    source.Skip(1);
-
-                    ending = CRLF;
-                    break;
-                }
+            if (source.Peek(b) && b == '\n') {
+                source.Skip(1);
             }
-
-            ending = CR;
             break;
         }
 
         // Not End-of-Line, accumulate it.
-        temp.Put(b);
+        line += b;
     }
 
-    if (temp.AnyRetrievable())
-    {
-        line.resize(temp.MaxRetrievable());
-        temp.Get(byte_ptr(line), line.size());
-    }
-    else
-    {
-        line.clear();
-        ending.clear();
-    }
-
-    // We return a line stripped of CRs and LFs. However, we return the actual number of
-    //   of bytes processed, including the CR and LF. A return of 0 means nothing was read.
-    //   A return of 1 means an empty line was read (CR or LF). A return of 2 could
-    //   mean an empty line was read (CRLF), or could mean 1 character was read. In
-    //   any case, line will hold whatever was parsed.
-    return line.size() + ending.size();
+    return line.size();
 }
 
 inline void PEM_TrimLeadingWhitespace(BufferedTransformation& source)
@@ -846,16 +823,19 @@ bool PEM_NextObject(BufferedTransformation& src, BufferedTransformation& dest)
         }
     }
 
-    // Did we find `-----BEGIN XXX-----` (RFC 1421 calls this pre-encapsulated boundary)?
+    // Did we find `-----BEGIN XXX-----` (RFC 1421 calls this pre-encapsulated
+    // boundary)?
     if (idx1 == BAD_IDX || idx2 == BAD_IDX)
         throw InvalidDataFormat("PEM_NextObject: could not locate boundary header");
 
-    // Did we find `-----END XXX-----` (RFC 1421 calls this post-encapsulated boundary)?
+    // Did we find `-----END XXX-----` (RFC 1421 calls this post-encapsulated
+    // boundary)?
     if (idx3 == BAD_IDX || idx4 == BAD_IDX)
         throw InvalidDataFormat("PEM_NextObject: could not locate boundary footer");
 
-    // *IF* the trailing '-----' occurred in the last 5 bytes in accum, then we might miss the
-    // End of Line. We need to peek 2 more bytes if available and append them to accum.
+    // *IF* the trailing '-----' occurred in the last 5 bytes in accum, then
+    // we might miss the End of Line. We need to peek 2 more bytes if
+    // available and append them to accum.
     if (available >= 2)
     {
         ByteQueue tq;
@@ -902,9 +882,6 @@ bool PEM_NextObject(BufferedTransformation& src, BufferedTransformation& dest)
     dest.MessageEnd();
 
     src.Skip(used + adjust);
-
-    // Trailing whitespace of former queue is now
-    // leading whitespace of the new queue.
     PEM_TrimLeadingWhitespace(src);
 
     return true;
