@@ -402,7 +402,7 @@ void PEM_CipherForAlgorithm(const EncapsulatedHeader& header,
     hex.MessageEnd();
 
     // If the IV size is wrong, SetKeyWithIV will throw an exception.
-    const size_t size = (std::min)(hex.MaxRetrievable(), static_cast<size_t>(vsize));
+    const size_t size = (std::min)(hex.MaxRetrievable(), static_cast<lword>(vsize));
 
     secure_string _key(ksize, '\0');
     secure_string _iv(size, '\0');
