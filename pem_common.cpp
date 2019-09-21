@@ -161,19 +161,13 @@ int CompareNoCase(const secure_string& first, const secure_string& second)
     else if (first.size() > second.size())
         return 1;
 
-    // Same size... compare them....
-#if (_MSC_VER >= 1500)
-    secure_string t1(first), t2(second);
-    std::transform(t1.begin(), t1.end(), stdext::make_checked_array_iterator(t1.begin(), t1.size()), ByteToLower());
-    std::transform(t2.begin(), t2.end(), stdext::make_checked_array_iterator(t2.begin(), t2.size()), ByteToLower());
-#else
-    secure_string t1(first), t2(second);
-    std::transform(t1.begin(), t1.end(), t1.begin(), ByteToLower());
-    std::transform(t2.begin(), t2.end(), t2.begin(), ByteToLower());
-#endif
+    // Same size, compare them...
+    int d=0;
+    const size_t n = first.size();
+    for (size_t i=0; d==0 && i<n; ++i)
+        d = std::tolower(static_cast<int>(first[i])) - std::tolower(static_cast<int>(second[i]));
 
-    // Strings are the same length
-    return std::memcmp(t1.data(), t2.data(), t2.size());
+    return d;
 }
 
 // From crypto/evp/evp_key.h. Signature changed a bit to match Crypto++.
