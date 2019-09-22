@@ -976,7 +976,7 @@ void PEM_Load(BufferedTransformation& bt, DSA::PrivateKey& dsa, const char* pass
     PEM_LoadPrivateKey(t3, dsa);
 }
 
-void PEM_Load(BufferedTransformation& bt, ElGamal::PublicKey& key)
+void PEM_Load(BufferedTransformation& bt, ElGamalKeys::PublicKey& key)
 {
     ByteQueue t1, t2, t3;
     if (PEM_NextObject(bt, t1) == false)
@@ -994,12 +994,12 @@ void PEM_Load(BufferedTransformation& bt, ElGamal::PublicKey& key)
     PEM_LoadPublicKey(t3, key, type == PEM_PUBLIC_KEY);
 }
 
-void PEM_Load(BufferedTransformation& bt, ElGamal::PrivateKey& key)
+void PEM_Load(BufferedTransformation& bt, ElGamalKeys::PrivateKey& key)
 {
     return PEM_Load(bt, key, NULL, 0);
 }
 
-void PEM_Load(BufferedTransformation& bt, ElGamal::PrivateKey& key, const char* password, size_t length)
+void PEM_Load(BufferedTransformation& bt, ElGamalKeys::PrivateKey& key, const char* password, size_t length)
 {
     ByteQueue t1, t2, t3;
     if (PEM_NextObject(bt, t1) == false)

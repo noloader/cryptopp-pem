@@ -484,17 +484,17 @@ void PEM_Save(BufferedTransformation& bt, const DSA::PrivateKey& dsa,
     PEM_SavePrivateKey(bt, dsa, rng, algorithm, password, length, DSA_PRIVATE_BEGIN, DSA_PRIVATE_END);
 }
 
-void PEM_Save(BufferedTransformation& bt, const ElGamal::PublicKey& key)
+void PEM_Save(BufferedTransformation& bt, const ElGamalKeys::PublicKey& key)
 {
     PEM_SavePublicKey(bt, key, PUBLIC_BEGIN, PUBLIC_END);
 }
 
-void PEM_Save(BufferedTransformation& bt, const ElGamal::PrivateKey& key)
+void PEM_Save(BufferedTransformation& bt, const ElGamalKeys::PrivateKey& key)
 {
     PEM_SavePrivateKey(bt, key, ELGAMAL_PRIVATE_BEGIN, ELGAMAL_PRIVATE_END);
 }
 
-void PEM_Save(BufferedTransformation& bt, const ElGamal::PrivateKey& key,
+void PEM_Save(BufferedTransformation& bt, const ElGamalKeys::PrivateKey& key,
               RandomNumberGenerator& rng, const std::string& algorithm,
               const char* password, size_t length)
 {

@@ -170,13 +170,13 @@ void PEM_Load(BufferedTransformation& bt, DSA::PrivateKey& key,
 /// \param bt the source BufferedTransformation
 /// \param key the ElGamal public key
 /// \throws Exception on failure
-void PEM_Load(BufferedTransformation& bt, ElGamal::PublicKey& key);
+void PEM_Load(BufferedTransformation& bt, ElGamalKeys::PublicKey& key);
 
 /// \brief Load a PEM encoded ElGamal private key
 /// \param bt the source BufferedTransformation
 /// \param key the ElGamal private key
 /// \throws Exception on failure
-void PEM_Load(BufferedTransformation& bt, ElGamal::PrivateKey& key);
+void PEM_Load(BufferedTransformation& bt, ElGamalKeys::PrivateKey& key);
 
 /// \brief Load a PEM encoded ElGamal private key
 /// \param bt the source BufferedTransformation
@@ -184,7 +184,7 @@ void PEM_Load(BufferedTransformation& bt, ElGamal::PrivateKey& key);
 /// \param password pointer to the password buffer
 /// \param length the size of the password buffer
 /// \throws Exception on failure
-void PEM_Load(BufferedTransformation& bt, ElGamal::PrivateKey& key,
+void PEM_Load(BufferedTransformation& bt, ElGamalKeys::PrivateKey& key,
               const char* password, size_t length);
 
 /// \brief Load a PEM encoded ECP public key
@@ -366,13 +366,13 @@ void PEM_Save(BufferedTransformation& bt, const DSA::PrivateKey& key,
 /// \param bt the destination BufferedTransformation
 /// \param key the ElGamal public key
 /// \throws Exception on failure
-void PEM_Save(BufferedTransformation& bt, const ElGamal::PublicKey& key);
+void PEM_Save(BufferedTransformation& bt, const ElGamalKeys::PublicKey& key);
 
 /// \brief Save a PEM encoded ElGamal private key
 /// \param bt the destination BufferedTransformation
 /// \param key the ElGamal private key
 /// \throws Exception on failure
-void PEM_Save(BufferedTransformation& bt, const ElGamal::PrivateKey& key);
+void PEM_Save(BufferedTransformation& bt, const ElGamalKeys::PrivateKey& key);
 
 /// \brief Save a PEM encoded ElGamal private key
 /// \param bt the destination BufferedTransformation
@@ -385,7 +385,7 @@ void PEM_Save(BufferedTransformation& bt, const ElGamal::PrivateKey& key);
 ///  <tt>pem_read.cpp</tt> and <tt>pem_write.cpp</tt> for the values that are
 ///  recognized.
 /// \throws Exception on failure
-void PEM_Save(BufferedTransformation& bt, const ElGamal::PrivateKey& key,
+void PEM_Save(BufferedTransformation& bt, const ElGamalKeys::PrivateKey& key,
               RandomNumberGenerator& rng, const std::string& algorithm,
               const char* password, size_t length);
 
