@@ -9,6 +9,7 @@
 #include <string>
 #include <algorithm>
 #include <cctype>
+#include <iterator>
 
 #include "cryptlib.h"
 #include "secblock.h"
@@ -311,11 +312,15 @@ void PEM_CipherForAlgorithm(const EncapsulatedHeader& header,
                             const char* password, size_t length,
                             member_ptr<StreamTransformation>& stream)
 {
-    unsigned int ksize, vsize;
+    unsigned int ksize=0, vsize=0;
     stream.release();
 
-    secure_string alg(header.m_algorithm);
-    std::transform(alg.begin(), alg.end(), alg.begin(), (int(*)(int))std::toupper);
+    secure_string alg;
+    std::transform(header.m_algorithm.begin(), header.m_algorithm.end(),
+                   std::back_inserter(alg), (int(*)(int))std::toupper);
+
+    if (alg.empty())
+        goto verify;  // verify throws
 
     if (alg[0] == 'A')
     {
@@ -390,6 +395,8 @@ void PEM_CipherForAlgorithm(const EncapsulatedHeader& header,
         }
     }
 
+verify:
+
     // Verify a cipher was selected
     if (stream.get() == NULLPTR)
         throw NotImplemented(std::string("PEM_CipherForAlgorithm: '")
@@ -415,8 +422,8 @@ void PEM_CipherForAlgorithm(const EncapsulatedHeader& header,
     // cipher.
     _salt = _iv;
 
-    // MD5 is engrained OpenSSL goodness. MD5, IV and Password are IN; KEY is
-    // OUT. {NULL,0} parameters are the OUT IV. However, the original IV in
+    // MD5 is OpenSSL goodness. MD5, IV and Password are IN; KEY is OUT.
+    // {NULL,0} parameters are the OUT IV. However, the original IV in
     // the PEM header is used; and not the derived IV.
     Weak::MD5 md5;
     int ret = OPENSSL_EVP_BytesToKey(md5, byte_ptr(_iv),
