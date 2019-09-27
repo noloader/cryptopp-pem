@@ -315,7 +315,7 @@ void PEM_CipherForAlgorithm(const EncapsulatedHeader& header,
     unsigned int ksize=0, vsize=0;
     stream.release();
 
-    secure_string alg;
+    secure_string alg; alg.reserve(header.m_algorithm.size());
     std::transform(header.m_algorithm.begin(), header.m_algorithm.end(),
                    std::back_inserter(alg), (int(*)(int))std::toupper);
 

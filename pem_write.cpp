@@ -317,7 +317,7 @@ void PEM_CipherForAlgorithm(RandomNumberGenerator& rng, std::string algorithm,
     unsigned int ksize=0, vsize=0;
     stream.release();
 
-    secure_string alg;
+    secure_string alg; alg.reserve(algorithm.size());
     std::transform(algorithm.begin(), algorithm.end(),
                    std::back_inserter(alg), (int(*)(int))std::toupper);
 
