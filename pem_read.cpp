@@ -1173,6 +1173,8 @@ void PEM_Load(BufferedTransformation& bt, DL_GroupParameters_DSA& params)
 
 void PEM_Load(BufferedTransformation& bt, X509Certificate& cert)
 {
+    CRYPTOPP_UNUSED(cert);
+
     ByteQueue t1;
     if (PEM_NextObject(bt, t1) == false)
         throw InvalidArgument("PEM_Load: PEM object not available");
