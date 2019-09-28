@@ -51,12 +51,12 @@ struct OID_State
     virtual ~OID_State();
 
     const T& m_gp;
-    bool m_oid;
+    bool m_flag;
 };
 
 template <>
 OID_State<DL_GroupParameters_EC<ECP> >::OID_State(const DL_GroupParameters_EC<ECP>& gp)
-: m_gp(gp), m_oid(gp.GetEncodeAsOID()) {
+: m_gp(gp), m_flag(gp.GetEncodeAsOID()) {
     DL_GroupParameters_EC<ECP>& obj = const_cast<DL_GroupParameters_EC<ECP>&>(m_gp);
     obj.SetEncodeAsOID(true);
 }
@@ -64,12 +64,12 @@ OID_State<DL_GroupParameters_EC<ECP> >::OID_State(const DL_GroupParameters_EC<EC
 template <>
 OID_State<DL_GroupParameters_EC<ECP> >::~OID_State() {
     DL_GroupParameters_EC<ECP>& obj = const_cast<DL_GroupParameters_EC<ECP>&>(m_gp);
-    obj.SetEncodeAsOID(m_oid);
+    obj.SetEncodeAsOID(m_flag);
 }
 
 template <>
 OID_State<DL_GroupParameters_EC<EC2N> >::OID_State(const DL_GroupParameters_EC<EC2N>& gp)
-: m_gp(gp), m_oid(gp.GetEncodeAsOID()) {
+: m_gp(gp), m_flag(gp.GetEncodeAsOID()) {
     DL_GroupParameters_EC<EC2N>& obj = const_cast<DL_GroupParameters_EC<EC2N>&>(m_gp);
     obj.SetEncodeAsOID(true);
 }
@@ -77,7 +77,7 @@ OID_State<DL_GroupParameters_EC<EC2N> >::OID_State(const DL_GroupParameters_EC<E
 template <>
 OID_State<DL_GroupParameters_EC<EC2N> >::~OID_State() {
     DL_GroupParameters_EC<EC2N>& obj = const_cast<DL_GroupParameters_EC<EC2N>&>(m_gp);
-    obj.SetEncodeAsOID(m_oid);
+    obj.SetEncodeAsOID(m_flag);
 }
 
 // Returns a keyed StreamTransformation ready to use to encrypt a DER encoded key
