@@ -99,6 +99,53 @@ head -c 180 /dev/urandom | base64 -w 64 >> foobar.pem
 echo "-----END BAR-----" >> foobar.pem
 
 ##################################
+# Test Certificate
+
+cat << EOF > ./example-com.conf
+prompt              = no
+[ req ]
+default_bits        = 2048
+default_keyfile     = server-key.pem
+distinguished_name  = subject
+req_extensions      = req_ext
+x509_extensions     = x509_ext
+string_mask         = utf8only
+
+[ subject ]
+countryName          = US
+stateOrProvinceName  = NY
+localityName         = New York
+organizationName     = Example, LLC
+commonName           = Example Company
+emailAddress         = test@example.com
+
+[ x509_ext ]
+subjectKeyIdentifier    = hash
+authorityKeyIdentifier  = keyid,issuer
+basicConstraints        = critical,CA:FALSE
+keyUsage                = digitalSignature, keyEncipherment
+subjectAltName          = @alternate_names
+nsComment               = "OpenSSL Generated Certificate"
+
+[ req_ext ]
+subjectKeyIdentifier    = hash
+basicConstraints        = critical,CA:FALSE
+keyUsage                = digitalSignature, keyEncipherment
+subjectAltName          = @alternate_names
+nsComment               = "OpenSSL Generated Certificate"
+
+[ alternate_names ]
+DNS.1  = example.com
+DNS.2  = www.example.com
+DNS.3  = mail.example.com
+DNS.4  = ftp.example.com
+EOF
+
+# And the cert
+openssl req -config example-com.conf -new -x509 -sha256 -newkey rsa:2048 -nodes \
+    -keyout example-com.key.pem -days 365 -out example-com.cert.pem
+
+##################################
 # cacert.pem
 
 if [ ! -e "cacert.pem" ]; then
