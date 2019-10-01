@@ -12,6 +12,7 @@
 ///  Crypto++ library algorithms.
 /// \details This is a library add-on. You must download and compile it
 ///  yourself.
+/// \since Crypto++ 8.3
 /// \sa <A HREF="http://www.cryptopp.com/wiki/X509Certificate">X509Certificate</A>
 ///  and <A HREF="http://www.cryptopp.com/wiki/PEM_Pack">PEM Pack</A> on the
 ///  Crypto++ wiki.
@@ -114,8 +115,8 @@ typedef std::vector<IdentityValue> IdentityValueArray;
 
 /// \brief X.509 Certificate
 /// \details X509Certificate is a partial implementation of X.509 certificate
-///  parsing. The class loads a DER encoded certificate and presents many of
-///  the more important attributes and values through accessor functions. The
+///  support. The class loads a DER encoded certificate and presents many of
+///  the important attributes and values through accessor functions. The
 ///  attributes and values include signature, signature algorithm, toBeSigned,
 ///  serialNumber, issuerDistinguishedName, subjectDistinguishedName, and
 ///  subjectPublicKeyInfo exposed as a X509PubliKey ready for use in Crypto++
@@ -129,6 +130,7 @@ typedef std::vector<IdentityValue> IdentityValueArray;
 ///  GetVoidValue, and Validate.
 /// \details This is a library add-on. You must download and compile it
 ///  yourself.
+/// \since Crypto++ 8.3
 /// \sa <A HREF="http://www.cryptopp.com/wiki/X509Certificate">X509Certificate</A>
 ///  and <A HREF="http://www.cryptopp.com/wiki/PEM_Pack">PEM Pack</A> on the
 ///  Crypto++ wiki.
@@ -237,35 +239,31 @@ public:
 
     /// \brief Subject public key algorithm
     /// \returns Subject public key algorithm
+    /// \sa GetSubjectPublicKey
     const OID& GetSubjectPublicKeyAlgorithm() const
         { return m_subjectPublicKeyAlgortihm; }
 
     /// \brief Subject public key
     /// \returns Subject public key
+    /// \sa GetSubjectPublicKeyAlgorithm
     const X509PublicKey& GetSubjectPublicKey() const
         { return *m_subjectPublicKey.get(); }
 
-    /// \brief Determine if optional attribute is present
-    /// \param bt BufferedTransformation object
-    /// \param tag the expected tag
-    /// \returns true if an optional attribute is present, false otherwise
-    bool HasOptionalAttribute(const BufferedTransformation &bt, byte tag) const;
-
     /// \brief Determine if Issuer UniqueId is present
-    /// \returns true if if Issuer UniqueId is present, false otherwise
-    /// \details Subject Issuer is available with X.509 v2.
+    /// \returns true if Issuer UniqueId is present, false otherwise
+    /// \details Issuer UniqueId is optional and available with X.509 v2.
     bool HasIssuerUniqueId() const
         { return m_issuerUid.get() != NULLPTR; }
 
     /// \brief Determine if Subject UniqueId is present
-    /// \returns true if if Subject UniqueId is present, false otherwise
-    /// \details Subject UniqueId is available with X.509 v2.
+    /// \returns true if Subject UniqueId is present, false otherwise
+    /// \details Subject UniqueId is optional and available with X.509 v2.
     bool HasSubjectUniqueId() const
         { return m_subjectUid.get() != NULLPTR; }
 
     /// \brief Determine if Extensions are present
-    /// \returns true if if Extensions are present, false otherwise
-    /// \details Extensions are available with X.509 v3.
+    /// \returns true if Extensions are present, false otherwise
+    /// \details Extensions are optional and available with X.509 v3.
     bool HasExtensions() const
         { return m_extensions.get() != NULLPTR; }
 
@@ -295,12 +293,18 @@ protected:
     void BERDecodeDate(BufferedTransformation &bt, DateValue &date);
     void BERDecodeSubjectPublicKeyInfo(BufferedTransformation &bt, member_ptr<X509PublicKey>& publicKey);
 
-    // Optional parameters
+    // Optional attributes
+    bool HasOptionalAttribute(const BufferedTransformation &bt, byte tag) const;
     void BERDecodeIssuerUniqueId(BufferedTransformation &bt);
     void BERDecodeSubjectUniqueId(BufferedTransformation &bt);
     void BERDecodeExtensions(BufferedTransformation &bt);
 
-    // BERDecodeSubjectPublicKeyInfo helper to get public key OIDs
+    // BERDecodeSubjectPublicKeyInfo peeks at the subjectPublicKeyInfo because the
+    // information is less ambiguous. If we used subjectPublicKeyAlgorithm we would
+    // still need to peek because subjectPublicKeyAlgorithm lacks field information
+    // (prime vs. binary). We need a field to instantiate a key. For example,
+    // subjectPublicKeyAlgorithm==ecdsa_with_sha384() does not contain enough
+    // information to determine PublicKey_EC<ECP> or PublicKey_EC<EC2N>.
     void GetSubjectPublicKeyInfoOids(BufferedTransformation &bt, OID& algorithm, OID& field) const;
 
 private:

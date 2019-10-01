@@ -302,6 +302,14 @@ int main(int argc, char* argv[])
                 cert.WriteCertificateBytes(x);
                 throw;
             }
+
+            AutoSeededRandomPool prng;
+            if (cert.Validate(prng, 2) == false)
+            {
+                std::ostringstream oss;
+                oss << "Failed to validate public key for " << cert.GetSubjectDistinguishedName();
+                throw Exception(Exception::OTHER_ERROR, oss.str());
+            }
             count++;
         }
 

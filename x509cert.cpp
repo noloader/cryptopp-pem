@@ -24,6 +24,9 @@
 #include "filters.h"
 #include "hex.h"
 
+// For Validate
+#include "osrng.h"
+
 #include <iostream>
 #include <iomanip>
 #include <sstream>
@@ -134,7 +137,8 @@ bool HasOptionalAttribute(const BufferedTransformation &bt, byte tag)
 
 inline bool IsRSAAlgorithm(const OID& alg)
 {
-    return alg == ASN1::rsaEncryption();
+    return alg == ASN1::rsaEncryption() ||  // rsaEncryption is most popular in spki
+        (alg >= ASN1::rsaEncryption() && alg <= ASN1::sha512_256WithRSAEncryption());
 }
 
 inline bool IsDSAAlgorithm(const OID& alg)
@@ -310,9 +314,6 @@ void X509Certificate::Save(BufferedTransformation &bt) const
 
 void X509Certificate::Load(BufferedTransformation &bt)
 {
-    // Stash a copy of the certificate.
-    SaveCertificateBytes(bt);
-
     BERDecode(bt);
 }
 
@@ -411,6 +412,9 @@ const SecByteBlock& X509Certificate::GetToBeSigned() const
 
 void X509Certificate::BERDecode(BufferedTransformation &bt)
 {
+    // Stash a copy of the certificate.
+    SaveCertificateBytes(bt);
+
     BERSequenceDecoder certificate(bt);
 
       BERSequenceDecoder tbsCertificate(certificate);
@@ -529,6 +533,8 @@ void X509Certificate::BERDecodeSubjectPublicKeyInfo(BufferedTransformation &bt, 
     OID algorithm;  // Public key algorithm
     OID field;      // Field for elliptic curves
 
+    // See the comments for BERDecodeSubjectPublicKeyInfo for
+    // why we are not using m_subjectPublicKeyAlgortihm.
     GetSubjectPublicKeyInfoOids(bt, algorithm, field);
 
     if (IsRSAAlgorithm(algorithm))
@@ -544,17 +550,29 @@ void X509Certificate::BERDecodeSubjectPublicKeyInfo(BufferedTransformation &bt, 
     else
     {
         std::ostringstream oss;
-        if (field.Empty()) {
-            oss << "Algorithm " << algorithm << " is not supported at the moment";
+        oss << "X509Certificate::BERDecodeSubjectPublicKeyInfo: ";
+        if (field.Empty() == false) {
+            oss << "Field " << field << " is not supported";
         } else {
-            oss << "Field " << field << " is not supported at the moment";
+            oss << "Algorithm " << algorithm << " is not supported";
         }
         throw NotImplemented(oss.str());
     }
 
     publicKey->Load(bt);
+
+#if defined(PEM_KEY_OR_PARAMETER_VALIDATION) && !defined(NO_OS_DEPENDENCE)
+    AutoSeededRandomPool prng;
+    publicKey->Validate(prng, 3);
+#endif
 }
 
+// BERDecodeSubjectPublicKeyInfo peeks at the subjectPublicKeyInfo because the
+// information is less ambiguous. If we used subjectPublicKeyAlgorithm we would
+// still need to peek because subjectPublicKeyAlgorithm lacks field information
+// (prime vs. binary). We need a field to instantiate a key. For example,
+// subjectPublicKeyAlgorithm==ecdsa_with_sha384() does not contain enough
+// information to determine PublicKey_EC<ECP> or PublicKey_EC<EC2N>.
 void X509Certificate::GetSubjectPublicKeyInfoOids(BufferedTransformation &bt, OID& algorithm, OID& field) const
 {
     try
@@ -568,9 +586,10 @@ void X509Certificate::GetSubjectPublicKeyInfoOids(BufferedTransformation &bt, OI
             algorithm.BERDecode(seq2);
             // EC Public Keys specify a field, also
             if (algorithm == ASN1::id_ecPublicKey())
-                field.BERDecode(seq2);
+                { field.BERDecode(seq2); }
             seq2.SkipAll();
           seq2.MessageEnd();
+        seq1.SkipAll();
         seq1.MessageEnd();
     }
     catch (const Exception&)
@@ -652,12 +671,8 @@ void X509Certificate::BERDecodeVersion(BufferedTransformation &bt, Version &vers
 
 bool X509Certificate::Validate(RandomNumberGenerator &rng, unsigned int level) const
 {
-    CRYPTOPP_UNUSED(rng); CRYPTOPP_UNUSED(level);
-
-    // TODO: Implement this function
-    throw NotImplemented("X509Certificate::Validate");
-
-    return false;
+    // TODO: add more tests
+    return m_subjectPublicKey->Validate(rng, level);
 }
 
 void X509Certificate::AssignFrom(const NameValuePairs &source)
