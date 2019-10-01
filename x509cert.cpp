@@ -34,6 +34,26 @@ ANONYMOUS_NAMESPACE_BEGIN
 
 using namespace CryptoPP;
 
+class SecByteBlockSink : public Bufferless<Sink>
+{
+public:
+    SecByteBlockSink(SecByteBlock &block) : m_block(block) { }
+
+    size_t Put2(const byte *inString, size_t length, int, bool)
+    {
+        if(!inString || !length) return length;
+
+        size_t currentSize = m_block.size();
+        m_block.Grow(currentSize+length);
+        std::memcpy(m_block+currentSize, inString, length);
+
+        return 0;
+    }
+
+private:
+    SecByteBlock& m_block;
+};
+
 struct OidToName
 {
     OidToName (const OID& o, const std::string& n) : oid(o), name(n) {}
@@ -315,15 +335,20 @@ bool X509Certificate::HasOptionalAttribute(const BufferedTransformation &bt, byt
 
 const SecByteBlock& X509Certificate::GetToBeSigned() const
 {
-    if (m_toBeSigned.size() == 0)
+    if (m_toBeSigned.empty() && !m_origCertificate.empty())
     {
         ArraySource source(m_origCertificate, m_origCertificate.size(), true);
-        m_toBeSigned.resize(m_origCertificate.size());
-        ArraySink sink(m_toBeSigned, m_toBeSigned.size());
+        SecByteBlockSink sink(m_toBeSigned);
 
-        BERSequenceDecoder seq(source);
-          seq.TransferTo(sink, m_toBeSigned.size());
-        seq.MessageEnd();
+        // The extra gyrations below are due to the ctor removing the tag and length
+        BERSequenceDecoder cert(source);   // Certifcate octets, without tag and length
+          BERSequenceDecoder tbs(cert);    // TBSCertifcate octets, without tag and length
+            DERSequenceEncoder seq(sink);  // TBSCertifcate octets, with tag and length
+              tbs.TransferTo(seq);         // Re-encoded TBSCertifcate, ready to verify
+            seq.MessageEnd();
+          tbs.MessageEnd();
+        cert.SkipAll();
+        cert.MessageEnd();
     }
 
     return m_toBeSigned;
