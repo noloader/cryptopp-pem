@@ -214,10 +214,9 @@ std::string RdnValue::EncodeRdnValue() const
 {
     if (m_value.empty()) return "";
 
-    std::string val; val.reserve(4+m_value.size());
+    std::string val = OidToNameLookup(m_oid);
     bool quote = std::find(m_value.begin(), m_value.end(), byte(' ')) != m_value.end();
 
-    val = OidToNameLookup(m_oid);
     if (!val.empty()) val += "=";
     if (quote) val += "\"";
     val.append((const char*)m_value.data(), m_value.size());
