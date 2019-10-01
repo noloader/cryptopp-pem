@@ -285,6 +285,8 @@ int main(int argc, char* argv[])
     // Test cacert.pem. There should be ~130 to ~150 certs in it.
     try
     {
+        std::cout << "Load certificates from cacert.pem" << std::endl;
+
         FileSource fs("cacert.pem", true);
         ByteQueue t;
         size_t count=0;
@@ -303,7 +305,6 @@ int main(int argc, char* argv[])
             count++;
         }
 
-        std::cout << "Parsed " << count << " certificates from cacert.pem" << std::endl;
         if (count >= 120)
             std::cout << "  - OK" << std::endl;
         else {

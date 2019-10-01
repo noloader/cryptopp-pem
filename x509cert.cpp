@@ -40,8 +40,6 @@ struct OidToName
     std::string name;
 };
 
-typedef std::vector<OidToName> OidToNameVector;
-
 std::string OidToNameLookup(const OID& oid)
 {
     // Must be sorted by oid. The names are mostly standard.
@@ -110,6 +108,32 @@ bool HasOptionalAttribute(const BufferedTransformation &bt, byte tag)
     if (bt.Peek(b) && b == tag)
         return true;
     return false;
+}
+
+inline bool IsRSAAlgorithm(const OID& alg)
+{
+    return alg == ASN1::rsaEncryption();
+}
+
+inline bool IsDSAAlgorithm(const OID& alg)
+{
+    return alg == ASN1::id_dsa();
+}
+
+inline bool IsEd25519Algorithm(const OID& alg)
+{
+    return alg == ASN1::Ed25519();
+}
+
+inline bool IsECPrimeFieldAlgorithm(const OID& alg, const OID& field)
+{
+    // Commodo use SignatureAlgorithm for field type??
+    return (alg == ASN1::id_ecPublicKey() && field == ASN1::prime_field());
+}
+
+inline bool IsECBinaryFieldAlgorithm(const OID& alg, const OID& field)
+{
+    return (alg == ASN1::id_ecPublicKey() && field == ASN1::characteristic_two_field());
 }
 
 ANONYMOUS_NAMESPACE_END
@@ -472,20 +496,24 @@ void X509Certificate::BERDecodeSubjectPublicKeyInfo(BufferedTransformation &bt, 
 
     GetSubjectPublicKeyInfoOids(bt, algorithm, field);
 
-    if (algorithm == ASN1::rsaEncryption())
+    if (IsRSAAlgorithm(algorithm))
         publicKey.reset(new RSA::PublicKey);
-    else if (algorithm == ASN1::id_dsa())
+    else if (IsDSAAlgorithm(algorithm))
         publicKey.reset(new DSA::PublicKey);
-    else if (algorithm == ASN1::id_ecPublicKey() && field == ASN1::prime_field())
-        publicKey.reset(new DL_PublicKey_EC<ECP>);
-    else if (algorithm == ASN1::id_ecPublicKey() && field == ASN1::characteristic_two_field())
-        publicKey.reset(new DL_PublicKey_EC<EC2N>);
-    else if (algorithm == ASN1::Ed25519())
+    else if (IsEd25519Algorithm(algorithm))
         publicKey.reset(new ed25519PublicKey);
+    else if (IsECPrimeFieldAlgorithm(algorithm, field))
+        publicKey.reset(new DL_PublicKey_EC<ECP>);
+    else if (IsECBinaryFieldAlgorithm(algorithm, field))
+        publicKey.reset(new DL_PublicKey_EC<EC2N>);
     else
     {
         std::ostringstream oss;
-        oss << algorithm << " is not supported at the moment";
+        if (field.Empty()) {
+            oss << "Algorithm " << algorithm << " is not supported at the moment";
+        } else {
+            oss << "Field " << field << " is not supported at the moment";
+        }
         throw NotImplemented(oss.str());
     }
 
@@ -645,9 +673,7 @@ std::ostream& X509Certificate::Print(std::ostream& out) const
 
     oss << "Signature Alg: " << GetCertificateSignatureAlgorithm() << std::endl;
     oss << "To Be Signed: " << toBeSigned << std::endl;
-    oss << "Signature: " << signature;
-
-    // No endl for the last entry. Caller is responsible to add it.
+    oss << "Signature: " << signature << std::endl;
 
     return out << oss.str();
 }
