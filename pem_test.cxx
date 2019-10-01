@@ -306,9 +306,9 @@ int main(int argc, char* argv[])
         }
 
         if (count >= 120)
-            std::cout << "  - OK" << std::endl;
+            std::cout << "  - OK (" << count << " certificates)" << std::endl;
         else {
-            std::cout << "  - Failed" << std::endl;
+            std::cout << "  - Failed (died at certificate" << count << ")" << std::endl;
             fail = true;
         }
     }
