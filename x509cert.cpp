@@ -127,13 +127,21 @@ inline bool IsEd25519Algorithm(const OID& alg)
 
 inline bool IsECPrimeFieldAlgorithm(const OID& alg, const OID& field)
 {
-    // Commodo use SignatureAlgorithm for field type??
-    return (alg == ASN1::id_ecPublicKey() && field == ASN1::prime_field());
+    if (alg != ASN1::id_ecPublicKey())
+        return false;
+
+    return field == ASN1::prime_field() ||
+        (field >= ASN1::secp112r1() && field <= ASN1::secp521r1()) ||
+        (field >= ASN1::secp192r1() && field <= ASN1::secp256r1()) ||
+        (field >= ASN1::brainpoolP160r1() && field <= ASN1::brainpoolP512r1());
 }
 
 inline bool IsECBinaryFieldAlgorithm(const OID& alg, const OID& field)
 {
-    return (alg == ASN1::id_ecPublicKey() && field == ASN1::characteristic_two_field());
+    if (alg != ASN1::id_ecPublicKey())
+        return false;
+
+    return field == ASN1::characteristic_two_field();
 }
 
 ANONYMOUS_NAMESPACE_END
