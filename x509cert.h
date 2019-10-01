@@ -268,6 +268,13 @@ public:
     ///  or override this class in a derived class.
     virtual std::ostream& Print(std::ostream& out) const;
 
+    /// \brief Write certificate data
+    /// \returns Write certificate data
+    /// \details WriteCertificateBytes() is a debug function. It dumps
+    ///  the bytes stored in m_origCertificate. WriteCertificateBytes()
+    ///  also sets up a try/catch and silently swallows exceptions.
+    void WriteCertificateBytes(BufferedTransformation &bt) const;
+
 protected:
     // Crib away the original certificate
     void SaveCertificateBytes(BufferedTransformation &bt);

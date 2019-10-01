@@ -502,20 +502,8 @@ void X509Certificate::GetSubjectPublicKeyInfoOids(BufferedTransformation &bt, OI
             algorithm.BERDecode(seq2);
             // EC Public Keys specify a field, also
             if (algorithm == ASN1::id_ecPublicKey())
-            {
-              BERSequenceDecoder seq3(seq2);
-                word32 unused;
-                BERDecodeUnsigned(seq3, unused, INTEGER);
-                BERSequenceDecoder seq4(seq3);
-                  field.BERDecode(seq4);
-                  seq4.SkipAll();
-                seq4.MessageEnd();
-              seq3.MessageEnd();
-            }
-            else
-            {
-              seq2.SkipAll();
-            }
+                field.BERDecode(seq2);
+            seq2.SkipAll();
           seq2.MessageEnd();
         seq1.MessageEnd();
     }
@@ -659,6 +647,17 @@ std::ostream& X509Certificate::Print(std::ostream& out) const
     // No endl for the last entry. Caller is responsible to add it.
 
     return out << oss.str();
+}
+
+void X509Certificate::WriteCertificateBytes(BufferedTransformation &bt) const
+{
+    try
+    {
+        bt.Put(m_origCertificate, m_origCertificate.size());
+    }
+    catch(const Exception&)
+    {
+    }
 }
 
 NAMESPACE_END  // Cryptopp
