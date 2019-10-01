@@ -421,7 +421,7 @@ void X509Certificate::BERDecode(BufferedTransformation &bt)
             m_version = v1;  // Default per RFC
 
         m_serialNumber.BERDecode(tbsCertificate);
-        BERDecodeSignatureAlgorithm(tbsCertificate, m_certSignatureAlgortihm);
+        BERDecodeSignatureAlgorithm(tbsCertificate, m_subjectPublicKeyAlgortihm);
 
         BERDecodeDistinguishedName(tbsCertificate, m_issuerName);
         BERDecodeValidity(tbsCertificate, m_notBefore, m_notAfter);

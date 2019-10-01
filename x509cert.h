@@ -235,6 +235,11 @@ public:
     const ExtensionValueArray& GetExtensions() const
         { return *m_extensions.get(); }
 
+    /// \brief Subject public key algorithm
+    /// \returns Subject public key algorithm
+    const OID& GetSubjectPublicKeyAlgorithm() const
+        { return m_subjectPublicKeyAlgortihm; }
+
     /// \brief Subject public key
     /// \returns Subject public key
     const X509PublicKey& GetSubjectPublicKey() const
@@ -311,7 +316,8 @@ private:
 
     DateValue m_notBefore, m_notAfter;
 
-    // The one thing of value in this collection of bits
+    // The subject's key and algorithm
+    OID m_subjectPublicKeyAlgortihm;
     member_ptr<X509PublicKey> m_subjectPublicKey;
 
     // Certificate v2, optional
