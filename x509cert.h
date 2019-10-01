@@ -353,7 +353,7 @@ inline std::ostream& operator<<(std::ostream& out, const RdnValueArray &values)
     {
         oss << *beg;
         if (++beg != end)
-            { oss << ";"; }
+            { oss << "; "; }
     }
     return out << oss.str();
 }
