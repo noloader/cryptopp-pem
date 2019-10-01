@@ -46,7 +46,7 @@ struct RdnValue : public ASN1Object
     void BERDecode(BufferedTransformation &bt);
     void DEREncode(BufferedTransformation &bt) const;
 
-    bool ValdateTag(byte tag) const;
+    bool ValidateTag(byte tag) const;
     std::ostream& Print(std::ostream& out) const;
 
     std::string EncodeRdnValue() const;
@@ -68,7 +68,7 @@ struct DateValue : public ASN1Object
     void BERDecode(BufferedTransformation &bt);
     void DEREncode(BufferedTransformation &bt) const;
 
-    bool ValdateTag(byte tag) const;
+    bool ValidateTag(byte tag) const;
     std::ostream& Print(std::ostream& out) const;
 
     SecByteBlock m_value;
@@ -84,7 +84,7 @@ struct ExtensionValue : public ASN1Object
     void BERDecode(BufferedTransformation &bt);
     void DEREncode(BufferedTransformation &bt) const;
 
-    bool ValdateTag(byte tag) const;
+    bool ValidateTag(byte tag) const;
     std::ostream& Print(std::ostream& out) const;
 
     OID m_oid;

@@ -123,7 +123,7 @@ void RdnValue::BERDecode(BufferedTransformation &bt)
       m_oid.BERDecode(seq);
 
       byte b;
-      if (seq.Peek(b) && ValdateTag(b))
+      if (seq.Peek(b) && ValidateTag(b))
       {
           m_tag = static_cast<ASNTag>(b);
           BERDecodeTextString(seq, m_value, b);
@@ -142,7 +142,7 @@ void RdnValue::DEREncode(BufferedTransformation &bt) const
     throw NotImplemented("RdnValue::DEREncode");
 }
 
-bool RdnValue::ValdateTag(byte tag) const
+bool RdnValue::ValidateTag(byte tag) const
 {
     if (tag == PRINTABLE_STRING || tag == IA5_STRING || tag == UTF8_STRING)
         return true;
@@ -176,7 +176,7 @@ std::ostream& RdnValue::Print(std::ostream& out) const
 void DateValue::BERDecode(BufferedTransformation &bt)
 {
     byte b;
-    if (bt.Peek(b) && ValdateTag(b))
+    if (bt.Peek(b) && ValidateTag(b))
     {
         m_tag = static_cast<ASNTag>(b);
         BERDecodeDate(bt, m_value, b);
@@ -193,7 +193,7 @@ void DateValue::DEREncode(BufferedTransformation &bt) const
     throw NotImplemented("DateValue::DEREncode");
 }
 
-bool DateValue::ValdateTag(byte tag) const
+bool DateValue::ValidateTag(byte tag) const
 {
     if (tag == UTC_TIME || tag == GENERALIZED_TIME)
         return true;
@@ -234,7 +234,7 @@ void ExtensionValue::DEREncode(BufferedTransformation &bt) const
     throw NotImplemented("ExtensionValue::DEREncode");
 }
 
-bool ExtensionValue::ValdateTag(byte tag) const
+bool ExtensionValue::ValidateTag(byte tag) const
 {
     return true;
 }
