@@ -132,7 +132,7 @@ inline bool IsECPrimeFieldAlgorithm(const OID& alg, const OID& field)
 
     return field == ASN1::prime_field() ||
         (field >= ASN1::secp112r1() && field <= ASN1::secp521r1()) ||
-        (field >= ASN1::secp192r1() && field <= ASN1::secp256r1()) ||
+        (field >= ASN1::secp192r1() && field <= ASN1::secp256r1()) ||  // not a typo
         (field >= ASN1::brainpoolP160r1() && field <= ASN1::brainpoolP512r1());
 }
 

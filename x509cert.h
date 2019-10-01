@@ -179,12 +179,12 @@ public:
         {DEREncodeNull(bt); return false;}
 
     /// \brief Retrieve complete DER encoded certicate
-    /// \param certificate SecByteBlock to receive the certificate
+    /// \returns the certificate data
     const SecByteBlock& GetCertificate () const
         { return m_origCertificate; }
 
     /// \brief Retrieve DER encoded ToBeSigned
-    /// \param toBeSigned SecByteBlock to receive the toBeSigned
+    /// \returns the toBeSigned data
     const SecByteBlock& GetToBeSigned () const;
 
     /// \brief Version number
@@ -240,6 +240,8 @@ public:
         { return *m_subjectPublicKey.get(); }
 
     /// \brief Determine if optional attribute is present
+    /// \param bt BufferedTransformation object
+    /// \param tag the expected tag
     /// \returns true if an optional attribute is present, false otherwise
     bool HasOptionalAttribute(const BufferedTransformation &bt, byte tag) const;
 
@@ -262,6 +264,7 @@ public:
         { return m_extensions.get() != NULLPTR; }
 
     /// \brief Print a certificate
+    /// \param out ostream object
     /// \returns Print a certificate
     /// \details Print() displays some of the fields of a certificate for
     ///  debug purposes. Users should modify the class to suit their taste
@@ -269,7 +272,7 @@ public:
     virtual std::ostream& Print(std::ostream& out) const;
 
     /// \brief Write certificate data
-    /// \returns Write certificate data
+    /// \param bt BufferedTransformation object
     /// \details WriteCertificateBytes() is a debug function. It dumps
     ///  the bytes stored in m_origCertificate. WriteCertificateBytes()
     ///  also sets up a try/catch and silently swallows exceptions.
