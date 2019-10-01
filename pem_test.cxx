@@ -287,6 +287,25 @@ int main(int argc, char* argv[])
         fail = true;
     }
 
+    // Read the OpenSSL generated self-signed end-entity cert for example.com
+    {
+        std::cout << "Load X.509 example-com.cert.pem certificate" << std::endl;
+        try {
+            X509Certificate cert;
+            FileSource fs1("example-com.cert.pem", true);
+            PEM_Load(fs1, cert);
+
+            std::cout << "  - OK" << std::endl;
+
+            std::cout << "\nDumping certificate:" << std::endl;
+            std::cout << cert << std::endl;
+        }
+        catch(const Exception& ex) {
+            std::cout << "Caught exception: " << ex.what() << std::endl;
+            fail = true;
+        }
+    }
+
     return fail ? 1 : 0;
 }
 

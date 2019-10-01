@@ -1175,11 +1175,22 @@ void PEM_Load(BufferedTransformation& bt, X509Certificate& cert)
 {
     CRYPTOPP_UNUSED(cert);
 
-    ByteQueue t1;
+    ByteQueue t1, t2, t3;
     if (PEM_NextObject(bt, t1) == false)
         throw InvalidArgument("PEM_Load: PEM object not available");
 
-    throw NotImplemented("PEM_Load: X.509 certificate is not implemented");
+    PEM_Type type = PEM_GetType(t1);
+    if (type == PEM_X509_CERTIFICATE)
+        PEM_StripEncapsulatedBoundary(t1, t2, X509_CERTIFICATE_BEGIN, X509_CERTIFICATE_END);
+    else if (type == PEM_CERTIFICATE)
+        PEM_StripEncapsulatedBoundary(t1, t2, CERTIFICATE_BEGIN, CERTIFICATE_END);
+    else
+        throw InvalidDataFormat("PEM_Read: invalid X.509 certificate");
+
+    PEM_Base64Decode(t2, t3);
+    cert.Load(t3);
+
+    // throw NotImplemented("PEM_Load: X.509 certificate is not implemented");
 }
 
 void PEM_DH_Load(BufferedTransformation& bt, Integer& p, Integer& g)

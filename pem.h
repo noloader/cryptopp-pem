@@ -18,18 +18,13 @@
 #include "pubkey.h"
 #include "eccrypto.h"
 #include "gfpcrypt.h"
-#include "integer.h"
+#include "x509cert.h"
+#include "elgamal.h"
 #include "rsa.h"
 #include "dsa.h"
-#include "elgamal.h"
+#include "asn.h"
 
 NAMESPACE_BEGIN(CryptoPP)
-
-/// \brief X.509 Certificate
-struct X509Certificate
-{
-    // Not implemented
-};
 
 /// \brief Get the next PEM object
 /// \param src the source BufferedTransformation

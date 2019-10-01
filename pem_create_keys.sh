@@ -27,7 +27,7 @@ fi
 ##################################
 # test program
 
-echo "Compiling test program"
+echo "Compiling test program with $CXX"
 
 rm -rf pem_test.exe &>/dev/null
 
@@ -40,7 +40,7 @@ if ! CXX="$CXX" CXXFLAGS="$CXXFLAGS" make -j 4; then
 fi
 
 # Build the test program
-if ! "$CXX" "$CXXFLAGS" pem_test.cxx ./libcryptopp.a -o pem_test.exe; then
+if ! $CXX $CXXFLAGS pem_test.cxx ./libcryptopp.a -o pem_test.exe; then
     echo "Failed to build pem_test.exe"
     exit 1
 fi
@@ -141,11 +141,15 @@ DNS.3  = mail.example.com
 DNS.4  = ftp.example.com
 EOF
 
-# And the cert
+# And create the cert
 openssl req -config example-com.conf -new -x509 -sha256 -newkey rsa:2048 -nodes \
     -keyout example-com.key.pem -days 365 -out example-com.cert.pem
 
-# View cert with 'openssl x509 -in example-com.cert.pem -inform PEM -text -noout'
+# Convert to ASN.1/DER
+openssl x509 -in example-com.cert.pem -inform PEM -out example-com.cert.der -outform DER
+
+# View PEM cert with 'openssl x509 -in example-com.cert.pem -inform PEM -text -noout'
+# View DER cert with 'dumpasn1 example-com.cert.der'
 
 ##################################
 # cacert.pem
@@ -153,4 +157,3 @@ openssl req -config example-com.conf -new -x509 -sha256 -newkey rsa:2048 -nodes 
 if [ ! -e "cacert.pem" ]; then
     wget http://curl.haxx.se/ca/cacert.pem -O cacert.pem
 fi
-

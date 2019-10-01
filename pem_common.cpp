@@ -7,7 +7,9 @@
 ///////////////////////////////////////////////////////////////////////////
 
 #include "cryptlib.h"
+#include "x509cert.h"
 #include "secblock.h"
+#include "integer.h"
 #include "base64.h"
 #include "osrng.h"
 
