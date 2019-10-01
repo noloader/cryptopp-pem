@@ -144,7 +144,10 @@ void RdnValue::DEREncode(BufferedTransformation &bt) const
 
 bool RdnValue::ValidateTag(byte tag) const
 {
-    if (tag == PRINTABLE_STRING || tag == IA5_STRING || tag == UTF8_STRING)
+    if (tag == UTF8_STRING || tag == NUMERIC_STRING || tag == PRINTABLE_STRING ||
+        tag == T61_STRING || tag == VIDEOTEXT_STRING || tag == IA5_STRING ||
+        tag == VISIBLE_STRING || tag == GENERAL_STRING || tag == UNIVERSAL_STRING ||
+        tag == BMP_STRING)
         return true;
     return false;
 }
