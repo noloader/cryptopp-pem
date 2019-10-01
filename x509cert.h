@@ -1,5 +1,6 @@
-// x509cert.h - X.509 certificate read and write routines.
-//              Written and placed in the public domain by Jeffrey Walton and Geoff Beier
+// x509cert.h - X.509 certificate read and write routines for Crypto++.
+//              Written and placed in the public domain by Jeffrey Walton
+//              and Geoff Beier
 
 /// \file x509cert.h
 /// \brief Classes and functions to read X.509 certificates

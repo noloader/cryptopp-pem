@@ -1,8 +1,10 @@
-// pem_common.cpp - commom PEM routines.
-//                  Written and placed in the public domain by Jeffrey Walton
+// x509cert.cpp - X.509 certificate read and write routines for Crypto++.
+//                Written and placed in the public domain by Jeffrey Walton
+//                and Geoff Beier
 
 ///////////////////////////////////////////////////////////////////////////
 // For documentation on the PEM read and write routines, see
+//   http://www.cryptopp.com/wiki/X509Certificate and
 //   http://www.cryptopp.com/wiki/PEM_Pack
 ///////////////////////////////////////////////////////////////////////////
 
