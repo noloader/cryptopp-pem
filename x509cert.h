@@ -79,7 +79,7 @@ struct DateValue : public ASN1Object
 struct ExtensionValue : public ASN1Object
 {
     virtual ~ExtensionValue() {}
-	ExtensionValue() : m_tag(InvalidTag) {}
+    ExtensionValue() : m_tag(InvalidTag) {}
 
     void BERDecode(BufferedTransformation &bt);
     void DEREncode(BufferedTransformation &bt) const;
@@ -135,15 +135,15 @@ class X509Certificate : public ASN1CryptoMaterial<Certificate>
 {
 public:
 
-	/// \brief Certificate version
+    /// \brief Certificate version
     enum Version {
-		/// \brief Version 1
-		v1=0,
-		/// \brief Version 2
-		v2,
-		/// \brief Version 3
-		v3
-	};
+        /// \brief Version 1
+        v1=0,
+        /// \brief Version 2
+        v2,
+        /// \brief Version 3
+        v3
+    };
 
 public:
     virtual ~X509Certificate() {}
@@ -181,7 +181,7 @@ public:
     /// \brief Retrieve complete DER encoded certicate
     /// \param certificate SecByteBlock to receive the certificate
     const SecByteBlock& GetCertificate () const
-	    { return m_origCertificate; }
+        { return m_origCertificate; }
 
     /// \brief Retrieve DER encoded ToBeSigned
     /// \param toBeSigned SecByteBlock to receive the toBeSigned
@@ -230,42 +230,42 @@ public:
 
     /// \brief Certificate extensions
     /// \returns Certificate extensions array
-	/// \details Certificate extensions are available with X.509 v3.
+    /// \details Certificate extensions are available with X.509 v3.
     const ExtensionValueArray& GetExtensions() const
         { return *m_extensions.get(); }
 
     /// \brief Subject public key
     /// \returns Subject public key
     const X509PublicKey& GetSubjectPublicKey() const
-	    { return *m_subjectPublicKey.get(); }
+        { return *m_subjectPublicKey.get(); }
 
-	/// \brief Determine if optional attribute is present
-	/// \returns true if an optional attribute is present, false otherwise
-	bool HasOptionalAttribute(const BufferedTransformation &bt, byte tag) const;
+    /// \brief Determine if optional attribute is present
+    /// \returns true if an optional attribute is present, false otherwise
+    bool HasOptionalAttribute(const BufferedTransformation &bt, byte tag) const;
 
-	/// \brief Determine if Issuer UniqueId is present
-	/// \returns true if if Issuer UniqueId is present, false otherwise
-	/// \details Subject Issuer is available with X.509 v2.
-	bool HasIssuerUniqueId() const
-	    { return m_issuerUid.get() != NULLPTR; }
+    /// \brief Determine if Issuer UniqueId is present
+    /// \returns true if if Issuer UniqueId is present, false otherwise
+    /// \details Subject Issuer is available with X.509 v2.
+    bool HasIssuerUniqueId() const
+        { return m_issuerUid.get() != NULLPTR; }
 
-	/// \brief Determine if Subject UniqueId is present
-	/// \returns true if if Subject UniqueId is present, false otherwise
-	/// \details Subject UniqueId is available with X.509 v2.
-	bool HasSubjectUniqueId() const
-	    { return m_subjectUid.get() != NULLPTR; }
+    /// \brief Determine if Subject UniqueId is present
+    /// \returns true if if Subject UniqueId is present, false otherwise
+    /// \details Subject UniqueId is available with X.509 v2.
+    bool HasSubjectUniqueId() const
+        { return m_subjectUid.get() != NULLPTR; }
 
-	/// \brief Determine if Extensions are present
-	/// \returns true if if Extensions are present, false otherwise
-	/// \details Extensions are available with X.509 v3.
-	bool HasExtensions() const
-	    { return m_extensions.get() != NULLPTR; }
+    /// \brief Determine if Extensions are present
+    /// \returns true if if Extensions are present, false otherwise
+    /// \details Extensions are available with X.509 v3.
+    bool HasExtensions() const
+        { return m_extensions.get() != NULLPTR; }
 
     /// \brief Print a certificate
     /// \returns Print a certificate
-	/// \details Print() displays some of the fields of a certificate for
-	///  debug purposes. Users should modify the class to suit their taste
-	///  or override this class in a derived class.
+    /// \details Print() displays some of the fields of a certificate for
+    ///  debug purposes. Users should modify the class to suit their taste
+    ///  or override this class in a derived class.
     virtual std::ostream& Print(std::ostream& out) const;
 
 protected:
@@ -284,14 +284,14 @@ protected:
     void BERDecodeSubjectUniqueId(BufferedTransformation &bt);
     void BERDecodeExtensions(BufferedTransformation &bt);
 
-	// BERDecodeSubjectPublicKeyInfo helper to get public key OIDs
-	void GetSubjectPublicKeyInfoOids(BufferedTransformation &bt, OID& algorithm, OID& field) const;
+    // BERDecodeSubjectPublicKeyInfo helper to get public key OIDs
+    void GetSubjectPublicKeyInfoOids(BufferedTransformation &bt, OID& algorithm, OID& field) const;
 
 private:
     Version m_version;
     Integer m_serialNumber;
 
-	// certificate algorithm and signature
+    // certificate algorithm and signature
     OID m_certSignatureAlgortihm;
     SecByteBlock m_certSignature;
 
@@ -300,7 +300,7 @@ private:
 
     DateValue m_notBefore, m_notAfter;
 
-	// The one thing of value in this collection of bits
+    // The one thing of value in this collection of bits
     member_ptr<X509PublicKey> m_subjectPublicKey;
 
     // Certificate v2, optional
@@ -312,7 +312,7 @@ private:
 
     // Hack so we can examine the octets and verify the signature
     SecByteBlock m_origCertificate;
-	mutable SecByteBlock m_toBeSigned;  // lazy
+    mutable SecByteBlock m_toBeSigned;  // lazy
 };
 
 inline std::ostream& operator<<(std::ostream& out, const X509Certificate &cert)
@@ -326,13 +326,13 @@ inline std::ostream& operator<<(std::ostream& out, const RdnValueArray &values)
 {
     RdnValueArray::const_iterator beg = values.begin();
     RdnValueArray::const_iterator end = values.end();
-	std::ostringstream oss;
+    std::ostringstream oss;
 
     while (beg != end)
     {
         oss << *beg;
         if (++beg != end)
-		    { oss << ";"; }
+            { oss << ";"; }
     }
     return out << oss.str();
 }

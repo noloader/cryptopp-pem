@@ -138,7 +138,7 @@ void RdnValue::DEREncode(BufferedTransformation &bt) const
 {
     CRYPTOPP_UNUSED(bt);
 
-	// TODO: Implement this function
+    // TODO: Implement this function
     throw NotImplemented("RdnValue::DEREncode");
 }
 
@@ -189,7 +189,7 @@ void DateValue::DEREncode(BufferedTransformation &bt) const
 {
     CRYPTOPP_UNUSED(bt);
 
-	// TODO: Implement this function
+    // TODO: Implement this function
     throw NotImplemented("DateValue::DEREncode");
 }
 
@@ -230,7 +230,7 @@ void ExtensionValue::DEREncode(BufferedTransformation &bt) const
 {
     CRYPTOPP_UNUSED(bt);
 
-	// TODO: Implement this function
+    // TODO: Implement this function
     throw NotImplemented("ExtensionValue::DEREncode");
 }
 
@@ -241,7 +241,7 @@ bool ExtensionValue::ValdateTag(byte tag) const
 
 std::ostream& ExtensionValue::Print(std::ostream& out) const
 {
-	// TODO: Implement this function
+    // TODO: Implement this function
     throw NotImplemented("ExtensionValue::DEREncode");
     return out;
 }
@@ -278,18 +278,18 @@ bool X509Certificate::HasOptionalAttribute(const BufferedTransformation &bt, byt
 
 const SecByteBlock& X509Certificate::GetToBeSigned() const
 {
-	if (m_toBeSigned.size() == 0)
-	{
-		ArraySource source(m_origCertificate, m_origCertificate.size(), true);
-		m_toBeSigned.resize(m_origCertificate.size());
-		ArraySink sink(m_toBeSigned, m_toBeSigned.size());
+    if (m_toBeSigned.size() == 0)
+    {
+        ArraySource source(m_origCertificate, m_origCertificate.size(), true);
+        m_toBeSigned.resize(m_origCertificate.size());
+        ArraySink sink(m_toBeSigned, m_toBeSigned.size());
 
-		BERSequenceDecoder seq(source);
-		  seq.TransferTo(sink, m_toBeSigned.size());
-		seq.MessageEnd();
-	}
+        BERSequenceDecoder seq(source);
+          seq.TransferTo(sink, m_toBeSigned.size());
+        seq.MessageEnd();
+    }
 
-	return m_toBeSigned;
+    return m_toBeSigned;
 }
 
 /*
@@ -403,7 +403,7 @@ void X509Certificate::DEREncode(BufferedTransformation &bt) const
 {
     CRYPTOPP_UNUSED(bt);
 
-	// TODO: Implement this function
+    // TODO: Implement this function
     throw NotImplemented("X509Certificate::DEREncode");
 }
 
@@ -412,22 +412,22 @@ void X509Certificate::BERDecodeIssuerUniqueId(BufferedTransformation &bt)
     CRYPTOPP_ASSERT(HasOptionalAttribute(bt, CONTEXT_SPECIFIC|CONSTRUCTED|1));
 
     m_issuerUid.reset(new SecByteBlock);
-	SecByteBlock temp;
+    SecByteBlock temp;
 
     BERGeneralDecoder seq(bt, CONTEXT_SPECIFIC|CONSTRUCTED|1);
       word32 unused;
       BERDecodeBitString(bt, temp, unused);
     seq.MessageEnd();
 
-	std::swap(temp, *m_issuerUid.get());
+    std::swap(temp, *m_issuerUid.get());
 }
 
 void X509Certificate::BERDecodeSubjectUniqueId(BufferedTransformation &bt)
 {
     CRYPTOPP_ASSERT(HasOptionalAttribute(bt, CONTEXT_SPECIFIC|CONSTRUCTED|2));
 
-	m_subjectUid.reset(new SecByteBlock);
-	SecByteBlock temp;
+    m_subjectUid.reset(new SecByteBlock);
+    SecByteBlock temp;
 
     BERGeneralDecoder seq(bt, CONTEXT_SPECIFIC|CONSTRUCTED|2);
       word32 unused;
@@ -442,7 +442,7 @@ void X509Certificate::BERDecodeExtensions(BufferedTransformation &bt)
     CRYPTOPP_ASSERT(HasOptionalAttribute(bt, CONTEXT_SPECIFIC|CONSTRUCTED|3));
 
     m_extensions.reset(new ExtensionValueArray);
-	ExtensionValueArray temp;
+    ExtensionValueArray temp;
 
     BERGeneralDecoder extensions(bt, CONTEXT_SPECIFIC|CONSTRUCTED|3);
 
@@ -467,7 +467,7 @@ void X509Certificate::BERDecodeSubjectPublicKeyInfo(BufferedTransformation &bt, 
     OID algorithm;  // Public key algorithm
     OID field;      // Field for elliptic curves
 
-	GetSubjectPublicKeyInfoOids(bt, algorithm, field);
+    GetSubjectPublicKeyInfoOids(bt, algorithm, field);
 
     if (algorithm == ASN1::rsaEncryption())
         publicKey.reset(new RSA::PublicKey);
@@ -500,7 +500,7 @@ void X509Certificate::GetSubjectPublicKeyInfoOids(BufferedTransformation &bt, OI
         BERSequenceDecoder seq1(temp);
           BERSequenceDecoder seq2(seq1);
             algorithm.BERDecode(seq2);
-		    // EC Public Keys specify a field, also
+            // EC Public Keys specify a field, also
             if (algorithm == ASN1::id_ecPublicKey())
             {
               BERSequenceDecoder seq3(seq2);
@@ -598,29 +598,29 @@ void X509Certificate::BERDecodeVersion(BufferedTransformation &bt, Version &vers
 
 bool X509Certificate::Validate(RandomNumberGenerator &rng, unsigned int level) const
 {
-	CRYPTOPP_UNUSED(rng); CRYPTOPP_UNUSED(level);
+    CRYPTOPP_UNUSED(rng); CRYPTOPP_UNUSED(level);
 
-	// TODO: Implement this function
-	throw NotImplemented("X509Certificate::Validate");
+    // TODO: Implement this function
+    throw NotImplemented("X509Certificate::Validate");
 
     return false;
 }
 
 void X509Certificate::AssignFrom(const NameValuePairs &source)
 {
-	CRYPTOPP_UNUSED(source);
+    CRYPTOPP_UNUSED(source);
 
-	// TODO: Implement this function
-	throw NotImplemented("X509Certificate::AssignFrom");
+    // TODO: Implement this function
+    throw NotImplemented("X509Certificate::AssignFrom");
 }
 
 bool X509Certificate::GetVoidValue(const char *name, const std::type_info &valueType, void *pValue) const
 {
-	CRYPTOPP_UNUSED(name); CRYPTOPP_UNUSED(valueType);
-	CRYPTOPP_UNUSED(pValue);
+    CRYPTOPP_UNUSED(name); CRYPTOPP_UNUSED(valueType);
+    CRYPTOPP_UNUSED(pValue);
 
-	// TODO: Implement this function
-	throw NotImplemented("X509Certificate::GetVoidValue");
+    // TODO: Implement this function
+    throw NotImplemented("X509Certificate::GetVoidValue");
 
     return false;
 }
@@ -640,21 +640,21 @@ std::ostream& X509Certificate::Print(std::ostream& out) const
     oss << "Issuer DN: " << GetIssuerDistinguishedName() << std::endl;
     oss << "Subject DN: " << GetSubjectDistinguishedName() << std::endl;
 
-	// Format signature
-	std::string signature;
-	const SecByteBlock& binarySignature = GetCertificateSignature();
-	StringSource(binarySignature, binarySignature.size(), true, new HexEncoder(new StringSink(signature)));
-	signature.resize(60); signature += "...";
+    // Format signature
+    std::string signature;
+    const SecByteBlock& binarySignature = GetCertificateSignature();
+    StringSource(binarySignature, binarySignature.size(), true, new HexEncoder(new StringSink(signature)));
+    signature.resize(60); signature += "...";
 
-	// Format tbs
-	std::string toBeSigned;
-	const SecByteBlock& binaryToBeSigned = GetToBeSigned();
-	StringSource(binaryToBeSigned, binaryToBeSigned.size(), true, new HexEncoder(new StringSink(toBeSigned)));
-	toBeSigned.resize(60); toBeSigned += "...";
+    // Format tbs
+    std::string toBeSigned;
+    const SecByteBlock& binaryToBeSigned = GetToBeSigned();
+    StringSource(binaryToBeSigned, binaryToBeSigned.size(), true, new HexEncoder(new StringSink(toBeSigned)));
+    toBeSigned.resize(60); toBeSigned += "...";
 
     oss << "Signature Alg: " << GetCertificateSignatureAlgorithm() << std::endl;
-	oss << "To Be Signed: " << toBeSigned << std::endl;
-	oss << "Signature: " << signature;
+    oss << "To Be Signed: " << toBeSigned << std::endl;
+    oss << "Signature: " << signature;
 
     // No endl for the last entry. Caller is responsible to add it.
 
