@@ -263,30 +263,6 @@ int main(int argc, char* argv[])
         std::cout << "  - OK" << std::endl;
     }
 
-    // Test cacert.pem. There should be ~130 to ~150 certs in it.
-    try
-    {
-        FileSource fs("cacert.pem", true);
-        size_t count=0;
-
-        while (PEM_NextObject(fs, TheBitBucket())) {
-            count++;
-        }
-
-        std::cout << "Parsed " << count << " certificates from cacert.pem" << std::endl;
-        if (count >= 120)
-            std::cout << "  - OK" << std::endl;
-        else {
-            std::cout << "  - Failed" << std::endl;
-            fail = true;
-        }
-    }
-    catch(const Exception& ex)
-    {
-        std::cout << "Caught exception: " << ex.what() << std::endl;
-        fail = true;
-    }
-
     // Read the OpenSSL generated self-signed end-entity cert for example.com
     {
         std::cout << "Load X.509 example-com.cert.pem certificate" << std::endl;
@@ -304,6 +280,41 @@ int main(int argc, char* argv[])
             std::cout << "Caught exception: " << ex.what() << std::endl;
             fail = true;
         }
+    }
+
+    // Test cacert.pem. There should be ~130 to ~150 certs in it.
+    try
+    {
+        FileSource fs("cacert.pem", true);
+        ByteQueue t;
+        size_t count=0;
+
+        while (PEM_NextObject(fs, t))
+        {
+            X509Certificate cert;
+            try {
+                PEM_Load(t, cert);
+            }
+            catch (const Exception&) {
+                FileSink x("badcert.der");
+                cert.WriteCertificateBytes(x);
+                throw;
+            }
+            count++;
+        }
+
+        std::cout << "Parsed " << count << " certificates from cacert.pem" << std::endl;
+        if (count >= 120)
+            std::cout << "  - OK" << std::endl;
+        else {
+            std::cout << "  - Failed" << std::endl;
+            fail = true;
+        }
+    }
+    catch(const Exception& ex)
+    {
+        std::cout << "Caught exception: " << ex.what() << std::endl;
+        fail = true;
     }
 
     return fail ? 1 : 0;
