@@ -400,7 +400,22 @@ std::ostream& IdentityValue::Print(std::ostream& out) const
 
     std::ostringstream oss;
     oss << OidToNameLookup(m_oid) << ": ";
-    oss.write((const char*)m_value.data(), m_value.size());
+
+    switch (m_src)
+    {
+        case UniqueId:
+        {
+            HexEncoder encoder;
+            encoder.Put(m_value.data(), m_value.size());
+
+            SecByteBlock temp(encoder.MaxRetrievable());
+            encoder.Get(temp, temp.size());
+            oss.write((const char*)temp.data(), temp.size());
+            break;
+        }
+        default:
+            oss.write((const char*)m_value.data(), m_value.size());
+    }
 
     return out << oss.str();
 }
@@ -873,6 +888,7 @@ void X509Certificate::GetIdentitiesFromSubjectUniqueId(IdentityValueArray& ident
     {
         IdentityValue identity;
         identity.m_value = *m_subjectUid.get();
+        identity.m_src = IdentityValue::UniqueId;
         identityArray.push_back(identity);
     }
 }
@@ -887,6 +903,7 @@ void X509Certificate::GetIdentitiesFromSubjectDistName(IdentityValueArray& ident
 
         IdentityValue identity;
         identity.m_oid = OID(2)+5+4+49;
+        identity.m_src = IdentityValue::SubjectDN;
         StringSource(id, true, new SecByteBlockSink(identity.m_value));
         identityArray.push_back(identity);
     }
@@ -905,6 +922,7 @@ void X509Certificate::GetIdentitiesFromSubjectDistName(IdentityValueArray& ident
                 IdentityValue identity;
                 identity.m_oid = commonName;
                 identity.m_value = first->m_value;
+                identity.m_src = IdentityValue::SubjectCN;
                 identityArray.push_back(identity);
                 break;  // Only one common name
             }
@@ -926,6 +944,7 @@ void X509Certificate::GetIdentitiesFromSubjectDistName(IdentityValueArray& ident
                 IdentityValue identity;
                 identity.m_oid = uid;
                 identity.m_value = first->m_value;
+                identity.m_src = IdentityValue::SubjectUID;
                 identityArray.push_back(identity);
                 // Don't break due to multiple UniqueId's
             }
@@ -947,6 +966,7 @@ void X509Certificate::GetIdentitiesFromSubjectDistName(IdentityValueArray& ident
                 IdentityValue identity;
                 identity.m_oid = email;
                 identity.m_value = first->m_value;
+                identity.m_src = IdentityValue::SubjectEmail;
                 identityArray.push_back(identity);
                 // Don't break due to multiple emails
             }
@@ -991,7 +1011,7 @@ void X509Certificate::GetIdentitiesFromSubjectAltName(IdentityValueArray& identi
                   }
                   case 0x81:
                   {
-                    identity.m_tag = IA5_STRING;
+                    identity.m_src = IdentityValue::rfc822Name;
                     id.resize(l);
                     seq.Get(id, id.size());
                     identityArray.push_back(identity);
@@ -999,7 +1019,7 @@ void X509Certificate::GetIdentitiesFromSubjectAltName(IdentityValueArray& identi
                   }
                   case 0x82:
                   {
-                    identity.m_tag = IA5_STRING;
+                    identity.m_src = IdentityValue::dNSName;
                     id.resize(l);
                     seq.Get(id, id.size());
                     identityArray.push_back(identity);
@@ -1007,9 +1027,16 @@ void X509Certificate::GetIdentitiesFromSubjectAltName(IdentityValueArray& identi
                   }
                   case 0x86:
                   {
-                    identity.m_tag = IA5_STRING;
+                    identity.m_src = IdentityValue::uniformResourceIdentifier;
                     id.resize(l);
                     seq.Get(id, id.size());
+                    identityArray.push_back(identity);
+                    break;
+                  }
+                  case 0x87:
+                  {
+                    identity.m_src = IdentityValue::iPAddress;
+                    BERDecodeOctetString(seq, id);
                     identityArray.push_back(identity);
                     break;
                   }
@@ -1038,7 +1065,7 @@ void X509Certificate::GetIdentitiesFromNetscapeServer(IdentityValueArray& identi
 
           IdentityValue identity;
           identity.m_oid = serverName;
-          identity.m_tag = IA5_STRING;
+          identity.m_src = IdentityValue::certExtensions;
 
           SecByteBlock& id = identity.m_value;
           id.resize(seq.MaxRetrievable());
@@ -1058,6 +1085,7 @@ void X509Certificate::GetIdentitiesFromUserPrincipalName(IdentityValueArray& ide
     CRYPTOPP_UNUSED(upn);
 
     // TODO: finish this once we get a MS client cert
+    // identity.m_src = IdentityValue::msOtherNameUPN;
 }
 
 const IdentityValueArray& X509Certificate::GetSubjectIdentities() const

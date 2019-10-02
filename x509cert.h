@@ -140,8 +140,16 @@ struct KeyIdentifierValue : public ASN1Object
 /// \brief Identity value
 struct IdentityValue
 {
+    enum IdentitySource {
+        UniqueId=1, SubjectDN, SubjectCN, SubjectUID, SubjectEmail,
+        otherName, rfc822Name, dNSName, x400Address, directoryName,        // SAN
+        ediPartyName, uniformResourceIdentifier, iPAddress, registeredID,  // SAN
+        certExtensions, msOtherNameUPN
+    };
+    const IdentitySource InvalidIdentitySource = static_cast<IdentitySource>(0);
+
     virtual ~IdentityValue() {}
-    IdentityValue() : m_tag(InvalidTag) {}
+    IdentityValue() : m_src(InvalidIdentitySource) {}
 
     /// \brief Print an Identity value
     /// \returns ostream reference
@@ -149,7 +157,7 @@ struct IdentityValue
 
     OID m_oid;
     SecByteBlock m_value;
-    ASNTag m_tag;
+    IdentitySource m_src;
 };
 
 typedef std::vector<IdentityValue> IdentityValueArray;
