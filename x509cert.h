@@ -37,10 +37,11 @@ NAMESPACE_BEGIN(CryptoPP)
 // Forward declaration
 class Integer;
 
-/// \brief Convert OID to friendly name
+/// \brief Convert OID to a LDAP name
 /// \param oid the object identifier
-/// \returns the firendly name for display
-std::string OidToNameLookup(const OID& oid);
+/// \returns the LDAP name for display
+/// \details LDAP names are specified in ITU X.520 and other places, like the RFCs.
+std::string OidToNameLookup(const OID& oid, const std::string defaultName="");
 
 /// \brief ASNTag initializer
 /// \details 0 is an invalid tag value
@@ -138,6 +139,7 @@ struct KeyIdentifierValue : public ASN1Object
 };
 
 /// \brief Identity value
+/// \details IdentityValue holds an identity and provides a textual representation of it.
 struct IdentityValue
 {
     enum IdentitySource {
@@ -150,13 +152,23 @@ struct IdentityValue
 
     virtual ~IdentityValue() {}
     IdentityValue() : m_src(InvalidIdentitySource) {}
+    IdentityValue(const SecByteBlock &value, IdentitySource src);
+    IdentityValue(const std::string &value, IdentitySource src);
+    IdentityValue(BufferedTransformation &value, IdentitySource src);
+    IdentityValue(const OID &oid, const SecByteBlock &value, IdentitySource src);
+    IdentityValue(const OID &oid, const std::string &value, IdentitySource src);
+    IdentityValue(const OID &oid, BufferedTransformation &value, IdentitySource src);
 
     /// \brief Print an Identity value
     /// \returns ostream reference
     std::ostream& Print(std::ostream& out) const;
 
+    /// \brief Convert value to text
+    void ConvertToText();
+
     OID m_oid;
-    SecByteBlock m_value;
+    SecByteBlock m_value;  // Raw value from source
+    SecByteBlock m_text;   // Value converted to text
     IdentitySource m_src;
 };
 

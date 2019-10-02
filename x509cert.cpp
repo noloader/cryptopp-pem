@@ -116,11 +116,15 @@ struct OidToName
     std::string name;
 };
 
-std::string OidToNameLookup(const OID& oid)
+std::string OidToNameLookup(const OID& oid, const std::string defaultName)
 {
     // Must be sorted by oid. The names are mostly standard.
+    // Also see X.520, Section 6, for a partial list of LDAP Names.
     static const OidToName table[] =
     {
+        { OID(0)+9+2342+19200300+100+1+ 1, "UID" },  // User Id
+        { OID(0)+9+2342+19200300+100+1+25, "DC" },   // Domain component
+
         { OID(1)+2+840+113549+1+1+1, "rsaEncryption" },
         { OID(1)+2+840+113549+1+1+2, "md2WithRSAEncryption" },
         { OID(1)+2+840+113549+1+1+3, "md4WithRSAEncryption" },
@@ -131,39 +135,53 @@ std::string OidToNameLookup(const OID& oid)
         { OID(1)+2+840+113549+1+1+14, "sha224WithRSAEncryption" },
         { OID(1)+2+840+113549+1+1+15, "sha512-224WithRSAEncryption" },
         { OID(1)+2+840+113549+1+1+16, "sha512-256WithRSAEncryption" },
-        { OID(1)+2+840+113549+1+9+1, "email" },
+
+        { OID(1)+2+840+113549+1+9+1, "EMAIL" },  // Email address
 
         { OID(1)+3+6+1+4+1+311+20+2+3, "UPN" },  // Microsoft User Principal Name (UPN)
                                                  // Found in the SAN as [1] otherName
 
         { OID(2)+5+4+ 3,  "CN" },     // Common name
-        { OID(2)+5+4+ 4,  "SNAME" },  // Surname
-        { OID(2)+5+4+ 5,  "SERNO" },  // Serial number
+        { OID(2)+5+4+ 4,  "SN" },     // Surname
+        { OID(2)+5+4+ 5,  "SERIALNUMBER" },  // Serial number
         { OID(2)+5+4+ 6,  "C" },      // Country
         { OID(2)+5+4+ 7,  "L" },      // Locality
         { OID(2)+5+4+ 8,  "ST" },     // State or province
-        { OID(2)+5+4+ 9,  "SADDR" },  // Street address
+        { OID(2)+5+4+ 9,  "STREET" }, // Street address
         { OID(2)+5+4+10,  "O" },      // Organization
         { OID(2)+5+4+11,  "OU" },     // Organization unit
         { OID(2)+5+4+12,  "TITLE" },  // Title
-        { OID(2)+5+4+13,  "DESC" },   // Description
-        { OID(2)+5+4+16,  "PADDR" },  // Postal address
-        { OID(2)+5+4+17,  "ZIP" },    // Postal code
-        { OID(2)+5+4+18,  "POBOX" },  // Postal office box
+        { OID(2)+5+4+13,  "DESCRIPTION" },    // Description
+        { OID(2)+5+4+16,  "POSTALADDRESS" },  // Postal address
+        { OID(2)+5+4+17,  "POSTALCODE" },     // Postal code
+        { OID(2)+5+4+18,  "POSTOFFICEBOX" },  // Postal office box
         { OID(2)+5+4+20,  "TEL" },    // Phone number
         { OID(2)+5+4+23,  "FAX" },    // Fax number
-        { OID(2)+5+4+35,  "PASSWD" }, // User password
-        { OID(2)+5+4+36,  "EECERT" }, // User certificate
-        { OID(2)+5+4+37,  "CACERT" }, // CA certificate
+        { OID(2)+5+4+35,   "USERPASSWORD" },        // User password
+        { OID(2)+5+4+35.2, "ENCUSERPASSWORD" },     // Encrypted user password
+        { OID(2)+5+4+36,   "USERCERTIFICATE" },     // User certificate
+        { OID(2)+5+4+36.2, "ENCUSERCERTIFICATE" },  // Encrypted user certificate
+        { OID(2)+5+4+37,   "CACERTIFICATE" },       // CA certificate
+        { OID(2)+5+4+37.2, "ENCCACERTIFICATE" },    // Encrypted CA certificate
         { OID(2)+5+4+41,  "NAME" },   // Name
-        { OID(2)+5+4+42,  "GNAME" },  // Given name
-        { OID(2)+5+4+45,  "UID" },    // Unique identifier
+        { OID(2)+5+4+42,  "GN" },     // Given name
+        { OID(2)+5+4+43,  "I" },      // Initials
+        { OID(2)+5+4+44,  "GENERATION" },  // Generation qualifier, Jr., Sr., etc
+        { OID(2)+5+4+45,  "UID" },    // X.500 Unique identifier
         { OID(2)+5+4+49,  "DN" },     // Distinguished name
+        { OID(2)+5+4+51,  "HOUSE" },  // House identifier
+        { OID(2)+5+4+65,  "PSEUDONYM" },  // Pseudonym
+        { OID(2)+5+4+78,  "OID" },      // Object identifier
+        { OID(2)+5+4+83,  "URI" },      // Uniform Resource Identifier
+        { OID(2)+5+4+85,  "USERPWD" },  // URI user password
+        { OID(2)+5+4+86,  "URN" },      // Uniform Resource Name
+        { OID(2)+5+4+87,  "URL" },      // Uniform Resource Locator
 
         { OID(2)+5+29+14, "SKI" },    // Subject key identifier
         { OID(2)+5+29+15, "KU" },     // Key usage
         { OID(2)+5+29+17, "SAN" },    // Subject alternate names
-        { OID(2)+5+29+19, "BCONST" }, // Basic constraints
+        { OID(2)+5+29+19, "BC" },     // Basic constraints
+        { OID(2)+5+29+30, "NC" },     // Name constraints
         { OID(2)+5+29+35, "AKI" },    // Authority key identifier
         { OID(2)+5+29+37, "EKU" },    // Extended key usage
 
@@ -193,10 +211,8 @@ std::string OidToNameLookup(const OID& oid)
         middle = (first + last)/2;
     }
 
-    // Not found, return oid.
-    std::ostringstream oss;
-    oss << oid;
-    return oss.str();
+    // Not found, return defaultName.
+    return defaultName;
 }
 
 void RdnValue::BERDecode(BufferedTransformation &bt)
@@ -394,12 +410,52 @@ std::ostream& KeyIdentifierValue::Print(std::ostream& out) const
     return out << oss.str();
 }
 
-std::ostream& IdentityValue::Print(std::ostream& out) const
+IdentityValue::IdentityValue(const SecByteBlock& value, IdentitySource src)
+    : m_value(value), m_src(src)
 {
-    if (m_value.empty()) return out;
+    ConvertToText();
+}
 
+IdentityValue::IdentityValue(const std::string &value, IdentitySource src)
+    : m_value((const byte*)value.data(), value.size()), m_src(src)
+{
+    ConvertToText();
+}
+
+IdentityValue::IdentityValue(BufferedTransformation &value, IdentitySource src)
+{
+    SecByteBlockSink sink(m_value);
+    value.TransferTo(sink);
+    m_src = src;
+
+    ConvertToText();
+}
+
+IdentityValue::IdentityValue(const OID &oid, BufferedTransformation &value, IdentitySource src)
+{
+    SecByteBlockSink sink(m_value);
+    value.TransferTo(sink);
+    m_oid = oid;
+    m_src = src;
+
+    ConvertToText();
+}
+
+IdentityValue::IdentityValue(const OID& oid, const SecByteBlock& value, IdentitySource src)
+    : m_oid(oid), m_value(value), m_src(src)
+{
+    ConvertToText();
+}
+
+IdentityValue::IdentityValue(const OID& oid, const std::string &value, IdentitySource src)
+    : m_oid(oid), m_value((const byte*)value.data(), value.size()), m_src(src)
+{
+    ConvertToText();
+}
+
+void IdentityValue::ConvertToText()
+{
     std::ostringstream oss;
-    oss << OidToNameLookup(m_oid) << ": ";
 
     switch (m_src)
     {
@@ -435,6 +491,18 @@ std::ostream& IdentityValue::Print(std::ostream& out) const
         default:
             oss.write((const char*)m_value.data(), m_value.size());
     }
+
+    const std::string& str = oss.str();
+    m_text = SecByteBlock((const byte*)str.data(), str.size());
+}
+
+std::ostream& IdentityValue::Print(std::ostream& out) const
+{
+    if (m_value.empty()) return out;
+
+    std::ostringstream oss;
+    oss << OidToNameLookup(m_oid) << ": ";
+    oss.write((const char*)m_text.data(), m_text.size());
 
     return out << oss.str();
 }
@@ -905,9 +973,7 @@ void X509Certificate::GetIdentitiesFromSubjectUniqueId(IdentityValueArray& ident
 {
     if (HasSubjectUniqueId())
     {
-        IdentityValue identity;
-        identity.m_value = *m_subjectUid.get();
-        identity.m_src = IdentityValue::UniqueId;
+        IdentityValue identity(*m_subjectUid.get(), IdentityValue::UniqueId);
         identityArray.push_back(identity);
     }
 }
@@ -920,10 +986,8 @@ void X509Certificate::GetIdentitiesFromSubjectDistName(IdentityValueArray& ident
         oss << GetSubjectDistinguishedName();
         const std::string id(oss.str());
 
-        IdentityValue identity;
-        identity.m_oid = OID(2)+5+4+49;
-        identity.m_src = IdentityValue::SubjectDN;
-        StringSource(id, true, new SecByteBlockSink(identity.m_value));
+        const OID subjectDN = OID(2)+5+4+49;
+        IdentityValue identity(subjectDN, id, IdentityValue::SubjectDN);
         identityArray.push_back(identity);
     }
 
@@ -938,10 +1002,7 @@ void X509Certificate::GetIdentitiesFromSubjectDistName(IdentityValueArray& ident
         {
             if (first->m_oid == commonName)
             {
-                IdentityValue identity;
-                identity.m_oid = commonName;
-                identity.m_value = first->m_value;
-                identity.m_src = IdentityValue::SubjectCN;
+                IdentityValue identity(commonName, first->m_value, IdentityValue::SubjectCN);
                 identityArray.push_back(identity);
                 break;  // Only one common name
             }
@@ -960,10 +1021,7 @@ void X509Certificate::GetIdentitiesFromSubjectDistName(IdentityValueArray& ident
         {
             if (first->m_oid == uid)
             {
-                IdentityValue identity;
-                identity.m_oid = uid;
-                identity.m_value = first->m_value;
-                identity.m_src = IdentityValue::SubjectUID;
+                IdentityValue identity(uid, first->m_value, IdentityValue::SubjectUID);
                 identityArray.push_back(identity);
                 // Don't break due to multiple UniqueId's
             }
@@ -982,10 +1040,7 @@ void X509Certificate::GetIdentitiesFromSubjectDistName(IdentityValueArray& ident
         {
             if (first->m_oid == email)
             {
-                IdentityValue identity;
-                identity.m_oid = email;
-                identity.m_value = first->m_value;
-                identity.m_src = IdentityValue::SubjectEmail;
+                IdentityValue identity(email, first->m_value, IdentityValue::SubjectEmail);
                 identityArray.push_back(identity);
                 // Don't break due to multiple emails
             }
@@ -1015,9 +1070,8 @@ void X509Certificate::GetIdentitiesFromSubjectAltName(IdentityValueArray& identi
               if (! BERLengthDecode(seq, l))
                   BERDecodeError();
 
-              IdentityValue identity;
-              identity.m_oid = subjectAltName;
-              SecByteBlock& id = identity.m_value;
+              SecByteBlock value(l);
+              seq.Get(value, value.size());
 
               switch (c)
               {
@@ -1030,33 +1084,25 @@ void X509Certificate::GetIdentitiesFromSubjectAltName(IdentityValueArray& identi
                   }
                   case 0x81:
                   {
-                    identity.m_src = IdentityValue::rfc822Name;
-                    id.resize(l);
-                    seq.Get(id, id.size());
+                    IdentityValue identity(subjectAltName, value, IdentityValue::rfc822Name);
                     identityArray.push_back(identity);
                     break;
                   }
                   case 0x82:
                   {
-                    identity.m_src = IdentityValue::dNSName;
-                    id.resize(l);
-                    seq.Get(id, id.size());
+                    IdentityValue identity(subjectAltName, value, IdentityValue::dNSName);
                     identityArray.push_back(identity);
                     break;
                   }
                   case 0x86:
                   {
-                    identity.m_src = IdentityValue::uniformResourceIdentifier;
-                    id.resize(l);
-                    seq.Get(id, id.size());
+                    IdentityValue identity(subjectAltName, value, IdentityValue::uniformResourceIdentifier);
                     identityArray.push_back(identity);
                     break;
                   }
                   case 0x87:
                   {
-                    identity.m_src = IdentityValue::iPAddress;
-                    id.resize(l);
-                    seq.Get(id, id.size());
+                    IdentityValue identity(subjectAltName, value, IdentityValue::iPAddress);
                     identityArray.push_back(identity);
                     break;
                   }
@@ -1083,14 +1129,7 @@ void X509Certificate::GetIdentitiesFromNetscapeServer(IdentityValueArray& identi
 
         BERSequenceDecoder seq(source);
 
-          IdentityValue identity;
-          identity.m_oid = serverName;
-          identity.m_src = IdentityValue::nsServer;
-
-          SecByteBlock& id = identity.m_value;
-          id.resize(seq.MaxRetrievable());
-          seq.Get(id, id.size());
-
+          IdentityValue identity(serverName, seq, IdentityValue::nsServer);
           identityArray.push_back(identity);
 
         seq.MessageEnd();
