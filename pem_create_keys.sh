@@ -141,6 +141,8 @@ DNS.1  = example.com
 DNS.2  = www.example.com
 DNS.3  = mail.example.com
 DNS.4  = ftp.example.com
+IP.1   = 127.0.0.1
+IP.2   = ::1
 EOF
 
 # And create the cert
