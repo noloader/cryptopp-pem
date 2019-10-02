@@ -37,6 +37,13 @@ NAMESPACE_BEGIN(CryptoPP)
 // Forward declaration
 class Integer;
 
+/// \brief Convert OID to friendly name
+/// \param oid the object identifier
+/// \returns the firendly name for display
+std::string OidToNameLookup(const OID& oid);
+
+/// \brief ASNTag initializer
+/// \details 0 is an invalid tag value
 const ASNTag InvalidTag = static_cast<ASNTag>(0);
 
 /// \brief X.500 Relative Distinguished Name value
@@ -106,6 +113,29 @@ struct ExtensionValue : public ASN1Object
 
 /// \brief Array of X.509 Extension values
 typedef std::vector<ExtensionValue> ExtensionValueArray;
+
+/// \brief X.509 KeyIdentifier value
+struct KeyIdentifierValue : public ASN1Object
+{
+    enum KeyIdentifierType { Hash=1 };
+    const KeyIdentifierType InvalidKeyIdentifier = static_cast<KeyIdentifierType>(0);
+
+    ~KeyIdentifierValue() {}
+    KeyIdentifierValue() : m_type(InvalidKeyIdentifier) {}
+
+    void BERDecode(BufferedTransformation &bt);
+    void DEREncode(BufferedTransformation &bt) const;
+
+    bool ValidateTag(byte tag) const;
+
+    /// \brief Print an Extension value
+    /// \returns ostream reference
+    std::ostream& Print(std::ostream& out) const;
+
+    OID m_oid;
+    SecByteBlock m_identifier;
+    KeyIdentifierType m_type;
+};
 
 /// \brief Identity value
 struct IdentityValue
@@ -302,6 +332,18 @@ public:
     bool HasExtensions() const
         { return m_extensions.get() != NULLPTR; }
 
+    /// \brief Authority key identifier
+    /// \returns Authority key identifier
+    /// \details Authority key identifier is optional and available with X.509 v3.
+    /// \sa GetSubjectKeyIdentifier
+    const KeyIdentifierValue& GetAuthorityKeyIdentifier() const;
+
+    /// \brief Subject key identifier
+    /// \returns Subject key identifier
+    /// \details Subject key identifier is optional and available with X.509 v3.
+    /// \sa GetAuthorityKeyIdentifier
+    const KeyIdentifierValue& GetSubjectKeyIdentifier() const;
+
     /// \brief Print a certificate
     /// \param out ostream object
     /// \returns ostream reference
@@ -342,6 +384,9 @@ protected:
     // information to determine PublicKey_EC<ECP> or PublicKey_EC<EC2N>.
     void GetSubjectPublicKeyInfoOids(BufferedTransformation &bt, OID& algorithm, OID& field) const;
 
+    // Find an extension with the OID. Returns false and end() if not found.
+    bool FindExtension(const OID& oid, ExtensionValueArray::const_iterator& loc) const;
+
 private:
     Version m_version;
     Integer m_serialNumber;
@@ -366,6 +411,10 @@ private:
     // Certificate v3, optional
     member_ptr<ExtensionValueArray> m_extensions;
 
+    // SKI and AKI extensions
+    mutable member_ptr<KeyIdentifierValue> m_subjectKeyIdentifier;    // lazy
+    mutable member_ptr<KeyIdentifierValue> m_authorityKeyIdentifier;  // lazy
+
     // Hack so we can examine the octets and verify the signature
     SecByteBlock m_origCertificate;
     mutable SecByteBlock m_toBeSigned;  // lazy
@@ -376,6 +425,8 @@ inline std::ostream& operator<<(std::ostream& out, const X509Certificate &cert)
 inline std::ostream& operator<<(std::ostream& out, const RdnValue &value)
     { return value.Print(out); }
 inline std::ostream& operator<<(std::ostream& out, const DateValue &value)
+    { return value.Print(out); }
+inline std::ostream& operator<<(std::ostream& out, const KeyIdentifierValue &value)
     { return value.Print(out); }
 
 inline std::ostream& operator<<(std::ostream& out, const RdnValueArray &values)

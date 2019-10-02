@@ -12,6 +12,7 @@
 #include "secblock.h"
 #include "x509cert.h"
 #include "integer.h"
+#include "files.h"
 #include "oids.h"
 #include "trap.h"
 
@@ -56,73 +57,6 @@ public:
 private:
     SecByteBlock& m_block;
 };
-
-struct OidToName
-{
-    OidToName (const OID& o, const std::string& n) : oid(o), name(n) {}
-
-    OID oid;
-    std::string name;
-};
-
-std::string OidToNameLookup(const OID& oid)
-{
-    // Must be sorted by oid. The names are mostly standard.
-    static const OidToName table[] =
-    {
-        { OID(1)+2+840+113549+1+9+1, "EMAIL" },
-        { OID(2)+5+4+ 3, "CN" },     // Common name
-        { OID(2)+5+4+ 4, "SNAME" },  // Surname
-        { OID(2)+5+4+ 5, "SERNO" },  // Serial number
-        { OID(2)+5+4+ 6, "C" },      // Country
-        { OID(2)+5+4+ 7, "L" },      // Locality
-        { OID(2)+5+4+ 8, "ST" },     // State or province
-        { OID(2)+5+4+ 9, "SADDR" },  // Street address
-        { OID(2)+5+4+10, "O" },      // Organization
-        { OID(2)+5+4+11, "OU" },     // Organization unit
-        { OID(2)+5+4+12, "TITLE" },  // Title
-        { OID(2)+5+4+13, "DESC" },   // Description
-        { OID(2)+5+4+16, "PADDR" },  // Postal address
-        { OID(2)+5+4+17, "ZIP" },    // Postal code
-        { OID(2)+5+4+18, "POBOX" },  // Postal office box
-        { OID(2)+5+4+20, "TEL" },    // Phone number
-        { OID(2)+5+4+23, "FAX" },    // Fax number
-        { OID(2)+5+4+35, "PASSWD" }, // User password
-        { OID(2)+5+4+36, "EECERT" }, // User certificate
-        { OID(2)+5+4+37, "CACERT" }, // CA certificate
-        { OID(2)+5+4+41, "NAME" },   // Name
-        { OID(2)+5+4+42, "GNAME" },  // Given name
-        { OID(2)+5+4+45, "UID" },    // Unique identifier
-        { OID(2)+5+4+49, "DN" },     // Distinguished name
-    };
-    static const size_t elements = COUNTOF(table);
-
-    // binary search
-    size_t first  = 0;
-    size_t last   = elements - 1;
-    size_t middle = (first+last)/2;
-
-    while (first <= last)
-    {
-        if (table[middle].oid < oid)
-        {
-            first = middle + 1;
-        }
-        else if (table[middle].oid == oid)
-        {
-            return table[middle].name;
-        }
-        else
-            last = middle - 1;
-
-        middle = (first + last)/2;
-    }
-
-    // Not found, return oid.
-    std::ostringstream oss;
-    oss << oid;
-    return oss.str();
-}
 
 bool HasOptionalAttribute(const BufferedTransformation &bt, byte tag)
 {
@@ -173,6 +107,94 @@ inline bool IsECBinaryFieldAlgorithm(const OID& alg, const OID& field)
 ANONYMOUS_NAMESPACE_END
 
 NAMESPACE_BEGIN(CryptoPP)
+
+struct OidToName
+{
+    OidToName (const OID& o, const std::string& n) : oid(o), name(n) {}
+
+    OID oid;
+    std::string name;
+};
+
+std::string OidToNameLookup(const OID& oid)
+{
+    // Must be sorted by oid. The names are mostly standard.
+    static const OidToName table[] =
+    {
+        { OID(1)+2+840+113549+1+1+1, "rsaEncryption" },
+        { OID(1)+2+840+113549+1+1+2, "md2WithRSAEncryption" },
+        { OID(1)+2+840+113549+1+1+3, "md4WithRSAEncryption" },
+        { OID(1)+2+840+113549+1+1+4, "md5WithRSAEncryption" },
+        { OID(1)+2+840+113549+1+1+11, "sha256WithRSAEncryption" },
+        { OID(1)+2+840+113549+1+1+12, "sha384WithRSAEncryption" },
+        { OID(1)+2+840+113549+1+1+13, "sha512WithRSAEncryption" },
+        { OID(1)+2+840+113549+1+1+14, "sha224WithRSAEncryption" },
+        { OID(1)+2+840+113549+1+1+15, "sha512-224WithRSAEncryption" },
+        { OID(1)+2+840+113549+1+1+16, "sha512-256WithRSAEncryption" },
+        { OID(1)+2+840+113549+1+9+1, "email" },
+
+        { OID(2)+5+4+ 3,  "CN" },     // Common name
+        { OID(2)+5+4+ 4,  "SNAME" },  // Surname
+        { OID(2)+5+4+ 5,  "SERNO" },  // Serial number
+        { OID(2)+5+4+ 6,  "C" },      // Country
+        { OID(2)+5+4+ 7,  "L" },      // Locality
+        { OID(2)+5+4+ 8,  "ST" },     // State or province
+        { OID(2)+5+4+ 9,  "SADDR" },  // Street address
+        { OID(2)+5+4+10,  "O" },      // Organization
+        { OID(2)+5+4+11,  "OU" },     // Organization unit
+        { OID(2)+5+4+12,  "TITLE" },  // Title
+        { OID(2)+5+4+13,  "DESC" },   // Description
+        { OID(2)+5+4+16,  "PADDR" },  // Postal address
+        { OID(2)+5+4+17,  "ZIP" },    // Postal code
+        { OID(2)+5+4+18,  "POBOX" },  // Postal office box
+        { OID(2)+5+4+20,  "TEL" },    // Phone number
+        { OID(2)+5+4+23,  "FAX" },    // Fax number
+        { OID(2)+5+4+35,  "PASSWD" }, // User password
+        { OID(2)+5+4+36,  "EECERT" }, // User certificate
+        { OID(2)+5+4+37,  "CACERT" }, // CA certificate
+        { OID(2)+5+4+41,  "NAME" },   // Name
+        { OID(2)+5+4+42,  "GNAME" },  // Given name
+        { OID(2)+5+4+45,  "UID" },    // Unique identifier
+        { OID(2)+5+4+49,  "DN" },     // Distinguished name
+
+        { OID(2)+5+29+14, "SKI" },    // Subject key identifier
+        { OID(2)+5+29+15, "KU" },     // Key usage
+        { OID(2)+5+29+17, "SAN" },    // Subject alternate names
+        { OID(2)+5+29+19, "BCONST" }, // Basic constraints
+        { OID(2)+5+29+35, "AKI" },    // Authority key identifier
+        { OID(2)+5+29+37, "EKU" },    // Extended key usage
+
+        { OID(2)+16+840+1+113730+1+12, "ssl-server-name" }, // Netscape server name
+        { OID(2)+16+840+1+113730+1+13, "ns-comment" }       // Netscape comment
+    };
+    static const size_t elements = COUNTOF(table);
+
+    // binary search
+    size_t first  = 0;
+    size_t last   = elements - 1;
+    size_t middle = (first+last)/2;
+
+    while (first <= last)
+    {
+        if (table[middle].oid < oid)
+        {
+            first = middle + 1;
+        }
+        else if (table[middle].oid == oid)
+        {
+            return table[middle].name;
+        }
+        else
+            last = middle - 1;
+
+        middle = (first + last)/2;
+    }
+
+    // Not found, return oid.
+    std::ostringstream oss;
+    oss << oid;
+    return oss.str();
+}
 
 void RdnValue::BERDecode(BufferedTransformation &bt)
 {
@@ -304,6 +326,67 @@ std::ostream& ExtensionValue::Print(std::ostream& out) const
     // TODO: Implement this function
     throw NotImplemented("ExtensionValue::DEREncode");
     return out;
+}
+
+void KeyIdentifierValue::BERDecode(BufferedTransformation &bt)
+{
+    byte tag;
+    if (!bt.Peek(tag) || !ValidateTag(tag))
+        BERDecodeError();
+
+    if (tag == (CONSTRUCTED | SEQUENCE))
+    {
+        // Authority key identifier
+        BERSequenceDecoder seq(bt);
+          if (HasOptionalAttribute(seq, CONTEXT_SPECIFIC|0))
+          {
+              BERGeneralDecoder dec(seq, CONTEXT_SPECIFIC|0);
+                m_identifier.resize(dec.MaxRetrievable());
+                dec.Get(m_identifier, m_identifier.size());
+              dec.MessageEnd();
+          }
+        seq.MessageEnd();
+
+        m_type = KeyIdentifierValue::Hash;
+        m_oid = OID(2)+5+29+35;
+    }
+    else if (tag == OCTET_STRING)
+    {
+        // Subject key identifier
+        BERDecodeOctetString(bt, m_identifier);
+        m_type = KeyIdentifierValue::Hash;
+        m_oid = OID(2)+5+29+14;
+    }
+    else
+        BERDecodeError();
+}
+
+void KeyIdentifierValue::DEREncode(BufferedTransformation &bt) const
+{
+    CRYPTOPP_UNUSED(bt);
+
+    // TODO: Implement this function
+    throw NotImplemented("KeyIdentifierValue::DEREncode");
+}
+
+bool KeyIdentifierValue::ValidateTag(byte tag) const
+{
+    return (tag == (CONSTRUCTED | SEQUENCE)) || tag == OCTET_STRING;
+}
+
+std::ostream& KeyIdentifierValue::Print(std::ostream& out) const
+{
+    std::ostringstream oss;
+    oss << "hash: ";
+
+    HexEncoder encoder;
+    encoder.Put(m_identifier.data(), m_identifier.size());
+
+    SecByteBlock temp(encoder.MaxRetrievable());
+    encoder.Get(temp, temp.size());
+    oss.write((const char*)temp.data(), temp.size());
+
+    return out << oss.str();
 }
 
 void X509Certificate::Save(BufferedTransformation &bt) const
@@ -693,6 +776,84 @@ bool X509Certificate::GetVoidValue(const char *name, const std::type_info &value
     return false;
 }
 
+bool X509Certificate::FindExtension(const OID& oid, ExtensionValueArray::const_iterator& loc) const
+{
+    ExtensionValueArray::const_iterator first = m_extensions.get()->begin();
+    ExtensionValueArray::const_iterator last = m_extensions.get()->end();
+
+    while (first != last)
+    {
+        if (first->m_oid == oid) {
+            loc = first;
+            return true;
+        }
+        ++first;
+    }
+    loc = last;
+    return false;
+}
+
+const KeyIdentifierValue& X509Certificate::GetAuthorityKeyIdentifier() const
+{
+    // OCTET STRING, encapsulates {
+    //   SEQUENCE {
+    //     [0]
+    //       AE 22 75 36 0B F0 D2 37 CB D2 AB 5B 47 B7 9E B0
+    //       ED 15 E5 9A
+    //   }
+    // }
+
+    if (m_authorityKeyIdentifier.get() == NULLPTR)
+    {
+        m_authorityKeyIdentifier.reset(new KeyIdentifierValue);
+        if (HasExtensions())
+        {
+            const OID keyIdentifier = OID(2)+5+29+35;
+            ExtensionValueArray::const_iterator loc;
+
+            if (FindExtension(keyIdentifier, loc))
+            {
+                const ExtensionValue& ext = *loc;
+                ArraySource source(ext.m_value, ext.m_value.size(), true);
+                KeyIdentifierValue& identifier = *m_authorityKeyIdentifier.get();
+                identifier.BERDecode(source);
+            }
+        }
+    }
+
+    return *m_authorityKeyIdentifier.get();
+}
+
+const KeyIdentifierValue& X509Certificate::GetSubjectKeyIdentifier() const
+{
+    // OCTET STRING, encapsulates {
+    //   OCTET STRING
+    //     AE 22 75 36 0B F0 D2 37 CB D2 AB 5B 47 B7 9E B0
+    //     ED 15 E5 9A
+    //   }
+    // }
+
+    if (m_subjectKeyIdentifier.get() == NULLPTR)
+    {
+        m_subjectKeyIdentifier.reset(new KeyIdentifierValue);
+        if (HasExtensions())
+        {
+            const OID keyIdentifier = OID(2)+5+29+14;
+            ExtensionValueArray::const_iterator loc;
+
+            if (FindExtension(keyIdentifier, loc))
+            {
+                const ExtensionValue& ext = *loc;
+                ArraySource source(ext.m_value, ext.m_value.size(), true);
+                KeyIdentifierValue& identifier = *m_subjectKeyIdentifier.get();
+                identifier.BERDecode(source);
+            }
+        }
+    }
+
+    return *m_subjectKeyIdentifier.get();
+}
+
 std::ostream& X509Certificate::Print(std::ostream& out) const
 {
     std::ostringstream oss;
@@ -707,6 +868,9 @@ std::ostream& X509Certificate::Print(std::ostream& out) const
 
     oss << "Issuer DN: " << GetIssuerDistinguishedName() << std::endl;
     oss << "Subject DN: " << GetSubjectDistinguishedName() << std::endl;
+
+    oss << "Authority KeyId: " << GetAuthorityKeyIdentifier() << std::endl;
+    oss << "Subject KeyId: " << GetSubjectKeyIdentifier() << std::endl;
 
     // Format signature
     std::string signature;
