@@ -413,6 +413,25 @@ std::ostream& IdentityValue::Print(std::ostream& out) const
             oss.write((const char*)temp.data(), temp.size());
             break;
         }
+        case iPAddress:
+        {
+            if (m_value.size() == 4)  // ipv4
+            {
+                for (size_t i=0; i<3; ++i)
+                    oss << (unsigned int)m_value[i] << ".";
+                oss << (unsigned int)m_value[3];
+            }
+            else  // ipv6
+            {
+                HexEncoder encoder(NULLPTR, true, 2, ":");
+                encoder.Put(m_value.data(), m_value.size());
+
+                SecByteBlock temp(encoder.MaxRetrievable());
+                encoder.Get(temp, temp.size());
+                oss.write((const char*)temp.data(), temp.size());
+            }
+            break;
+        }
         default:
             oss.write((const char*)m_value.data(), m_value.size());
     }
@@ -1036,7 +1055,8 @@ void X509Certificate::GetIdentitiesFromSubjectAltName(IdentityValueArray& identi
                   case 0x87:
                   {
                     identity.m_src = IdentityValue::iPAddress;
-                    BERDecodeOctetString(seq, id);
+                    id.resize(l);
+                    seq.Get(id, id.size());
                     identityArray.push_back(identity);
                     break;
                   }
