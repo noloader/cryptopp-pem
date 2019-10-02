@@ -344,12 +344,17 @@ public:
     /// \sa GetAuthorityKeyIdentifier
     const KeyIdentifierValue& GetSubjectKeyIdentifier() const;
 
+    /// \brief Identities
+    /// \returns Identities
+    /// \details GetSubjectIdentities() attempts to collect the identities in the certificate.
+    const IdentityValueArray& GetSubjectIdentities() const;
+
     /// \brief Print a certificate
     /// \param out ostream object
     /// \returns ostream reference
     /// \details Print() displays some of the fields of a certificate for
-    ///  debug purposes. Users should modify the class to suit their taste
-    ///  or override this class in a derived class.
+    ///  debug purposes. Users should modify the class or override this
+    ///  class in a derived class to suit their taste.
     virtual std::ostream& Print(std::ostream& out) const;
 
     /// \brief Write certificate data
@@ -365,7 +370,7 @@ protected:
 
     void BERDecodeVersion(BufferedTransformation &bt, Version &version);
     void BERDecodeSignatureAlgorithm(BufferedTransformation &bt, OID &algorithm);
-    void BERDecodeDistinguishedName(BufferedTransformation &bt, RdnValueArray &rdn);
+    void BERDecodeDistinguishedName(BufferedTransformation &bt, RdnValueArray &rdnArray);
     void BERDecodeValidity(BufferedTransformation &bt, DateValue &notBefore, DateValue &notAfter);
     void BERDecodeSubjectPublicKeyInfo(BufferedTransformation &bt, member_ptr<X509PublicKey>& publicKey);
 
@@ -382,6 +387,13 @@ protected:
     // subjectPublicKeyAlgorithm==ecdsa_with_sha384() does not contain enough
     // information to determine PublicKey_EC<ECP> or PublicKey_EC<EC2N>.
     void GetSubjectPublicKeyInfoOids(BufferedTransformation &bt, OID& algorithm, OID& field) const;
+
+    // Identity helper functions. Find them wherever we can.
+    void GetIdentitiesFromSubjectDistName(IdentityValueArray& identityArray) const;
+    void GetIdentitiesFromSubjectAltName(IdentityValueArray& identityArray) const;
+    void GetIdentitiesFromSubjectUniqueId(IdentityValueArray& identityArray) const;
+    void GetIdentitiesFromNetscapeServer(IdentityValueArray& identityArray) const;
+    void GetIdentitiesFromUserPrincipalName(IdentityValueArray& identityArray) const;
 
     // Find an extension with the OID. Returns false and end() if not found.
     bool FindExtension(const OID& oid, ExtensionValueArray::const_iterator& loc) const;
@@ -414,6 +426,9 @@ private:
     mutable member_ptr<KeyIdentifierValue> m_subjectKeyIdentifier;    // lazy
     mutable member_ptr<KeyIdentifierValue> m_authorityKeyIdentifier;  // lazy
 
+    // Identities
+    mutable member_ptr<IdentityValueArray> m_identities;  // lazy
+
     // Hack so we can examine the octets and verify the signature
     SecByteBlock m_origCertificate;
     mutable SecByteBlock m_toBeSigned;  // lazy
@@ -427,6 +442,8 @@ inline std::ostream& operator<<(std::ostream& out, const DateValue &value)
     { return value.Print(out); }
 inline std::ostream& operator<<(std::ostream& out, const KeyIdentifierValue &value)
     { return value.Print(out); }
+inline std::ostream& operator<<(std::ostream& out, const IdentityValue &value)
+    { return value.Print(out); }
 
 inline std::ostream& operator<<(std::ostream& out, const RdnValueArray &values)
 {
@@ -439,6 +456,21 @@ inline std::ostream& operator<<(std::ostream& out, const RdnValueArray &values)
         oss << *beg;
         if (++beg != end)
             { oss << "; "; }
+    }
+    return out << oss.str();
+}
+
+inline std::ostream& operator<<(std::ostream& out, const IdentityValueArray &values)
+{
+    IdentityValueArray::const_iterator beg = values.begin();
+    IdentityValueArray::const_iterator end = values.end();
+    std::ostringstream oss;
+
+    while (beg != end)
+    {
+        oss << *beg;
+        if (++beg != end)
+            { oss << "\n"; }
     }
     return out << oss.str();
 }

@@ -133,6 +133,9 @@ std::string OidToNameLookup(const OID& oid)
         { OID(1)+2+840+113549+1+1+16, "sha512-256WithRSAEncryption" },
         { OID(1)+2+840+113549+1+9+1, "email" },
 
+        { OID(1)+3+6+1+4+1+311+20+2+3, "UPN" },  // Microsoft User Principal Name (UPN)
+                                                 // Found in the SAN as [1] otherName
+
         { OID(2)+5+4+ 3,  "CN" },     // Common name
         { OID(2)+5+4+ 4,  "SNAME" },  // Surname
         { OID(2)+5+4+ 5,  "SERNO" },  // Serial number
@@ -387,6 +390,17 @@ std::ostream& KeyIdentifierValue::Print(std::ostream& out) const
     SecByteBlock temp(encoder.MaxRetrievable());
     encoder.Get(temp, temp.size());
     oss.write((const char*)temp.data(), temp.size());
+
+    return out << oss.str();
+}
+
+std::ostream& IdentityValue::Print(std::ostream& out) const
+{
+    if (m_value.empty()) return out;
+
+    std::ostringstream oss;
+    oss << OidToNameLookup(m_oid) << ": ";
+    oss.write((const char*)m_value.data(), m_value.size());
 
     return out << oss.str();
 }
@@ -811,8 +825,9 @@ const KeyIdentifierValue& X509Certificate::GetAuthorityKeyIdentifier() const
             if (FindExtension(keyIdentifier, loc))
             {
                 const ExtensionValue& ext = *loc;
-                ArraySource source(ext.m_value, ext.m_value.size(), true);
                 KeyIdentifierValue& identifier = *m_authorityKeyIdentifier.get();
+
+                ArraySource source(ext.m_value, ext.m_value.size(), true);
                 identifier.BERDecode(source);
             }
         }
@@ -841,14 +856,227 @@ const KeyIdentifierValue& X509Certificate::GetSubjectKeyIdentifier() const
             if (FindExtension(keyIdentifier, loc))
             {
                 const ExtensionValue& ext = *loc;
-                ArraySource source(ext.m_value, ext.m_value.size(), true);
                 KeyIdentifierValue& identifier = *m_subjectKeyIdentifier.get();
+
+                ArraySource source(ext.m_value, ext.m_value.size(), true);
                 identifier.BERDecode(source);
             }
         }
     }
 
     return *m_subjectKeyIdentifier.get();
+}
+
+void X509Certificate::GetIdentitiesFromSubjectUniqueId(IdentityValueArray& identityArray) const
+{
+    if (HasSubjectUniqueId())
+    {
+        IdentityValue identity;
+        identity.m_value = *m_subjectUid.get();
+        identityArray.push_back(identity);
+    }
+}
+
+void X509Certificate::GetIdentitiesFromSubjectDistName(IdentityValueArray& identityArray) const
+{
+    // The full readable string
+    {
+        std::ostringstream oss;
+        oss << GetSubjectDistinguishedName();
+        const std::string id(oss.str());
+
+        IdentityValue identity;
+        identity.m_oid = OID(2)+5+4+49;
+        StringSource(id, true, new SecByteBlockSink(identity.m_value));
+        identityArray.push_back(identity);
+    }
+
+    // Get the CommonName separately
+    {
+        const RdnValueArray& rdnArray = GetSubjectDistinguishedName();
+        RdnValueArray::const_iterator first = rdnArray.begin();
+        RdnValueArray::const_iterator last = rdnArray.end();
+
+        const OID commonName = OID(2)+5+4+3;
+        while (first != last)
+        {
+            if (first->m_oid == commonName)
+            {
+                IdentityValue identity;
+                identity.m_oid = commonName;
+                identity.m_value = first->m_value;
+                identityArray.push_back(identity);
+                break;  // Only one common name
+            }
+            ++first;
+        }
+    }
+
+    // Get the UniqueId separately
+    {
+        const RdnValueArray& rdnArray = GetSubjectDistinguishedName();
+        RdnValueArray::const_iterator first = rdnArray.begin();
+        RdnValueArray::const_iterator last = rdnArray.end();
+
+        const OID uid = OID(2)+5+4+45;
+        while (first != last)
+        {
+            if (first->m_oid == uid)
+            {
+                IdentityValue identity;
+                identity.m_oid = uid;
+                identity.m_value = first->m_value;
+                identityArray.push_back(identity);
+                // Don't break due to multiple UniqueId's
+            }
+            ++first;
+        }
+    }
+
+    // Get the PKCS#9 email separately
+    {
+        const RdnValueArray& rdnArray = GetSubjectDistinguishedName();
+        RdnValueArray::const_iterator first = rdnArray.begin();
+        RdnValueArray::const_iterator last = rdnArray.end();
+
+        const OID email = OID(1)+2+840+113549+1+9+1;
+        while (first != last)
+        {
+            if (first->m_oid == email)
+            {
+                IdentityValue identity;
+                identity.m_oid = email;
+                identity.m_value = first->m_value;
+                identityArray.push_back(identity);
+                // Don't break due to multiple emails
+            }
+            ++first;
+        }
+    }
+}
+
+void X509Certificate::GetIdentitiesFromSubjectAltName(IdentityValueArray& identityArray) const
+{
+    const OID subjectAltName = OID(2)+5+29+17;
+    ExtensionValueArray::const_iterator loc;
+
+    if (FindExtension(subjectAltName, loc))
+    {
+        const ExtensionValue& ext = *loc;
+        ArraySource source(ext.m_value, ext.m_value.size(), true);
+
+        BERSequenceDecoder seq(source);
+          while (! seq.EndReached())
+          {
+              byte c;
+              if (! seq.Get(c))
+                  BERDecodeError();
+
+              size_t l;
+              if (! BERLengthDecode(seq, l))
+                  BERDecodeError();
+
+              IdentityValue identity;
+              identity.m_oid = subjectAltName;
+              SecByteBlock& id = identity.m_value;
+
+              switch (c)
+              {
+                  case 0x80:
+                  {
+                    // Micosoft PKI can include a User Principal Name in the otherName
+                    // https://security.stackexchange.com/q/62746/29925
+                    CRYPTOPP_ASSERT(0);
+                    break;
+                  }
+                  case 0x81:
+                  {
+                    identity.m_tag = IA5_STRING;
+                    id.resize(l);
+                    seq.Get(id, id.size());
+                    identityArray.push_back(identity);
+                    break;
+                  }
+                  case 0x82:
+                  {
+                    identity.m_tag = IA5_STRING;
+                    id.resize(l);
+                    seq.Get(id, id.size());
+                    identityArray.push_back(identity);
+                    break;
+                  }
+                  case 0x86:
+                  {
+                    identity.m_tag = IA5_STRING;
+                    id.resize(l);
+                    seq.Get(id, id.size());
+                    identityArray.push_back(identity);
+                    break;
+                  }
+                  default:
+                  {
+                    // TODO: add other CHOICEs
+                    seq.Skip(l);
+                  }
+              }
+          }
+        seq.MessageEnd();
+    }
+}
+
+void X509Certificate::GetIdentitiesFromNetscapeServer(IdentityValueArray& identityArray) const
+{
+    const OID serverName = OID(2)+16+840+1+113730+1+12;
+    ExtensionValueArray::const_iterator loc;
+
+    if (FindExtension(serverName, loc))
+    {
+        const ExtensionValue& ext = *loc;
+        ArraySource source(ext.m_value, ext.m_value.size(), true);
+
+        BERSequenceDecoder seq(source);
+
+          IdentityValue identity;
+          identity.m_oid = serverName;
+          identity.m_tag = IA5_STRING;
+
+          SecByteBlock& id = identity.m_value;
+          id.resize(seq.MaxRetrievable());
+          seq.Get(id, id.size());
+
+          identityArray.push_back(identity);
+
+        seq.MessageEnd();
+    }
+}
+
+void X509Certificate::GetIdentitiesFromUserPrincipalName(IdentityValueArray& identityArray) const
+{
+    CRYPTOPP_UNUSED(identityArray);
+
+    const OID upn = OID(1)+3+6+1+4+1+311+20+2+3;
+    CRYPTOPP_UNUSED(upn);
+
+    // TODO: finish this once we get a MS client cert
+}
+
+const IdentityValueArray& X509Certificate::GetSubjectIdentities() const
+{
+    if (m_identities.get() == NULLPTR)
+    {
+        m_identities.reset(new IdentityValueArray);
+        IdentityValueArray identities;
+
+        GetIdentitiesFromSubjectUniqueId(identities);
+        GetIdentitiesFromSubjectDistName(identities);
+        GetIdentitiesFromSubjectAltName(identities);
+        GetIdentitiesFromNetscapeServer(identities);
+        GetIdentitiesFromUserPrincipalName(identities);
+
+        std::swap(*m_identities.get(), identities);
+    }
+
+    return *m_identities.get();
 }
 
 std::ostream& X509Certificate::Print(std::ostream& out) const
@@ -883,7 +1111,7 @@ std::ostream& X509Certificate::Print(std::ostream& out) const
 
     oss << "Signature Alg: " << OidToNameLookup(GetCertificateSignatureAlgorithm()) << std::endl;
     oss << "To Be Signed: " << toBeSigned << std::endl;
-    oss << "Signature: " << signature << std::endl;
+    oss << "Signature: " << signature;
 
     return out << oss.str();
 }

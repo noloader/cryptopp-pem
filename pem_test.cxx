@@ -275,6 +275,9 @@ int main(int argc, char* argv[])
 
             std::cout << "\nDumping certificate:" << std::endl;
             std::cout << cert << std::endl;
+
+            std::cout << "\nDumping identities:" << std::endl;
+            std::cout << cert.GetSubjectIdentities() << std::endl;
         }
         catch(const Exception& ex) {
             std::cout << "Caught exception: " << ex.what() << std::endl;
@@ -285,7 +288,7 @@ int main(int argc, char* argv[])
     // Test cacert.pem. There should be ~130 to ~150 certs in it.
     try
     {
-        std::cout << "Load certificates from cacert.pem" << std::endl;
+        std::cout << "\nLoad certificates from cacert.pem" << std::endl;
 
         FileSource fs("cacert.pem", true);
         ByteQueue t;
