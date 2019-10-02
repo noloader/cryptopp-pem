@@ -49,6 +49,9 @@ struct RdnValue : public ASN1Object
     void DEREncode(BufferedTransformation &bt) const;
 
     bool ValidateTag(byte tag) const;
+
+    /// \brief Print an RDN value
+    /// \returns ostream reference
     std::ostream& Print(std::ostream& out) const;
 
     std::string EncodeRdnValue() const;
@@ -71,6 +74,9 @@ struct DateValue : public ASN1Object
     void DEREncode(BufferedTransformation &bt) const;
 
     bool ValidateTag(byte tag) const;
+
+    /// \brief Print a Date value
+    /// \returns ostream reference
     std::ostream& Print(std::ostream& out) const;
 
     SecByteBlock m_value;
@@ -87,6 +93,9 @@ struct ExtensionValue : public ASN1Object
     void DEREncode(BufferedTransformation &bt) const;
 
     bool ValidateTag(byte tag) const;
+
+    /// \brief Print an Extension value
+    /// \returns ostream reference
     std::ostream& Print(std::ostream& out) const;
 
     OID m_oid;
@@ -104,6 +113,8 @@ struct IdentityValue
     virtual ~IdentityValue() {}
     IdentityValue() : m_tag(InvalidTag) {}
 
+    /// \brief Print an Identity value
+    /// \returns ostream reference
     std::ostream& Print(std::ostream& out) const;
 
     OID m_oid;
@@ -183,11 +194,13 @@ public:
 
     /// \brief Retrieve complete DER encoded certicate
     /// \returns the certificate data
+    /// \sa GetToBeSigned
     const SecByteBlock& GetCertificate () const
         { return m_origCertificate; }
 
     /// \brief Retrieve DER encoded ToBeSigned
     /// \returns the toBeSigned data
+    /// \sa GetCertificate
     const SecByteBlock& GetToBeSigned () const;
 
     /// \brief Version number
@@ -203,21 +216,25 @@ public:
 
     /// \brief Certificate signature algorithm
     /// \returns Certificate signature algorithm
+    /// \sa GetCertificateSignature
     const OID& GetCertificateSignatureAlgorithm() const
         { return m_certSignatureAlgortihm; }
 
     /// \brief Certificate signature
     /// \returns Certificate signature
+    /// \sa GetCertificateSignatureAlgorithm
     const SecByteBlock& GetCertificateSignature() const
         { return m_certSignature; }
 
     /// \brief Validity not before
     /// \returns Validity not before
+    /// \sa GetNotAfter
     const DateValue& GetNotBefore() const
         { return m_notBefore; }
 
     /// \brief Validity not after
     /// \returns Validity not after
+    /// \sa GetNotBefore
     const DateValue& GetNotAfter() const
         { return m_notAfter; }
 
@@ -231,9 +248,24 @@ public:
     const RdnValueArray& GetSubjectDistinguishedName() const
         { return m_subjectName; }
 
+    /// \brief Issuer UniqueId
+    /// \returns Issuer UniqueId
+    /// \details Issuer UniqueId is optional and available with X.509 v2.
+    /// \sa HasIssuerUniqueId
+    const SecByteBlock& GetIssuerUniqueId() const
+        { return *m_issuerUid.get(); }
+
+    /// \brief Subject UniqueId
+    /// \returns Subject UniqueId
+    /// \details Subject UniqueId is optional and available with X.509 v2.
+    /// \sa HasSubjectUniqueId
+    const SecByteBlock& GetSubjectUniqueId() const
+        { return *m_subjectUid.get(); }
+
     /// \brief Certificate extensions
     /// \returns Certificate extensions array
     /// \details Certificate extensions are available with X.509 v3.
+    /// \sa HasExtensions
     const ExtensionValueArray& GetExtensions() const
         { return *m_extensions.get(); }
 
@@ -252,24 +284,27 @@ public:
     /// \brief Determine if Issuer UniqueId is present
     /// \returns true if Issuer UniqueId is present, false otherwise
     /// \details Issuer UniqueId is optional and available with X.509 v2.
+    /// \sa HasSubjectUniqueId, GetIssuerUniqueId
     bool HasIssuerUniqueId() const
         { return m_issuerUid.get() != NULLPTR; }
 
     /// \brief Determine if Subject UniqueId is present
     /// \returns true if Subject UniqueId is present, false otherwise
     /// \details Subject UniqueId is optional and available with X.509 v2.
+    /// \sa HasIssuerUniqueId, GetSubjectUniqueId
     bool HasSubjectUniqueId() const
         { return m_subjectUid.get() != NULLPTR; }
 
     /// \brief Determine if Extensions are present
     /// \returns true if Extensions are present, false otherwise
     /// \details Extensions are optional and available with X.509 v3.
+    /// \sa GetExtensions
     bool HasExtensions() const
         { return m_extensions.get() != NULLPTR; }
 
     /// \brief Print a certificate
     /// \param out ostream object
-    /// \returns Print a certificate
+    /// \returns ostream reference
     /// \details Print() displays some of the fields of a certificate for
     ///  debug purposes. Users should modify the class to suit their taste
     ///  or override this class in a derived class.
