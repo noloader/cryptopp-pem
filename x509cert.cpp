@@ -536,10 +536,13 @@ bool X509Certificate::HasOptionalAttribute(const BufferedTransformation &bt, byt
 
 const SecByteBlock& X509Certificate::GetToBeSigned() const
 {
-    if (m_toBeSigned.empty() && !m_origCertificate.empty())
+    if (m_toBeSigned.get() == NULLPTR)
     {
+        m_toBeSigned.reset(new SecByteBlock);
+        SecByteBlock &toBeSigned = *m_toBeSigned.get();
+
         ArraySource source(m_origCertificate, m_origCertificate.size(), true);
-        SecByteBlockSink sink(m_toBeSigned);
+        SecByteBlockSink sink(toBeSigned);
 
         // The extra gyrations below are due to the ctor removing the tag and length
         BERSequenceDecoder cert(source);   // Certifcate octets, without tag and length
@@ -552,7 +555,7 @@ const SecByteBlock& X509Certificate::GetToBeSigned() const
         cert.MessageEnd();
     }
 
-    return m_toBeSigned;
+    return *m_toBeSigned.get();
 }
 
 /*

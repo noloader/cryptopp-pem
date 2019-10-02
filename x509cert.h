@@ -451,7 +451,7 @@ private:
 
     // Hack so we can examine the octets and verify the signature
     SecByteBlock m_origCertificate;
-    mutable SecByteBlock m_toBeSigned;  // lazy
+    mutable member_ptr<SecByteBlock> m_toBeSigned;  // lazy
 };
 
 inline std::ostream& operator<<(std::ostream& out, const X509Certificate &cert)
