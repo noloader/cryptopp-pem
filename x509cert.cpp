@@ -684,14 +684,9 @@ void X509Certificate::GetSubjectPublicKeyInfoOids(BufferedTransformation &bt, OI
 void X509Certificate::BERDecodeValidity(BufferedTransformation &bt, DateValue &notBefore, DateValue &notAfter)
 {
     BERSequenceDecoder validitiy(bt);
-      BERDecodeDate(validitiy, notBefore);
-      BERDecodeDate(validitiy, notAfter);
+      notBefore.BERDecode(validitiy);
+      notAfter.BERDecode(validitiy);
     validitiy.MessageEnd();
-}
-
-void X509Certificate::BERDecodeDate(BufferedTransformation &bt, DateValue &date)
-{
-    date.BERDecode(bt);
 }
 
 void X509Certificate::BERDecodeDistinguishedName(BufferedTransformation &bt, RdnValueArray &rdnArray)

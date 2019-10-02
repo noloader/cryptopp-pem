@@ -367,7 +367,6 @@ protected:
     void BERDecodeSignatureAlgorithm(BufferedTransformation &bt, OID &algorithm);
     void BERDecodeDistinguishedName(BufferedTransformation &bt, RdnValueArray &rdn);
     void BERDecodeValidity(BufferedTransformation &bt, DateValue &notBefore, DateValue &notAfter);
-    void BERDecodeDate(BufferedTransformation &bt, DateValue &date);
     void BERDecodeSubjectPublicKeyInfo(BufferedTransformation &bt, member_ptr<X509PublicKey>& publicKey);
 
     // Optional attributes
