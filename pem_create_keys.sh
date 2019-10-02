@@ -124,6 +124,7 @@ subjectKeyIdentifier    = hash
 authorityKeyIdentifier  = keyid,issuer
 basicConstraints        = critical,CA:FALSE
 keyUsage                = digitalSignature, keyEncipherment
+extendedKeyUsage        = serverAuth
 subjectAltName          = @alternate_names
 nsComment               = "OpenSSL Generated Certificate"
 
@@ -131,6 +132,7 @@ nsComment               = "OpenSSL Generated Certificate"
 subjectKeyIdentifier    = hash
 basicConstraints        = critical,CA:FALSE
 keyUsage                = digitalSignature, keyEncipherment
+extendedKeyUsage        = serverAuth
 subjectAltName          = @alternate_names
 nsComment               = "OpenSSL Generated Certificate"
 
