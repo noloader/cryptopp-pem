@@ -311,7 +311,7 @@ public:
     /// \returns Subject public key algorithm
     /// \sa GetSubjectPublicKey
     const OID& GetSubjectPublicKeyAlgorithm() const
-        { return m_subjectPublicKeyAlgortihm; }
+        { return m_subjectSignatureAlgortihm; }
 
     /// \brief Subject public key
     /// \returns Subject public key
@@ -420,7 +420,7 @@ private:
     DateValue m_notBefore, m_notAfter;
 
     // The subject's key and algorithm
-    OID m_subjectPublicKeyAlgortihm;
+    OID m_subjectSignatureAlgortihm;
     member_ptr<X509PublicKey> m_subjectPublicKey;
 
     // Certificate v2, optional

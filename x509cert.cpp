@@ -538,7 +538,7 @@ void X509Certificate::BERDecode(BufferedTransformation &bt)
             m_version = v1;  // Default per RFC
 
         m_serialNumber.BERDecode(tbsCertificate);
-        BERDecodeSignatureAlgorithm(tbsCertificate, m_subjectPublicKeyAlgortihm);
+        BERDecodeSignatureAlgorithm(tbsCertificate, m_subjectSignatureAlgortihm);
 
         BERDecodeDistinguishedName(tbsCertificate, m_issuerName);
         BERDecodeValidity(tbsCertificate, m_notBefore, m_notAfter);
@@ -647,7 +647,7 @@ void X509Certificate::BERDecodeSubjectPublicKeyInfo(BufferedTransformation &bt, 
     OID field;      // Field for elliptic curves
 
     // See the comments for BERDecodeSubjectPublicKeyInfo for
-    // why we are not using m_subjectPublicKeyAlgortihm.
+    // why we are not using m_subjectSignatureAlgortihm.
     GetSubjectPublicKeyInfoOids(bt, algorithm, field);
 
     if (IsRSAAlgorithm(algorithm))
