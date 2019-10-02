@@ -1085,7 +1085,7 @@ void X509Certificate::GetIdentitiesFromNetscapeServer(IdentityValueArray& identi
 
           IdentityValue identity;
           identity.m_oid = serverName;
-          identity.m_src = IdentityValue::certExtensions;
+          identity.m_src = IdentityValue::nsServer;
 
           SecByteBlock& id = identity.m_value;
           id.resize(seq.MaxRetrievable());

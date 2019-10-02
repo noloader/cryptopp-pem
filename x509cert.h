@@ -144,7 +144,7 @@ struct IdentityValue
         UniqueId=1, SubjectDN, SubjectCN, SubjectUID, SubjectEmail,
         otherName, rfc822Name, dNSName, x400Address, directoryName,        // SAN
         ediPartyName, uniformResourceIdentifier, iPAddress, registeredID,  // SAN
-        certExtensions, msOtherNameUPN
+        nsServer, msOtherNameUPN
     };
     const IdentitySource InvalidIdentitySource = static_cast<IdentitySource>(0);
 
