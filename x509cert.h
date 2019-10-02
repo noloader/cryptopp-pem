@@ -424,11 +424,11 @@ private:
     member_ptr<X509PublicKey> m_subjectPublicKey;
 
     // Certificate v2, optional
-    member_ptr<SecByteBlock> m_issuerUid;
-    member_ptr<SecByteBlock> m_subjectUid;
+    ASNOptional<SecByteBlock> m_issuerUid;
+    ASNOptional<SecByteBlock> m_subjectUid;
 
     // Certificate v3, optional
-    member_ptr<ExtensionValueArray> m_extensions;
+    ASNOptional<ExtensionValueArray> m_extensions;
 
     // SKI and AKI extensions
     mutable member_ptr<KeyIdentifierValue> m_subjectKeyIdentifier;    // lazy
