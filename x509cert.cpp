@@ -377,7 +377,9 @@ bool KeyIdentifierValue::ValidateTag(byte tag) const
 std::ostream& KeyIdentifierValue::Print(std::ostream& out) const
 {
     std::ostringstream oss;
-    oss << "hash: ";
+
+    if (m_type == Hash)
+        oss << "hash: ";
 
     HexEncoder encoder;
     encoder.Put(m_identifier.data(), m_identifier.size());
@@ -884,7 +886,7 @@ std::ostream& X509Certificate::Print(std::ostream& out) const
     StringSource(binaryToBeSigned, binaryToBeSigned.size(), true, new HexEncoder(new StringSink(toBeSigned)));
     toBeSigned.resize(60); toBeSigned += "...";
 
-    oss << "Signature Alg: " << GetCertificateSignatureAlgorithm() << std::endl;
+    oss << "Signature Alg: " << OidToNameLookup(GetCertificateSignatureAlgorithm()) << std::endl;
     oss << "To Be Signed: " << toBeSigned << std::endl;
     oss << "Signature: " << signature << std::endl;
 
