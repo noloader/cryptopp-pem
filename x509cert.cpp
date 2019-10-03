@@ -3,7 +3,7 @@
 //                and Geoff Beier
 
 ///////////////////////////////////////////////////////////////////////////
-// For documentation on the PEM read and write routines, see
+// For documentation on the X509Certificate class, see
 //   http://www.cryptopp.com/wiki/X509Certificate and
 //   http://www.cryptopp.com/wiki/PEM_Pack
 ///////////////////////////////////////////////////////////////////////////
@@ -116,7 +116,7 @@ struct OidToName
     std::string name;
 };
 
-std::string OidToNameLookup(const OID& oid, const std::string defaultName)
+std::string OidToNameLookup(const OID& oid, const char *defaultName)
 {
     // Must be sorted by oid. The names are mostly standard.
     // Also see X.520, Section 6, for a partial list of LDAP Names.
@@ -177,7 +177,7 @@ std::string OidToNameLookup(const OID& oid, const std::string defaultName)
         { OID(2)+5+4+86,  "URN" },      // Uniform Resource Name
         { OID(2)+5+4+87,  "URL" },      // Uniform Resource Locator
 
-        { OID(2)+5+29+14, "SKI" },    // Subject key identifier
+        { OID(2)+5+29+14, "SPKI" },   // Subject public key identifier
         { OID(2)+5+29+15, "KU" },     // Key usage
         { OID(2)+5+29+17, "SAN" },    // Subject alternate names
         { OID(2)+5+29+19, "BC" },     // Basic constraints
@@ -212,7 +212,12 @@ std::string OidToNameLookup(const OID& oid, const std::string defaultName)
     }
 
     // Not found, return defaultName.
-    return defaultName;
+    if (defaultName != NULLPTR)
+        return defaultName;
+    
+    std::ostringstream oss;
+    oss << oid;
+    return oss.str();
 }
 
 void RdnValue::BERDecode(BufferedTransformation &bt)
@@ -258,7 +263,7 @@ std::string RdnValue::EncodeRdnValue() const
     std::string val = OidToNameLookup(m_oid);
     bool quote = std::find(m_value.begin(), m_value.end(), byte(' ')) != m_value.end();
 
-    if (!val.empty()) val += "=";
+    val += "=";
     if (quote) val += "\"";
     val.append((const char*)ConstBytePtr(m_value), BytePtrSize(m_value));
     if (quote) val += "\"";
@@ -1214,7 +1219,8 @@ std::ostream& X509Certificate::Print(std::ostream& out) const
     StringSource(binaryToBeSigned, binaryToBeSigned.size(), true, new HexEncoder(new StringSink(toBeSigned)));
     toBeSigned.resize(60); toBeSigned += "...";
 
-    oss << "Signature Alg: " << OidToNameLookup(GetCertificateSignatureAlgorithm()) << std::endl;
+    const OID& algorithm = GetCertificateSignatureAlgorithm();
+    oss << "Signature Alg: " << OidToNameLookup(algorithm) << std::endl;
     oss << "To Be Signed: " << toBeSigned << std::endl;
     oss << "Signature: " << signature;
 

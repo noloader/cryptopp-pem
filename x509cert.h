@@ -39,9 +39,11 @@ class Integer;
 
 /// \brief Convert OID to a LDAP name
 /// \param oid the object identifier
+/// \param defaultName the name to use if lookup fails
 /// \returns the LDAP name for display
 /// \details LDAP names are specified in ITU X.520 and other places, like the RFCs.
-std::string OidToNameLookup(const OID& oid, const std::string defaultName="");
+///  If defaultName is NULL, then the OID is used.
+std::string OidToNameLookup(const OID& oid, const char *defaultName=NULLPTR);
 
 /// \brief ASNTag initializer
 /// \details 0 is an invalid tag value
