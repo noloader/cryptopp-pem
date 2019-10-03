@@ -480,48 +480,38 @@ IdentityValue::IdentityValue(const OID& oid, const std::string &value, IdentityS
 
 void IdentityValue::ConvertToText()
 {
-    std::ostringstream oss;
-
     switch (m_src)
     {
         case UniqueId:
         case SubjectPKI:
         {
-            HexEncoder encoder;
+            HexEncoder encoder(new SecByteBlockSink(m_text));
             encoder.Put(ConstBytePtr(m_value), BytePtrSize(m_value));
-
-            SecByteBlock temp;
-            SecByteBlockSink sink(temp);
-            encoder.TransferTo(sink);
-            oss.write((const char*)temp.data(), temp.size());
+            encoder.MessageEnd();
             break;
         }
         case iPAddress:
         {
             if (m_value.size() == 4)  // ipv4
             {
+                std::ostringstream oss;
                 for (size_t i=0; i<3; ++i)
                     oss << (unsigned int)m_value[i] << ".";
                 oss << (unsigned int)m_value[3];
+                const std::string& str = oss.str();
+                m_text = SecByteBlock(ConstBytePtr(str), BytePtrSize(str));
             }
             else  // ipv6
             {
-                HexEncoder encoder(NULLPTR, true, 2, ":");
+                HexEncoder encoder(new SecByteBlockSink(m_text), true, 2, ":");
                 encoder.Put(ConstBytePtr(m_value), BytePtrSize(m_value));
-
-                SecByteBlock temp;
-                SecByteBlockSink sink(temp);
-                encoder.TransferTo(sink);
-                oss.write((const char*)temp.data(), temp.size());
+                encoder.MessageEnd();
             }
             break;
         }
         default:
-            oss.write((const char*)ConstBytePtr(m_value), BytePtrSize(m_value));
+            m_text = m_value;
     }
-
-    const std::string& str = oss.str();
-    m_text = SecByteBlock(ConstBytePtr(str), BytePtrSize(str));
 }
 
 std::ostream& IdentityValue::Print(std::ostream& out) const
@@ -538,7 +528,7 @@ std::ostream& IdentityValue::Print(std::ostream& out) const
 
 std::string IdentityValue::EncodeValue() const
 {
-    if (m_value.empty())
+    if (m_text.empty())
         return "";
     return std::string((const char*)m_text.data(), m_text.size());
 }
