@@ -158,11 +158,11 @@ std::string OidToNameLookup(const OID& oid, const std::string defaultName)
         { OID(2)+5+4+20,  "TEL" },    // Phone number
         { OID(2)+5+4+23,  "FAX" },    // Fax number
         { OID(2)+5+4+35,   "USERPASSWORD" },        // User password
-        { OID(2)+5+4+35.2, "ENCUSERPASSWORD" },     // Encrypted user password
+        { OID(2)+5+4+35+2, "ENCUSERPASSWORD" },     // Encrypted user password
         { OID(2)+5+4+36,   "USERCERTIFICATE" },     // User certificate
-        { OID(2)+5+4+36.2, "ENCUSERCERTIFICATE" },  // Encrypted user certificate
+        { OID(2)+5+4+36+2, "ENCUSERCERTIFICATE" },  // Encrypted user certificate
         { OID(2)+5+4+37,   "CACERTIFICATE" },       // CA certificate
-        { OID(2)+5+4+37.2, "ENCCACERTIFICATE" },    // Encrypted CA certificate
+        { OID(2)+5+4+37+2, "ENCCACERTIFICATE" },    // Encrypted CA certificate
         { OID(2)+5+4+41,  "NAME" },   // Name
         { OID(2)+5+4+42,  "GN" },     // Given name
         { OID(2)+5+4+43,  "I" },      // Initials
@@ -851,6 +851,7 @@ void X509Certificate::BERDecodeSignatureAlgorithm(BufferedTransformation &bt, OI
       bool parametersPresent = seq.EndReached() ? false : BERDecodeAlgorithmParameters(seq);
       // TODO: Figure out what to do here???
       CRYPTOPP_ASSERT(parametersPresent == false);
+      CRYPTOPP_UNUSED(parametersPresent);
     seq.MessageEnd();
 }
 
@@ -1112,6 +1113,7 @@ void X509Certificate::GetIdentitiesFromSubjectAltName(IdentityValueArray& identi
                   default:
                   {
                     // TODO: add other CHOICEs
+                    CRYPTOPP_ASSERT(0);
                     seq.Skip(l);
                   }
               }
