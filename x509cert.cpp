@@ -256,27 +256,29 @@ bool RdnValue::ValidateTag(byte tag) const
     return false;
 }
 
+std::ostream& RdnValue::Print(std::ostream& out) const
+{
+    std::ostringstream oss;
+    oss << OidToNameLookup(m_oid);
+    oss << "=";
+    oss << EncodeValue();
+
+    return out << oss.str();
+}
+
 std::string RdnValue::EncodeValue() const
 {
-    if (m_value.empty()) return "";
+    if (m_value.empty())
+        { return "\"\""; }
 
-    std::string val = OidToNameLookup(m_oid);
     bool quote = std::find(m_value.begin(), m_value.end(), byte(' ')) != m_value.end();
 
-    val += "=";
+    std::string val;
     if (quote) val += "\"";
     val.append((const char*)ConstBytePtr(m_value), BytePtrSize(m_value));
     if (quote) val += "\"";
 
     return val;
-}
-
-std::ostream& RdnValue::Print(std::ostream& out) const
-{
-    if (m_value.empty())
-        return out;
-
-    return out << EncodeValue();
 }
 
 void DateValue::BERDecode(BufferedTransformation &bt)
@@ -309,7 +311,7 @@ bool DateValue::ValidateTag(byte tag) const
 std::ostream& DateValue::Print(std::ostream& out) const
 {
     if (m_value.empty())
-        return out;
+        { return out; }
 
     return out << EncodeValue();
 }
@@ -317,7 +319,8 @@ std::ostream& DateValue::Print(std::ostream& out) const
 std::string DateValue::EncodeValue() const
 {
     if (m_value.empty())
-        return "";
+        { return ""; }
+
     return std::string((const char*)ConstBytePtr(m_value), BytePtrSize(m_value));
 }
 
@@ -356,7 +359,7 @@ bool ExtensionValue::ValidateTag(byte tag) const
 std::ostream& ExtensionValue::Print(std::ostream& out) const
 {
     if (m_value.empty())
-        return out;
+        { return out; }
 
     return out << EncodeValue();
 }
@@ -417,7 +420,7 @@ bool KeyIdentifierValue::ValidateTag(byte tag) const
 std::ostream& KeyIdentifierValue::Print(std::ostream& out) const
 {
     if (m_value.empty())
-        return out;
+        { return out; }
 
     return out << EncodeValue();
 }
@@ -426,7 +429,7 @@ std::string KeyIdentifierValue::EncodeValue() const
 {
     std::string val;
     if (m_type == Hash)
-        val += "hash: ";
+        { val += "hash: "; }
 
     HexEncoder encoder(new StringSink(val));
     encoder.Put(ConstBytePtr(m_value), BytePtrSize(m_value));
@@ -516,8 +519,8 @@ void IdentityValue::ConvertToText()
 
 std::ostream& IdentityValue::Print(std::ostream& out) const
 {
-    if (m_text.empty())
-        return out;
+    if (m_value.empty())
+        { return out; }
 
     std::ostringstream oss;
     oss << OidToNameLookup(m_oid) << ": ";
@@ -529,8 +532,9 @@ std::ostream& IdentityValue::Print(std::ostream& out) const
 std::string IdentityValue::EncodeValue() const
 {
     if (m_text.empty())
-        return "";
-    return std::string((const char*)m_text.data(), m_text.size());
+        { return ""; }
+
+    return std::string((const char*)ConstBytePtr(m_text), BytePtrSize(m_text));
 }
 
 void X509Certificate::Save(BufferedTransformation &bt) const
