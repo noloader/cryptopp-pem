@@ -417,7 +417,7 @@ IdentityValue::IdentityValue(const SecByteBlock& value, IdentitySource src)
 }
 
 IdentityValue::IdentityValue(const std::string &value, IdentitySource src)
-    : m_value((const byte*)value.data(), value.size()), m_src(src)
+    : m_value(ConstBytePtr(value), BytePtrSize(value)), m_src(src)
 {
     ConvertToText();
 }
@@ -448,7 +448,7 @@ IdentityValue::IdentityValue(const OID& oid, const SecByteBlock& value, Identity
 }
 
 IdentityValue::IdentityValue(const OID& oid, const std::string &value, IdentitySource src)
-    : m_oid(oid), m_value((const byte*)value.data(), value.size()), m_src(src)
+    : m_oid(oid), m_value(ConstBytePtr(value), BytePtrSize(value)), m_src(src)
 {
     ConvertToText();
 }
@@ -493,7 +493,7 @@ void IdentityValue::ConvertToText()
     }
 
     const std::string& str = oss.str();
-    m_text = SecByteBlock((const byte*)str.data(), str.size());
+    m_text = SecByteBlock(ConstBytePtr(str), BytePtrSize(str));
 }
 
 std::ostream& IdentityValue::Print(std::ostream& out) const
