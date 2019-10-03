@@ -134,7 +134,7 @@ struct KeyIdentifierValue : public ASN1Object
     std::ostream& Print(std::ostream& out) const;
 
     OID m_oid;
-    SecByteBlock m_identifier;
+    SecByteBlock m_value;
     KeyIdentifierType m_type;
 };
 
@@ -143,7 +143,7 @@ struct KeyIdentifierValue : public ASN1Object
 struct IdentityValue
 {
     enum IdentitySource {
-        UniqueId=1, SubjectDN, SubjectCN, SubjectUID, SubjectEmail,
+        UniqueId=1, SubjectDN, SubjectCN, SubjectUID, SubjectEmail, SubjectPKI,
         otherName, rfc822Name, dNSName, x400Address, directoryName,        // SAN
         ediPartyName, uniformResourceIdentifier, iPAddress, registeredID,  // SAN
         nsServer, msOtherNameUPN
@@ -412,6 +412,7 @@ protected:
     void GetIdentitiesFromSubjectDistName(IdentityValueArray& identityArray) const;
     void GetIdentitiesFromSubjectAltName(IdentityValueArray& identityArray) const;
     void GetIdentitiesFromSubjectUniqueId(IdentityValueArray& identityArray) const;
+    void GetIdentitiesFromSubjectPublicKeyId(IdentityValueArray& identityArray) const;
     void GetIdentitiesFromNetscapeServer(IdentityValueArray& identityArray) const;
     void GetIdentitiesFromUserPrincipalName(IdentityValueArray& identityArray) const;
 

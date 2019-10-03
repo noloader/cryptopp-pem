@@ -360,8 +360,8 @@ void KeyIdentifierValue::BERDecode(BufferedTransformation &bt)
           if (HasOptionalAttribute(seq, CONTEXT_SPECIFIC|0))
           {
               BERGeneralDecoder dec(seq, CONTEXT_SPECIFIC|0);
-                m_identifier.resize(dec.MaxRetrievable());
-                dec.Get(m_identifier, m_identifier.size());
+                m_value.resize(dec.MaxRetrievable());
+                dec.Get(m_value, m_value.size());
               dec.MessageEnd();
           }
         seq.MessageEnd();
@@ -372,7 +372,7 @@ void KeyIdentifierValue::BERDecode(BufferedTransformation &bt)
     else if (tag == OCTET_STRING)
     {
         // Subject key identifier
-        BERDecodeOctetString(bt, m_identifier);
+        BERDecodeOctetString(bt, m_value);
         m_type = KeyIdentifierValue::Hash;
         m_oid = OID(2)+5+29+14;
     }
@@ -401,7 +401,7 @@ std::ostream& KeyIdentifierValue::Print(std::ostream& out) const
         oss << "hash: ";
 
     HexEncoder encoder;
-    encoder.Put(m_identifier.data(), m_identifier.size());
+    encoder.Put(m_value.data(), m_value.size());
 
     SecByteBlock temp(encoder.MaxRetrievable());
     encoder.Get(temp, temp.size());
@@ -460,6 +460,7 @@ void IdentityValue::ConvertToText()
     switch (m_src)
     {
         case UniqueId:
+        case SubjectPKI:
         {
             HexEncoder encoder;
             encoder.Put(m_value.data(), m_value.size());
@@ -982,6 +983,14 @@ void X509Certificate::GetIdentitiesFromSubjectUniqueId(IdentityValueArray& ident
     }
 }
 
+void X509Certificate::GetIdentitiesFromSubjectPublicKeyId(IdentityValueArray& identityArray) const
+{
+    const OID spki = OID(2)+5+29+14;
+    const KeyIdentifierValue& subjectKeyIdentifier = GetSubjectKeyIdentifier();
+    IdentityValue identity(spki, subjectKeyIdentifier.m_value, IdentityValue::SubjectPKI);
+    identityArray.push_back(identity);
+}
+
 void X509Certificate::GetIdentitiesFromSubjectDistName(IdentityValueArray& identityArray) const
 {
     // The full readable string
@@ -1161,6 +1170,7 @@ const IdentityValueArray& X509Certificate::GetSubjectIdentities() const
 
         GetIdentitiesFromSubjectUniqueId(identities);
         GetIdentitiesFromSubjectDistName(identities);
+        GetIdentitiesFromSubjectPublicKeyId(identities);
         GetIdentitiesFromSubjectAltName(identities);
         GetIdentitiesFromNetscapeServer(identities);
         GetIdentitiesFromUserPrincipalName(identities);
