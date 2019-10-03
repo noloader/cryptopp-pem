@@ -555,9 +555,6 @@ void X509Certificate::SaveCertificateBytes(BufferedTransformation &bt)
 
 bool X509Certificate::HasOptionalAttribute(const BufferedTransformation &bt, byte tag) const
 {
-    if (! bt.AnyRetrievable())
-        return false;
-
     byte b;
     if (bt.Peek(b) && b == tag)
         return true;
@@ -588,61 +585,7 @@ const SecByteBlock& X509Certificate::GetToBeSigned() const
     return *m_toBeSigned.get();
 }
 
-/*
-   RFC 5280, Appendix A, pp. 112-116
-
-   Certificate  ::=  SEQUENCE  {
-     tbsCertificate       TBSCertificate,
-     signatureAlgorithm   AlgorithmIdentifier,
-     signature            BIT STRING  }
-
-   TBSCertificate  ::=  SEQUENCE  {
-     version         [0]  Version DEFAULT v1,
-     serialNumber         CertificateSerialNumber,
-     signature            AlgorithmIdentifier,
-     issuer               Name,
-     validity             Validity,
-     subject              Name,
-     subjectPublicKeyInfo SubjectPublicKeyInfo,
-     issuerUniqueID  [1]  IMPLICIT UniqueIdentifier OPTIONAL,
-                          -- If present, version MUST be v2 or v3
-     subjectUniqueID [2]  IMPLICIT UniqueIdentifier OPTIONAL,
-                          -- If present, version MUST be v2 or v3
-     extensions      [3]  Extensions OPTIONAL
-                          -- If present, version MUST be v3 --  }
-
-   AlgorithmIdentifier  ::=  SEQUENCE  {
-     algorithm               OBJECT IDENTIFIER,
-     parameters              ANY DEFINED BY algorithm OPTIONAL  }
-
-   Name ::= CHOICE { -- only one possibility for now --
-      rdnSequence  RDNSequence }
-
-   RDNSequence ::= SEQUENCE OF RelativeDistinguishedName
-
-   DistinguishedName ::=   RDNSequence
-
-   RelativeDistinguishedName ::= SET SIZE (1..MAX) OF AttributeTypeAndValue
-
-   AttributeType           ::= OBJECT IDENTIFIER
-
-   AttributeValue          ::= ANY -- DEFINED BY AttributeType
-
-   AttributeTypeAndValue   ::= SEQUENCE {
-        type    AttributeType,
-        value   AttributeValue  }
-
-   Extensions  ::=  SEQUENCE SIZE (1..MAX) OF Extension
-
-   Extension  ::=  SEQUENCE  {
-     extnID      OBJECT IDENTIFIER,
-     critical    BOOLEAN DEFAULT FALSE,
-     extnValue   OCTET STRING
-                 -- contains the DER encoding of an ASN.1 value
-                 -- corresponding to the extension type identified
-                 -- by extnID  }
-*/
-
+// RFC 5280, Appendix A, pp. 112-116
 void X509Certificate::BERDecode(BufferedTransformation &bt)
 {
     // Stash a copy of the certificate.
