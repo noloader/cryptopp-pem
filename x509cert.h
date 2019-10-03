@@ -130,7 +130,13 @@ typedef std::vector<ExtensionValue> ExtensionValueArray;
 /// \brief X.509 KeyIdentifier value
 struct KeyIdentifierValue : public ASN1Object
 {
-    enum KeyIdentifierType { Hash=1 };
+    enum KeyIdentifierType {
+        /// \brief Hash of the public key
+        Hash=1,
+        /// \brief Distinguised name and serial number
+        DnAndSn
+    };
+    /// \brief Invalid identifier
     const KeyIdentifierType InvalidKeyIdentifier = static_cast<KeyIdentifierType>(0);
 
     ~KeyIdentifierValue() {}

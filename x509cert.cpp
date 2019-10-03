@@ -437,11 +437,24 @@ std::string KeyIdentifierValue::EncodeValue() const
 {
     std::string val;
     if (m_type == Hash)
-        { val += "hash: "; }
+    {
+        val += "hash: ";
 
-    HexEncoder encoder(new StringSink(val));
-    encoder.Put(ConstBytePtr(m_value), BytePtrSize(m_value));
-    encoder.MessageEnd();
+        HexEncoder encoder(new StringSink(val));
+        encoder.Put(ConstBytePtr(m_value), BytePtrSize(m_value));
+        encoder.MessageEnd();
+    }
+    else if (m_type == DnAndSn)
+    {
+        val += "name and serno: ";
+
+        // TODO: finish this once we have a cert
+        // val += "XXX, NNN";
+
+        HexEncoder encoder(new StringSink(val));
+        encoder.Put(ConstBytePtr(m_value), BytePtrSize(m_value));
+        encoder.MessageEnd();
+    }
 
     return val;
 }
