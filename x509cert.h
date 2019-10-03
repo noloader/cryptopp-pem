@@ -64,7 +64,9 @@ struct RdnValue : public ASN1Object
     /// \returns ostream reference
     std::ostream& Print(std::ostream& out) const;
 
-    std::string EncodeRdnValue() const;
+    /// \brief Textual representation
+    /// \returns string representing the value
+    std::string EncodeValue() const;
 
     OID m_oid;
     SecByteBlock m_value;
@@ -89,6 +91,10 @@ struct DateValue : public ASN1Object
     /// \returns ostream reference
     std::ostream& Print(std::ostream& out) const;
 
+    /// \brief Textual representation
+    /// \returns string representing the value
+    std::string EncodeValue() const;
+
     SecByteBlock m_value;
     ASNTag m_tag;
 };
@@ -107,6 +113,10 @@ struct ExtensionValue : public ASN1Object
     /// \brief Print an Extension value
     /// \returns ostream reference
     std::ostream& Print(std::ostream& out) const;
+
+    /// \brief Textual representation
+    /// \returns string representing the value
+    std::string EncodeValue() const;
 
     OID m_oid;
     SecByteBlock m_value;
@@ -134,6 +144,10 @@ struct KeyIdentifierValue : public ASN1Object
     /// \brief Print an Extension value
     /// \returns ostream reference
     std::ostream& Print(std::ostream& out) const;
+
+    /// \brief Textual representation
+    /// \returns string representing the value
+    std::string EncodeValue() const;
 
     OID m_oid;
     SecByteBlock m_value;
@@ -164,6 +178,10 @@ struct IdentityValue
     /// \brief Print an Identity value
     /// \returns ostream reference
     std::ostream& Print(std::ostream& out) const;
+
+    /// \brief Textual representation
+    /// \returns string representing the value
+    std::string EncodeValue() const;
 
     /// \brief Convert value to text
     void ConvertToText();

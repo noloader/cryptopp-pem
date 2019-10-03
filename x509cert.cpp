@@ -214,7 +214,7 @@ std::string OidToNameLookup(const OID& oid, const char *defaultName)
     // Not found, return defaultName.
     if (defaultName != NULLPTR)
         return defaultName;
-    
+
     std::ostringstream oss;
     oss << oid;
     return oss.str();
@@ -256,7 +256,7 @@ bool RdnValue::ValidateTag(byte tag) const
     return false;
 }
 
-std::string RdnValue::EncodeRdnValue() const
+std::string RdnValue::EncodeValue() const
 {
     if (m_value.empty()) return "";
 
@@ -273,10 +273,10 @@ std::string RdnValue::EncodeRdnValue() const
 
 std::ostream& RdnValue::Print(std::ostream& out) const
 {
-    if (m_value.empty()) return out;
+    if (m_value.empty())
+        return out;
 
-    std::string val = EncodeRdnValue();
-    return out.write(&val[0], val.size());
+    return out << EncodeValue();
 }
 
 void DateValue::BERDecode(BufferedTransformation &bt)
@@ -310,7 +310,15 @@ std::ostream& DateValue::Print(std::ostream& out) const
 {
     if (m_value.empty())
         return out;
-    return out.write(reinterpret_cast<const char*>(&m_value[0]), m_value.size());
+
+    return out << EncodeValue();
+}
+
+std::string DateValue::EncodeValue() const
+{
+    if (m_value.empty())
+        return "";
+    return std::string((const char*)ConstBytePtr(m_value), BytePtrSize(m_value));
 }
 
 void ExtensionValue::BERDecode(BufferedTransformation &bt)
@@ -347,9 +355,17 @@ bool ExtensionValue::ValidateTag(byte tag) const
 
 std::ostream& ExtensionValue::Print(std::ostream& out) const
 {
+    if (m_value.empty())
+        return out;
+
+    return out << EncodeValue();
+}
+
+std::string ExtensionValue::EncodeValue() const
+{
     // TODO: Implement this function
-    throw NotImplemented("ExtensionValue::DEREncode");
-    return out;
+    throw NotImplemented("ExtensionValue::EncodeValue");
+    return "";
 }
 
 void KeyIdentifierValue::BERDecode(BufferedTransformation &bt)
@@ -400,20 +416,23 @@ bool KeyIdentifierValue::ValidateTag(byte tag) const
 
 std::ostream& KeyIdentifierValue::Print(std::ostream& out) const
 {
-    std::ostringstream oss;
+    if (m_value.empty())
+        return out;
 
+    return out << EncodeValue();
+}
+
+std::string KeyIdentifierValue::EncodeValue() const
+{
+    std::string val;
     if (m_type == Hash)
-        oss << "hash: ";
+        val += "hash: ";
 
-    HexEncoder encoder;
+    HexEncoder encoder(new StringSink(val));
     encoder.Put(ConstBytePtr(m_value), BytePtrSize(m_value));
+    encoder.MessageEnd();
 
-    SecByteBlock temp;
-    SecByteBlockSink sink(temp);
-    encoder.TransferTo(sink);
-
-    oss.write((const char*)temp.data(), temp.size());
-    return out << oss.str();
+    return val;
 }
 
 IdentityValue::IdentityValue(const SecByteBlock& value, IdentitySource src)
@@ -507,13 +526,21 @@ void IdentityValue::ConvertToText()
 
 std::ostream& IdentityValue::Print(std::ostream& out) const
 {
-    if (m_value.empty()) return out;
+    if (m_text.empty())
+        return out;
 
     std::ostringstream oss;
     oss << OidToNameLookup(m_oid) << ": ";
-    oss.write((const char*)m_text.data(), m_text.size());
+    oss << EncodeValue();
 
     return out << oss.str();
+}
+
+std::string IdentityValue::EncodeValue() const
+{
+    if (m_value.empty())
+        return "";
+    return std::string((const char*)m_text.data(), m_text.size());
 }
 
 void X509Certificate::Save(BufferedTransformation &bt) const
