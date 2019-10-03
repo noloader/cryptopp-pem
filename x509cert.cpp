@@ -260,7 +260,7 @@ std::string RdnValue::EncodeRdnValue() const
 
     if (!val.empty()) val += "=";
     if (quote) val += "\"";
-    val.append((const char*)m_value.data(), m_value.size());
+    val.append((const char*)ConstBytePtr(m_value), BytePtrSize(m_value));
     if (quote) val += "\"";
 
     return val;
@@ -360,8 +360,8 @@ void KeyIdentifierValue::BERDecode(BufferedTransformation &bt)
           if (HasOptionalAttribute(seq, CONTEXT_SPECIFIC|0))
           {
               BERGeneralDecoder dec(seq, CONTEXT_SPECIFIC|0);
-                m_value.resize(dec.MaxRetrievable());
-                dec.Get(m_value, m_value.size());
+                SecByteBlockSink sink(m_value);
+                dec.TransferTo(sink);
               dec.MessageEnd();
           }
         seq.MessageEnd();
@@ -401,12 +401,13 @@ std::ostream& KeyIdentifierValue::Print(std::ostream& out) const
         oss << "hash: ";
 
     HexEncoder encoder;
-    encoder.Put(m_value.data(), m_value.size());
+    encoder.Put(ConstBytePtr(m_value), BytePtrSize(m_value));
 
-    SecByteBlock temp(encoder.MaxRetrievable());
-    encoder.Get(temp, temp.size());
+    SecByteBlock temp;
+    SecByteBlockSink sink(temp);
+    encoder.TransferTo(sink);
+
     oss.write((const char*)temp.data(), temp.size());
-
     return out << oss.str();
 }
 
@@ -463,10 +464,11 @@ void IdentityValue::ConvertToText()
         case SubjectPKI:
         {
             HexEncoder encoder;
-            encoder.Put(m_value.data(), m_value.size());
+            encoder.Put(ConstBytePtr(m_value), BytePtrSize(m_value));
 
-            SecByteBlock temp(encoder.MaxRetrievable());
-            encoder.Get(temp, temp.size());
+            SecByteBlock temp;
+            SecByteBlockSink sink(temp);
+            encoder.TransferTo(sink);
             oss.write((const char*)temp.data(), temp.size());
             break;
         }
@@ -481,16 +483,17 @@ void IdentityValue::ConvertToText()
             else  // ipv6
             {
                 HexEncoder encoder(NULLPTR, true, 2, ":");
-                encoder.Put(m_value.data(), m_value.size());
+                encoder.Put(ConstBytePtr(m_value), BytePtrSize(m_value));
 
-                SecByteBlock temp(encoder.MaxRetrievable());
-                encoder.Get(temp, temp.size());
+                SecByteBlock temp;
+                SecByteBlockSink sink(temp);
+                encoder.TransferTo(sink);
                 oss.write((const char*)temp.data(), temp.size());
             }
             break;
         }
         default:
-            oss.write((const char*)m_value.data(), m_value.size());
+            oss.write((const char*)ConstBytePtr(m_value), BytePtrSize(m_value));
     }
 
     const std::string& str = oss.str();
