@@ -125,10 +125,18 @@ std::string OidToNameLookup(const OID& oid, const char *defaultName)
         { OID(0)+9+2342+19200300+100+1+ 1, "UID" },  // User Id
         { OID(0)+9+2342+19200300+100+1+25, "DC" },   // Domain component
 
+        { OID(1)+2+840+10045+4+3+2, "ecdsaWithSHA256" },
+        { OID(1)+2+840+10045+4+3+3, "ecdsaWithSHA384" },
+        { OID(1)+2+840+10045+4+3+4, "ecdsaWithSHA512" },
+
         { OID(1)+2+840+113549+1+1+1, "rsaEncryption" },
         { OID(1)+2+840+113549+1+1+2, "md2WithRSAEncryption" },
         { OID(1)+2+840+113549+1+1+3, "md4WithRSAEncryption" },
         { OID(1)+2+840+113549+1+1+4, "md5WithRSAEncryption" },
+        { OID(1)+2+840+113549+1+1+5, "sha1WithRSASignature" },
+        { OID(1)+2+840+113549+1+1+6, "rsaOAEPEncryption" },
+        { OID(1)+2+840+113549+1+1+7, "rsaAESOAEP" },
+        { OID(1)+2+840+113549+1+1+10, "rsaSSAPSS" },
         { OID(1)+2+840+113549+1+1+11, "sha256WithRSAEncryption" },
         { OID(1)+2+840+113549+1+1+12, "sha384WithRSAEncryption" },
         { OID(1)+2+840+113549+1+1+13, "sha512WithRSAEncryption" },
