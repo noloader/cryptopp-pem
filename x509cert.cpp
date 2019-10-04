@@ -543,6 +543,20 @@ void IdentityValue::ConvertToText()
             }
             break;
         }
+        case registeredID:
+        {
+            OID oid;
+            ArraySource source(ConstBytePtr(m_value), BytePtrSize(m_value), true);
+            oid.BERDecode(source);
+
+            std::ostringstream oss;
+            oss << oid;
+            const std::string str(oss.str());
+
+            m_text.New(str.size());
+            std::memcpy(BytePtr(m_text), ConstBytePtr(str), BytePtrSize(m_text));
+            break;
+        }
         default:
             m_text = m_value;
     }
@@ -1099,7 +1113,8 @@ void X509Certificate::GetIdentitiesFromSubjectAltName(IdentityValueArray& identi
                   {
                     // Micosoft PKI can include a User Principal Name in the otherName
                     // https://security.stackexchange.com/q/62746/29925
-                    CRYPTOPP_ASSERT(0);
+                    IdentityValue identity(subjectAltName, value, IdentityValue::otherName);
+                    identityArray.push_back(identity);
                     break;
                   }
                   case 0x81:
@@ -1111,6 +1126,24 @@ void X509Certificate::GetIdentitiesFromSubjectAltName(IdentityValueArray& identi
                   case 0x82:
                   {
                     IdentityValue identity(subjectAltName, value, IdentityValue::dNSName);
+                    identityArray.push_back(identity);
+                    break;
+                  }
+                  case 0x83:
+                  {
+                    IdentityValue identity(subjectAltName, value, IdentityValue::x400Address);
+                    identityArray.push_back(identity);
+                    break;
+                  }
+                  case 0x84:
+                  {
+                    IdentityValue identity(subjectAltName, value, IdentityValue::directoryName);
+                    identityArray.push_back(identity);
+                    break;
+                  }
+                  case 0x85:
+                  {
+                    IdentityValue identity(subjectAltName, value, IdentityValue::ediPartyName);
                     identityArray.push_back(identity);
                     break;
                   }
@@ -1126,11 +1159,16 @@ void X509Certificate::GetIdentitiesFromSubjectAltName(IdentityValueArray& identi
                     identityArray.push_back(identity);
                     break;
                   }
+                  case 0x88:
+                  {
+                    IdentityValue identity(subjectAltName, value, IdentityValue::registeredID);
+                    identityArray.push_back(identity);
+                    break;
+                  }
                   default:
                   {
                     // TODO: add other CHOICEs
                     CRYPTOPP_ASSERT(0);
-                    seq.Skip(l);
                   }
               }
           }

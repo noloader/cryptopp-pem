@@ -117,7 +117,7 @@ stateOrProvinceName  = NY
 localityName         = New York
 organizationName     = Example, LLC
 commonName           = Example Company
-emailAddress         = test@example.com
+emailAddress         = support@example.com
 
 [ x509_ext ]
 subjectKeyIdentifier    = hash
