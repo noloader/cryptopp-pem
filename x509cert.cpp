@@ -110,6 +110,7 @@ NAMESPACE_BEGIN(CryptoPP)
 
 struct OidToName
 {
+    virtual ~OidToName() {};
     OidToName (const OID& o, const std::string& n) : oid(o), name(n) {}
 
     OID oid;

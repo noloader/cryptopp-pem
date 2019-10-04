@@ -139,7 +139,7 @@ struct KeyIdentifierValue : public ASN1Object
     /// \brief Invalid identifier
     const KeyIdentifierType InvalidKeyIdentifier = static_cast<KeyIdentifierType>(0);
 
-    ~KeyIdentifierValue() {}
+    virtual ~KeyIdentifierValue() {}
     KeyIdentifierValue() : m_type(InvalidKeyIdentifier) {}
 
     void BERDecode(BufferedTransformation &bt);
