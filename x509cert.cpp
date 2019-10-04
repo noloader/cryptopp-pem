@@ -126,6 +126,11 @@ std::string OidToNameLookup(const OID& oid, const char *defaultName)
         { OID(0)+9+2342+19200300+100+1+ 1, "UID" },  // User Id
         { OID(0)+9+2342+19200300+100+1+25, "DC" },   // Domain component
 
+        { OID(1)+2+840+10045+2+1,   "ecPublicKey" },
+        { OID(1)+2+840+10045+3+1+1, "secp192v1" },
+        { OID(1)+2+840+10045+3+1+2, "secp192v2" },
+        { OID(1)+2+840+10045+3+1+3, "secp192v3" },
+        { OID(1)+2+840+10045+3+1+7, "secp256v1" },
         { OID(1)+2+840+10045+4+3+2, "ecdsaWithSHA256" },
         { OID(1)+2+840+10045+4+3+3, "ecdsaWithSHA384" },
         { OID(1)+2+840+10045+4+3+4, "ecdsaWithSHA512" },
@@ -149,6 +154,10 @@ std::string OidToNameLookup(const OID& oid, const char *defaultName)
 
         { OID(1)+3+6+1+4+1+311+20+2+3, "UPN" },  // Microsoft User Principal Name (UPN)
                                                  // Found in the SAN as [1] otherName
+
+        { OID(1)+3+132+0+33, "secp224r1" },
+        { OID(1)+3+132+0+34, "secp384r1" },
+        { OID(1)+3+132+0+35, "secp521r1" },
 
         { OID(2)+5+4+ 3,  "CN" },     // Common name
         { OID(2)+5+4+ 4,  "SN" },     // Surname
@@ -199,7 +208,7 @@ std::string OidToNameLookup(const OID& oid, const char *defaultName)
     };
     static const size_t elements = COUNTOF(table);
 
-    // binary search
+    // Binary search
     size_t first  = 0;
     size_t last   = elements - 1;
     size_t middle = (first+last)/2;
