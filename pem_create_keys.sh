@@ -102,8 +102,8 @@ echo "-----END BAR-----" >> foobar.pem
 # Test Certificate
 
 cat << EOF > ./example-com.conf
-prompt              = no
 [ req ]
+prompt              = no
 default_bits        = 2048
 default_keyfile     = server-key.pem
 distinguished_name  = subject

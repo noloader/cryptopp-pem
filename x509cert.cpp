@@ -1082,6 +1082,10 @@ void X509Certificate::GetIdentitiesFromSubjectAltName(IdentityValueArray& identi
               if (! seq.Get(c))
                   BERDecodeError();
 
+              // GeneralName must be in range [0] otherName to [8] registeredID
+              if (c < 0x80 || c > 0x88)
+                  BERDecodeError();
+
               size_t l;
               if (! BERLengthDecode(seq, l))
                   BERDecodeError();
