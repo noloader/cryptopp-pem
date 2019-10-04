@@ -143,6 +143,9 @@ DNS.3  = mail.example.com
 DNS.4  = ftp.example.com
 IP.1   = 127.0.0.1
 IP.2   = ::1
+email.1  = webmaster@example.com
+email.2  = ftpmaster@example.com
+email.3  = hostmaster@example.com
 EOF
 
 # And create the cert
