@@ -187,7 +187,10 @@ struct IdentityValue
     /// \returns string representing the value
     std::string EncodeValue() const;
 
-    /// \brief Convert this otherName into a different IdentityValue
+    /// \brief Convert otherName into a different IdentityValue
+    /// \details ConvertOtherName() operates on this object.
+    ///  m_value and m_src can be changed to a new identity
+    ///  type, like a UPN string and msOtherNameUPN type.
     void ConvertOtherName();
 
     OID m_oid;

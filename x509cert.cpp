@@ -562,7 +562,7 @@ std::string IdentityValue::EncodeValue() const
 
 // Micosoft PKI can include a User Principal Name in the otherName
 // https://security.stackexchange.com/q/62746/29925. For the ASN.1
-// see https://tools.ietf.org/html/rfc4556, AppendixA, Appendix C,
+// see https://tools.ietf.org/html/rfc4556, Appendix A, Appendix C,
 // and id-ms-san-sc-logon-upn.
 void IdentityValue::ConvertOtherName()
 {
@@ -1107,22 +1107,22 @@ void X509Certificate::GetIdentitiesFromSubjectAltName(IdentityValueArray& identi
         BERSequenceDecoder seq(source);
           while (! seq.EndReached())
           {
-              byte c;
-              if (! seq.Get(c))
+              byte choice;
+              if (! seq.Get(choice))
                   BERDecodeError();
 
               // GeneralName must be in range [0] otherName to [8] registeredID
-              if (c < 0x80 || c > 0x88)
+              if (choice < 0x80 || choice > 0x88)
                   BERDecodeError();
 
-              size_t l;
-              if (! BERLengthDecode(seq, l))
+              size_t len;
+              if (! BERLengthDecode(seq, len))
                   BERDecodeError();
 
-              SecByteBlock value(l);
+              SecByteBlock value(len);
               seq.Get(value, value.size());
 
-              switch (c)
+              switch (choice)
               {
                   case 0x80:
                   {
