@@ -1196,17 +1196,6 @@ void X509Certificate::GetIdentitiesFromNetscapeServer(IdentityValueArray& identi
     }
 }
 
-void X509Certificate::GetIdentitiesFromUserPrincipalName(IdentityValueArray& identityArray) const
-{
-    CRYPTOPP_UNUSED(identityArray);
-
-    const OID upn = OID(1)+3+6+1+4+1+311+20+2+3;
-    CRYPTOPP_UNUSED(upn);
-
-    // TODO: finish this once we get a MS client cert
-    // identity.m_src = IdentityValue::msOtherNameUPN;
-}
-
 const IdentityValueArray& X509Certificate::GetSubjectIdentities() const
 {
     if (m_identities.get() == NULLPTR)
@@ -1219,7 +1208,6 @@ const IdentityValueArray& X509Certificate::GetSubjectIdentities() const
         GetIdentitiesFromSubjectPublicKeyId(identities);
         GetIdentitiesFromSubjectAltName(identities);
         GetIdentitiesFromNetscapeServer(identities);
-        GetIdentitiesFromUserPrincipalName(identities);
 
         std::swap(*m_identities.get(), identities);
     }

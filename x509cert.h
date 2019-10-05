@@ -440,7 +440,6 @@ protected:
     void GetIdentitiesFromSubjectUniqueId(IdentityValueArray& identityArray) const;
     void GetIdentitiesFromSubjectPublicKeyId(IdentityValueArray& identityArray) const;
     void GetIdentitiesFromNetscapeServer(IdentityValueArray& identityArray) const;
-    void GetIdentitiesFromUserPrincipalName(IdentityValueArray& identityArray) const;
 
     // Find an extension with the OID. Returns false and end() if not found.
     bool FindExtension(const OID& oid, ExtensionValueArray::const_iterator& loc) const;
