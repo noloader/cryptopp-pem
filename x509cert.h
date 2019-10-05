@@ -137,7 +137,7 @@ struct KeyIdentifierValue : public ASN1Object
         DnAndSn
     };
     /// \brief Invalid identifier
-    const KeyIdentifierType InvalidKeyIdentifier = static_cast<KeyIdentifierType>(0);
+    static const KeyIdentifierType InvalidKeyIdentifier = static_cast<KeyIdentifierType>(0);
 
     virtual ~KeyIdentifierValue() {}
     KeyIdentifierValue() : m_type(InvalidKeyIdentifier) {}
@@ -170,7 +170,7 @@ struct IdentityValue
         ediPartyName, uniformResourceIdentifier, iPAddress, registeredID,  // SAN
         nsServer, msOtherNameUPN
     };
-    const IdentitySource InvalidIdentitySource = static_cast<IdentitySource>(0);
+    static const IdentitySource InvalidIdentitySource = static_cast<IdentitySource>(0);
 
     virtual ~IdentityValue() {}
     IdentityValue() : m_src(InvalidIdentitySource) {}

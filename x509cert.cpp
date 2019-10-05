@@ -1122,65 +1122,52 @@ void X509Certificate::GetIdentitiesFromSubjectAltName(IdentityValueArray& identi
               SecByteBlock value(len);
               seq.Get(value, value.size());
 
+              IdentityValue::IdentitySource src = IdentityValue::InvalidIdentitySource;
+
               switch (choice)
               {
                   case 0x80:
-                  {
-                    IdentityValue identity(subjectAltName, value, IdentityValue::otherName);
-                    identityArray.push_back(identity);
+                    src = IdentityValue::otherName;
                     break;
-                  }
+
                   case 0x81:
-                  {
-                    IdentityValue identity(subjectAltName, value, IdentityValue::rfc822Name);
-                    identityArray.push_back(identity);
+                    src = IdentityValue::rfc822Name;
                     break;
-                  }
+
                   case 0x82:
-                  {
-                    IdentityValue identity(subjectAltName, value, IdentityValue::dNSName);
-                    identityArray.push_back(identity);
+                    src = IdentityValue::dNSName;
                     break;
-                  }
+
                   case 0x83:
-                  {
-                    IdentityValue identity(subjectAltName, value, IdentityValue::x400Address);
-                    identityArray.push_back(identity);
+                    src = IdentityValue::x400Address;
                     break;
-                  }
+
                   case 0x84:
-                  {
-                    IdentityValue identity(subjectAltName, value, IdentityValue::directoryName);
-                    identityArray.push_back(identity);
+                    src = IdentityValue::directoryName;
                     break;
-                  }
+
                   case 0x85:
-                  {
-                    IdentityValue identity(subjectAltName, value, IdentityValue::ediPartyName);
-                    identityArray.push_back(identity);
+                    src = IdentityValue::ediPartyName;
                     break;
-                  }
+
                   case 0x86:
-                  {
-                    IdentityValue identity(subjectAltName, value, IdentityValue::uniformResourceIdentifier);
-                    identityArray.push_back(identity);
+                    src = IdentityValue::uniformResourceIdentifier;
                     break;
-                  }
+
                   case 0x87:
-                  {
-                    IdentityValue identity(subjectAltName, value, IdentityValue::iPAddress);
-                    identityArray.push_back(identity);
+                    src = IdentityValue::iPAddress;
                     break;
-                  }
+
                   case 0x88:
-                  {
-                    IdentityValue identity(subjectAltName, value, IdentityValue::registeredID);
-                    identityArray.push_back(identity);
+                    src = IdentityValue::registeredID;
                     break;
-                  }
+
                   default:
-                    ;;
+                    break;
               }
+
+              IdentityValue identity(subjectAltName, value, src);
+              identityArray.push_back(identity);
           }
         seq.MessageEnd();
     }
