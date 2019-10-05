@@ -472,94 +472,29 @@ std::string KeyIdentifierValue::EncodeValue() const
 IdentityValue::IdentityValue(const SecByteBlock& value, IdentitySource src)
     : m_value(value), m_src(src)
 {
-    ConvertToText();
+    if (m_src == otherName)
+        { ConvertOtherName(); }
 }
 
 IdentityValue::IdentityValue(const std::string &value, IdentitySource src)
     : m_value(ConstBytePtr(value), BytePtrSize(value)), m_src(src)
 {
-    ConvertToText();
-}
-
-IdentityValue::IdentityValue(BufferedTransformation &value, IdentitySource src)
-{
-    SecByteBlockSink sink(m_value);
-    value.TransferTo(sink);
-    m_src = src;
-
-    ConvertToText();
-}
-
-IdentityValue::IdentityValue(const OID &oid, BufferedTransformation &value, IdentitySource src)
-{
-    SecByteBlockSink sink(m_value);
-    value.TransferTo(sink);
-    m_oid = oid;
-    m_src = src;
-
-    ConvertToText();
+    if (m_src == otherName)
+        { ConvertOtherName(); }
 }
 
 IdentityValue::IdentityValue(const OID& oid, const SecByteBlock& value, IdentitySource src)
     : m_oid(oid), m_value(value), m_src(src)
 {
-    ConvertToText();
+    if (m_src == otherName)
+        { ConvertOtherName(); }
 }
 
 IdentityValue::IdentityValue(const OID& oid, const std::string &value, IdentitySource src)
     : m_oid(oid), m_value(ConstBytePtr(value), BytePtrSize(value)), m_src(src)
 {
-    ConvertToText();
-}
-
-void IdentityValue::ConvertToText()
-{
-    switch (m_src)
-    {
-        case UniqueId:
-        case SubjectPKI:
-        {
-            HexEncoder encoder(new SecByteBlockSink(m_text));
-            encoder.Put(ConstBytePtr(m_value), BytePtrSize(m_value));
-            encoder.MessageEnd();
-            break;
-        }
-        case iPAddress:
-        {
-            if (m_value.size() == 4)  // ipv4
-            {
-                std::ostringstream oss;
-                for (size_t i=0; i<3; ++i)
-                    oss << (unsigned int)m_value[i] << ".";
-                oss << (unsigned int)m_value[3];
-                const std::string& str = oss.str();
-                m_text = SecByteBlock(ConstBytePtr(str), BytePtrSize(str));
-            }
-            else  // ipv6
-            {
-                HexEncoder encoder(new SecByteBlockSink(m_text), true, 2, ":");
-                encoder.Put(ConstBytePtr(m_value), BytePtrSize(m_value));
-                encoder.MessageEnd();
-            }
-            break;
-        }
-        case registeredID:
-        {
-            OID oid;
-            ArraySource source(ConstBytePtr(m_value), BytePtrSize(m_value), true);
-            oid.BERDecode(source);
-
-            std::ostringstream oss;
-            oss << oid;
-            const std::string str(oss.str());
-
-            m_text.New(str.size());
-            std::memcpy(BytePtr(m_text), ConstBytePtr(str), BytePtrSize(m_text));
-            break;
-        }
-        default:
-            m_text = m_value;
-    }
+    if (m_src == otherName)
+        { ConvertOtherName(); }
 }
 
 std::ostream& IdentityValue::Print(std::ostream& out) const
@@ -576,10 +511,90 @@ std::ostream& IdentityValue::Print(std::ostream& out) const
 
 std::string IdentityValue::EncodeValue() const
 {
-    if (m_text.empty())
-        { return ""; }
+    std::string val;
 
-    return std::string((const char*)ConstBytePtr(m_text), BytePtrSize(m_text));
+    switch (m_src)
+    {
+        case UniqueId:
+        case SubjectPKI:
+        {
+            HexEncoder encoder(new StringSink(val));
+            encoder.Put(ConstBytePtr(m_value), BytePtrSize(m_value));
+            encoder.MessageEnd();
+            break;
+        }
+        case iPAddress:
+        {
+            if (m_value.size() == 4)  // ipv4
+            {
+                std::ostringstream oss;
+                for (size_t i=0; i<3; ++i)
+                    oss << (unsigned int)m_value[i] << ".";
+                oss << (unsigned int)m_value[3];
+                val = oss.str();
+            }
+            else  // ipv6
+            {
+                HexEncoder encoder(new StringSink(val), true, 2, ":");
+                encoder.Put(ConstBytePtr(m_value), BytePtrSize(m_value));
+                encoder.MessageEnd();
+            }
+            break;
+        }
+        case registeredID:
+        {
+            OID oid;
+            ArraySource source(ConstBytePtr(m_value), BytePtrSize(m_value), true);
+            oid.BERDecode(source);
+
+            std::ostringstream oss;
+            oss << oid;
+            val = oss.str();
+            break;
+        }
+        default:
+            val.resize(m_value.size());
+            std::memcpy(BytePtr(val), ConstBytePtr(m_value), BytePtrSize(val));
+    }
+
+    return val;
+}
+
+// Micosoft PKI can include a User Principal Name in the otherName
+// https://security.stackexchange.com/q/62746/29925. For the ASN.1
+// see https://tools.ietf.org/html/rfc4556, AppendixA, Appendix C,
+// and id-ms-san-sc-logon-upn.
+void IdentityValue::ConvertOtherName()
+{
+    CRYPTOPP_ASSERT(m_src == otherName);
+    if (m_src != otherName) { return; }
+
+    // TODO: fix this when we get a test cert
+    if (m_value[0] == OBJECT_IDENTIFIER)
+    {
+        SecByteBlock temp(m_value);
+        ArraySource source(ConstBytePtr(temp), BytePtrSize(temp), true);
+        OID oid; oid.BERDecode(source);
+
+        const OID msUPN = OID(1)+3+6+1+4+1+311+20+2+3;
+        if (oid == msUPN)  // Turn this object into a MS UPN
+        {
+            try
+            {
+                BERSequenceDecoder seq(source);
+                  BERDecodeTextString(seq, m_value, UTF8_STRING);
+                seq.MessageEnd();
+
+                m_oid = msUPN;
+                m_src = msOtherNameUPN;
+            }
+            catch (Exception& ex)
+            {
+                CRYPTOPP_UNUSED(ex);
+                CRYPTOPP_ASSERT(0);
+            }
+        }
+    }
 }
 
 void X509Certificate::Save(BufferedTransformation &bt) const
@@ -1111,8 +1126,6 @@ void X509Certificate::GetIdentitiesFromSubjectAltName(IdentityValueArray& identi
               {
                   case 0x80:
                   {
-                    // Micosoft PKI can include a User Principal Name in the otherName
-                    // https://security.stackexchange.com/q/62746/29925
                     IdentityValue identity(subjectAltName, value, IdentityValue::otherName);
                     identityArray.push_back(identity);
                     break;
@@ -1166,10 +1179,7 @@ void X509Certificate::GetIdentitiesFromSubjectAltName(IdentityValueArray& identi
                     break;
                   }
                   default:
-                  {
-                    // TODO: add other CHOICEs
-                    CRYPTOPP_ASSERT(0);
-                  }
+                    ;;
               }
           }
         seq.MessageEnd();
@@ -1188,7 +1198,11 @@ void X509Certificate::GetIdentitiesFromNetscapeServer(IdentityValueArray& identi
 
         BERSequenceDecoder seq(source);
 
-          IdentityValue identity(serverName, seq, IdentityValue::nsServer);
+          SecByteBlock temp;
+          temp.resize(seq.MaxRetrievable());
+          seq.Get(BytePtr(temp), BytePtrSize(temp));
+
+          IdentityValue identity(serverName, temp, IdentityValue::nsServer);
           identityArray.push_back(identity);
 
         seq.MessageEnd();

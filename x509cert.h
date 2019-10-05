@@ -176,10 +176,8 @@ struct IdentityValue
     IdentityValue() : m_src(InvalidIdentitySource) {}
     IdentityValue(const SecByteBlock &value, IdentitySource src);
     IdentityValue(const std::string &value, IdentitySource src);
-    IdentityValue(BufferedTransformation &value, IdentitySource src);
     IdentityValue(const OID &oid, const SecByteBlock &value, IdentitySource src);
     IdentityValue(const OID &oid, const std::string &value, IdentitySource src);
-    IdentityValue(const OID &oid, BufferedTransformation &value, IdentitySource src);
 
     /// \brief Print an Identity value
     /// \returns ostream reference
@@ -189,12 +187,11 @@ struct IdentityValue
     /// \returns string representing the value
     std::string EncodeValue() const;
 
-    /// \brief Convert value to text
-    void ConvertToText();
+    /// \brief Convert this otherName into a different IdentityValue
+    void ConvertOtherName();
 
     OID m_oid;
     SecByteBlock m_value;  // Raw value from source
-    SecByteBlock m_text;   // Value converted to text
     IdentitySource m_src;
 };
 
