@@ -108,6 +108,18 @@ ANONYMOUS_NAMESPACE_END
 
 NAMESPACE_BEGIN(CryptoPP)
 
+// Named OIDs used in the code below
+const OID id_basicConstraints = OID(2)+5+29+19;
+const OID id_authorityKeyIdentifier = OID(2)+5+29+35;
+const OID id_msUserPrincipalName = OID(1)+3+6+1+4+1+311+20+2+3;
+const OID id_subjectPublicKeyIdentifier = OID(2)+5+29+14;
+const OID id_distinguishedName = OID(2)+5+4+49;
+const OID id_commonName = OID(2)+5+4+3;
+const OID id_uniqueIdentifier = OID(2)+5+4+45;
+const OID id_email = OID(1)+2+840+113549+1+9+1;
+const OID id_subjectAltName = OID(2)+5+29+17;
+const OID id_netscapeServerName = OID(2)+16+840+1+113730+1+12;
+
 struct OidToName
 {
     virtual ~OidToName() {};
@@ -150,16 +162,16 @@ std::string OidToNameLookup(const OID& oid, const char *defaultName)
         { OID(1)+2+840+113549+1+1+15, "sha512-224WithRSAEncryption" },
         { OID(1)+2+840+113549+1+1+16, "sha512-256WithRSAEncryption" },
 
-        { OID(1)+2+840+113549+1+9+1, "EMAIL" },  // Email address
+        { id_email, "EMAIL" },  // Email address, part of DN, deprecated
 
-        { OID(1)+3+6+1+4+1+311+20+2+3, "UPN" },  // Microsoft User Principal Name (UPN)
-                                                 // Found in the SAN as [1] otherName
+        { id_msUserPrincipalName, "UPN" },  // Microsoft User Principal Name (UPN)
+                                            // Found in the SAN as [1] otherName
 
         { OID(1)+3+132+0+33, "secp224r1" },
         { OID(1)+3+132+0+34, "secp384r1" },
         { OID(1)+3+132+0+35, "secp521r1" },
 
-        { OID(2)+5+4+ 3,  "CN" },     // Common name
+        { id_commonName,  "CN" },     // Common name
         { OID(2)+5+4+ 4,  "SN" },     // Surname
         { OID(2)+5+4+ 5,  "SERIALNUMBER" },  // Serial number
         { OID(2)+5+4+ 6,  "C" },      // Country
@@ -185,26 +197,26 @@ std::string OidToNameLookup(const OID& oid, const char *defaultName)
         { OID(2)+5+4+42,  "GN" },     // Given name
         { OID(2)+5+4+43,  "I" },      // Initials
         { OID(2)+5+4+44,  "GENERATION" },  // Generation qualifier, Jr., Sr., etc
-        { OID(2)+5+4+45,  "UID" },    // X.500 Unique identifier
-        { OID(2)+5+4+49,  "DN" },     // Distinguished name
-        { OID(2)+5+4+51,  "HOUSE" },  // House identifier
-        { OID(2)+5+4+65,  "PSEUDONYM" },  // Pseudonym
-        { OID(2)+5+4+78,  "OID" },      // Object identifier
-        { OID(2)+5+4+83,  "URI" },      // Uniform Resource Identifier
-        { OID(2)+5+4+85,  "USERPWD" },  // URI user password
-        { OID(2)+5+4+86,  "URN" },      // Uniform Resource Name
-        { OID(2)+5+4+87,  "URL" },      // Uniform Resource Locator
+        { id_uniqueIdentifier,  "UID" },   // X.500 Unique identifier
+        { OID(2)+5+4+49,  "DN" },          // Distinguished name
+        { OID(2)+5+4+51,  "HOUSE" },       // House identifier
+        { OID(2)+5+4+65,  "PSEUDONYM" },   // Pseudonym
+        { OID(2)+5+4+78,  "OID" },         // Object identifier
+        { OID(2)+5+4+83,  "URI" },         // Uniform Resource Identifier
+        { OID(2)+5+4+85,  "USERPWD" },     // URI user password
+        { OID(2)+5+4+86,  "URN" },         // Uniform Resource Name
+        { OID(2)+5+4+87,  "URL" },         // Uniform Resource Locator
 
-        { OID(2)+5+29+14, "SPKI" },   // Subject public key identifier
-        { OID(2)+5+29+15, "KU" },     // Key usage
-        { OID(2)+5+29+17, "SAN" },    // Subject alternate names
-        { OID(2)+5+29+19, "BC" },     // Basic constraints
-        { OID(2)+5+29+30, "NC" },     // Name constraints
-        { OID(2)+5+29+35, "AKI" },    // Authority key identifier
-        { OID(2)+5+29+37, "EKU" },    // Extended key usage
+        { id_subjectPublicKeyIdentifier, "SPKI" }, // Subject public key identifier
+        { OID(2)+5+29+15, "KU" },                  // Key usage
+        { id_subjectAltName, "SAN" },              // Subject alternate names
+        { id_basicConstraints, "BC" },             // Basic constraints
+        { OID(2)+5+29+30, "NC" },                  // Name constraints
+        { id_authorityKeyIdentifier, "AKI" },      // Authority key identifier
+        { OID(2)+5+29+37, "EKU" },                 // Extended key usage
 
-        { OID(2)+16+840+1+113730+1+12, "ssl-server-name" }, // Netscape server name
-        { OID(2)+16+840+1+113730+1+13, "ns-comment" }       // Netscape comment
+        { id_netscapeServerName, "ssl-server-name" },  // Netscape server name
+        { OID(2)+16+840+1+113730+1+13, "ns-comment" }  // Netscape comment
     };
     static const size_t elements = COUNTOF(table);
 
@@ -408,14 +420,14 @@ void KeyIdentifierValue::BERDecode(BufferedTransformation &bt)
         seq.MessageEnd();
 
         m_type = KeyIdentifierValue::Hash;
-        m_oid = OID(2)+5+29+35;
+        m_oid = id_authorityKeyIdentifier;
     }
     else if (tag == OCTET_STRING)
     {
         // Subject key identifier
         BERDecodeOctetString(bt, m_value);
         m_type = KeyIdentifierValue::Hash;
-        m_oid = OID(2)+5+29+14;
+        m_oid = id_subjectPublicKeyIdentifier;
     }
     else
         BERDecodeError();
@@ -575,7 +587,7 @@ void IdentityValue::ConvertOtherName()
         ArraySource source(ConstBytePtr(temp), BytePtrSize(temp), true);
         OID oid; oid.BERDecode(source);
 
-        const OID msUPN = OID(1)+3+6+1+4+1+311+20+2+3;
+        const OID msUPN = id_msUserPrincipalName;
         if (oid == msUPN)  // Turn this object into a MS UPN
         {
             try
@@ -980,10 +992,8 @@ bool X509Certificate::IsCertificateAuthority() const
     //   pathLenConstraint     INTEGER (0..MAX) OPTIONAL
     // }
 
-    const OID basicConstraints = OID(2)+5+29+19;
     ExtensionValueArray::const_iterator loc;
-
-    if (FindExtension(basicConstraints, loc))
+    if (FindExtension(id_basicConstraints, loc))
     {
         const ExtensionValue& ext = *loc;
         BasicConstraintValue basicConstraints;
@@ -1040,10 +1050,8 @@ const KeyIdentifierValue& X509Certificate::GetAuthorityKeyIdentifier() const
         m_authorityKeyIdentifier.reset(new KeyIdentifierValue);
         if (HasExtensions())
         {
-            const OID keyIdentifier = OID(2)+5+29+35;
             ExtensionValueArray::const_iterator loc;
-
-            if (FindExtension(keyIdentifier, loc))
+            if (FindExtension(id_authorityKeyIdentifier, loc))
             {
                 const ExtensionValue& ext = *loc;
                 KeyIdentifierValue& identifier = *m_authorityKeyIdentifier.get();
@@ -1071,10 +1079,8 @@ const KeyIdentifierValue& X509Certificate::GetSubjectKeyIdentifier() const
         m_subjectKeyIdentifier.reset(new KeyIdentifierValue);
         if (HasExtensions())
         {
-            const OID keyIdentifier = OID(2)+5+29+14;
             ExtensionValueArray::const_iterator loc;
-
-            if (FindExtension(keyIdentifier, loc))
+            if (FindExtension(id_subjectPublicKeyIdentifier, loc))
             {
                 const ExtensionValue& ext = *loc;
                 KeyIdentifierValue& identifier = *m_subjectKeyIdentifier.get();
@@ -1099,9 +1105,8 @@ void X509Certificate::GetIdentitiesFromSubjectUniqueId(IdentityValueArray& ident
 
 void X509Certificate::GetIdentitiesFromSubjectPublicKeyId(IdentityValueArray& identityArray) const
 {
-    const OID spki = OID(2)+5+29+14;
     const KeyIdentifierValue& subjectKeyIdentifier = GetSubjectKeyIdentifier();
-    IdentityValue identity(spki, subjectKeyIdentifier.m_value, IdentityValue::SubjectPKI);
+    IdentityValue identity(id_subjectPublicKeyIdentifier, subjectKeyIdentifier.m_value, IdentityValue::SubjectPKI);
     identityArray.push_back(identity);
 }
 
@@ -1113,8 +1118,7 @@ void X509Certificate::GetIdentitiesFromSubjectDistName(IdentityValueArray& ident
         oss << GetSubjectDistinguishedName();
         const std::string id(oss.str());
 
-        const OID subjectDN = OID(2)+5+4+49;
-        IdentityValue identity(subjectDN, id, IdentityValue::SubjectDN);
+        IdentityValue identity(id_distinguishedName, id, IdentityValue::SubjectDN);
         identityArray.push_back(identity);
     }
 
@@ -1124,12 +1128,11 @@ void X509Certificate::GetIdentitiesFromSubjectDistName(IdentityValueArray& ident
         RdnValueArray::const_iterator first = rdnArray.begin();
         RdnValueArray::const_iterator last = rdnArray.end();
 
-        const OID commonName = OID(2)+5+4+3;
         while (first != last)
         {
-            if (first->m_oid == commonName)
+            if (first->m_oid == id_commonName)
             {
-                IdentityValue identity(commonName, first->m_value, IdentityValue::SubjectCN);
+                IdentityValue identity(id_commonName, first->m_value, IdentityValue::SubjectCN);
                 identityArray.push_back(identity);
                 break;  // Only one common name
             }
@@ -1143,12 +1146,11 @@ void X509Certificate::GetIdentitiesFromSubjectDistName(IdentityValueArray& ident
         RdnValueArray::const_iterator first = rdnArray.begin();
         RdnValueArray::const_iterator last = rdnArray.end();
 
-        const OID uid = OID(2)+5+4+45;
         while (first != last)
         {
-            if (first->m_oid == uid)
+            if (first->m_oid == id_uniqueIdentifier)
             {
-                IdentityValue identity(uid, first->m_value, IdentityValue::SubjectUID);
+                IdentityValue identity(id_uniqueIdentifier, first->m_value, IdentityValue::SubjectUID);
                 identityArray.push_back(identity);
                 // Don't break due to multiple UniqueId's
             }
@@ -1162,12 +1164,11 @@ void X509Certificate::GetIdentitiesFromSubjectDistName(IdentityValueArray& ident
         RdnValueArray::const_iterator first = rdnArray.begin();
         RdnValueArray::const_iterator last = rdnArray.end();
 
-        const OID email = OID(1)+2+840+113549+1+9+1;
         while (first != last)
         {
-            if (first->m_oid == email)
+            if (first->m_oid == id_email)
             {
-                IdentityValue identity(email, first->m_value, IdentityValue::SubjectEmail);
+                IdentityValue identity(id_email, first->m_value, IdentityValue::SubjectEmail);
                 identityArray.push_back(identity);
                 // Don't break due to multiple emails
             }
@@ -1178,10 +1179,8 @@ void X509Certificate::GetIdentitiesFromSubjectDistName(IdentityValueArray& ident
 
 void X509Certificate::GetIdentitiesFromSubjectAltName(IdentityValueArray& identityArray) const
 {
-    const OID subjectAltName = OID(2)+5+29+17;
     ExtensionValueArray::const_iterator loc;
-
-    if (FindExtension(subjectAltName, loc))
+    if (FindExtension(id_subjectAltName, loc))
     {
         const ExtensionValue& ext = *loc;
         ArraySource source(ext.m_value, ext.m_value.size(), true);
@@ -1249,7 +1248,7 @@ void X509Certificate::GetIdentitiesFromSubjectAltName(IdentityValueArray& identi
                     break;
               }
 
-              IdentityValue identity(subjectAltName, value, src);
+              IdentityValue identity(id_subjectAltName, value, src);
               identityArray.push_back(identity);
           }
         seq.MessageEnd();
@@ -1258,10 +1257,8 @@ void X509Certificate::GetIdentitiesFromSubjectAltName(IdentityValueArray& identi
 
 void X509Certificate::GetIdentitiesFromNetscapeServer(IdentityValueArray& identityArray) const
 {
-    const OID serverName = OID(2)+16+840+1+113730+1+12;
     ExtensionValueArray::const_iterator loc;
-
-    if (FindExtension(serverName, loc))
+    if (FindExtension(id_netscapeServerName, loc))
     {
         const ExtensionValue& ext = *loc;
         ArraySource source(ext.m_value, ext.m_value.size(), true);
@@ -1272,7 +1269,7 @@ void X509Certificate::GetIdentitiesFromNetscapeServer(IdentityValueArray& identi
           temp.resize(seq.MaxRetrievable());
           seq.Get(BytePtr(temp), BytePtrSize(temp));
 
-          IdentityValue identity(serverName, temp, IdentityValue::nsServer);
+          IdentityValue identity(id_netscapeServerName, temp, IdentityValue::nsServer);
           identityArray.push_back(identity);
 
         seq.MessageEnd();
