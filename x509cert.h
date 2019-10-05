@@ -103,7 +103,7 @@ struct DateValue : public ASN1Object
 struct ExtensionValue : public ASN1Object
 {
     virtual ~ExtensionValue() {}
-    ExtensionValue() : m_tag(InvalidTag) {}
+    ExtensionValue() : m_tag(InvalidTag), m_critical(false) {}
 
     void BERDecode(BufferedTransformation &bt);
     void DEREncode(BufferedTransformation &bt) const;
@@ -160,6 +160,27 @@ struct KeyIdentifierValue : public ASN1Object
     KeyIdentifierType m_type;
 };
 
+/// \brief X.509 Extension value
+struct BasicConstraintValue : public ASN1Object
+{
+    virtual ~BasicConstraintValue() {}
+    BasicConstraintValue() : m_pathLen(0), m_critical(false), m_ca(false) {}
+
+    void BERDecode(BufferedTransformation &bt);
+    void DEREncode(BufferedTransformation &bt) const;
+
+    /// \brief Print an Extension value
+    /// \returns ostream reference
+    std::ostream& Print(std::ostream& out) const;
+
+    /// \brief Textual representation
+    /// \returns string representing the value
+    std::string EncodeValue() const;
+
+    word32 m_pathLen;
+    bool m_critical, m_ca;
+};
+
 /// \brief Identity value
 /// \details IdentityValue holds an identity and provides a textual representation of it.
 struct IdentityValue
@@ -208,7 +229,7 @@ typedef std::vector<IdentityValue> IdentityValueArray;
 ///  serialNumber, issuerDistinguishedName, subjectDistinguishedName, and
 ///  subjectPublicKeyInfo exposed as a X509PubliKey ready for use in Crypto++
 ///  library algorithms.
-/// \details Most member functions related to saving or encoding a certifcate
+/// \details Most member functions related to saving or encoding a certificate
 ///  have not been cut-in. Calling member functions that have not been cut-in will
 ///  result in NotImplemented exception. Future versions of the X509Certificate
 ///  can provide them.
@@ -378,6 +399,16 @@ public:
     bool HasExtensions() const
         { return m_extensions.get() != NULLPTR; }
 
+    /// \brief Determine if certificate is a CA
+    /// \returns true if the certificate is a CA, false otherwise
+    /// \sa IsSelfSigned
+    bool IsCertificateAuthority() const;
+
+    /// \brief Determine if certificate is self-signed
+    /// \returns true if the certificate is self-signed, false otherwise
+    /// \sa IsCertificateAuthority
+    bool IsSelfSigned() const;
+
     /// \brief Authority key identifier
     /// \returns Authority key identifier
     /// \details Authority key identifier is optional and available with X.509 v3.
@@ -392,7 +423,7 @@ public:
 
     /// \brief Identities
     /// \returns Identities
-    /// \details GetSubjectIdentities() attempts to collect the identities in the certificate.
+    /// \details GetSubjectIdentities() collects the identities in the certificate.
     const IdentityValueArray& GetSubjectIdentities() const;
 
     /// \brief Print a certificate

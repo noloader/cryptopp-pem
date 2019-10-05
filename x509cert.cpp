@@ -350,10 +350,9 @@ void ExtensionValue::BERDecode(BufferedTransformation &bt)
       m_critical = false;
       if (HasOptionalAttribute(seq, BOOLEAN))
       {
-          BERGeneralDecoder flag(seq, BOOLEAN);
-            byte b; flag.Get(b);
-            m_critical = !!b;
-          flag.MessageEnd();
+          word32 flag;
+          BERDecodeUnsigned(seq, flag, BOOLEAN);
+          m_critical = !!flag;
       }
 
       BERDecodeOctetString(seq, m_value);
@@ -402,8 +401,8 @@ void KeyIdentifierValue::BERDecode(BufferedTransformation &bt)
           if (HasOptionalAttribute(seq, CONTEXT_SPECIFIC|0))
           {
               BERGeneralDecoder dec(seq, CONTEXT_SPECIFIC|0);
-                SecByteBlockSink sink(m_value);
-                dec.TransferTo(sink);
+                m_value.New(dec.MaxRetrievable());
+                dec.Get(BytePtr(m_value), BytePtrSize(m_value));
               dec.MessageEnd();
           }
         seq.MessageEnd();
@@ -597,6 +596,37 @@ void IdentityValue::ConvertOtherName()
     }
 }
 
+void BasicConstraintValue::BERDecode(BufferedTransformation &bt)
+{
+    // BasicConstraints ::= SEQUENCE {
+    //   cA                    BOOLEAN DEFAULT FALSE,
+    //   pathLenConstraint     INTEGER (0..MAX) OPTIONAL
+    // }
+
+    BERSequenceDecoder seq(bt);
+      if (HasOptionalAttribute(seq, BOOLEAN))
+      {
+          word32 flag;
+          BERDecodeUnsigned(seq, flag, BOOLEAN);
+          m_ca = !!flag;
+      }
+      if (HasOptionalAttribute(seq, INTEGER))
+      {
+          word32 len;
+          BERDecodeUnsigned(seq, len, INTEGER);
+          m_pathLen = len;
+      }
+    seq.MessageEnd();
+}
+
+void BasicConstraintValue::DEREncode(BufferedTransformation &bt) const
+{
+    CRYPTOPP_UNUSED(bt);
+
+    // TODO: Implement this function
+    throw NotImplemented("BasicConstraintValue::DEREncode");
+}
+
 void X509Certificate::Save(BufferedTransformation &bt) const
 {
     DEREncode(bt);
@@ -615,7 +645,7 @@ void X509Certificate::SaveCertificateBytes(BufferedTransformation &bt)
 
 bool X509Certificate::HasOptionalAttribute(const BufferedTransformation &bt, byte tag) const
 {
-    byte b;
+    byte b = 0;
     if (bt.Peek(b) && b == tag)
         return true;
     return false;
@@ -943,6 +973,58 @@ bool X509Certificate::FindExtension(const OID& oid, ExtensionValueArray::const_i
     return false;
 }
 
+bool X509Certificate::IsCertificateAuthority() const
+{
+    // BasicConstraints ::= SEQUENCE {
+    //   cA                    BOOLEAN DEFAULT FALSE,
+    //   pathLenConstraint     INTEGER (0..MAX) OPTIONAL
+    // }
+
+    const OID basicConstraints = OID(2)+5+29+19;
+    ExtensionValueArray::const_iterator loc;
+
+    if (FindExtension(basicConstraints, loc))
+    {
+        const ExtensionValue& ext = *loc;
+        BasicConstraintValue basicConstraints;
+
+        ArraySource source(ext.m_value, ext.m_value.size(), true);
+        basicConstraints.BERDecode(source);
+
+        return basicConstraints.m_ca;
+    }
+
+    return false;
+}
+
+bool X509Certificate::IsSelfSigned() const
+{
+    // IssuerUID and SubjectUID are optional
+    if (HasIssuerUniqueId() && HasSubjectUniqueId() && GetIssuerUniqueId() == GetSubjectUniqueId())
+        return true;
+
+    // AKI and SPKI are lazy, use accessor
+    if (GetAuthorityKeyIdentifier().m_value == GetSubjectKeyIdentifier().m_value)
+        return true;
+
+    bool same = false;
+    if (m_issuerName.size() == m_subjectName.size())
+    {
+        RdnValueArray::const_iterator a = m_issuerName.begin();
+        RdnValueArray::const_iterator b = m_subjectName.begin();
+        RdnValueArray::const_iterator c = m_issuerName.end();
+
+        same = true;
+        while (a != c)
+        {
+            same = (a->m_value == b->m_value) && same;
+            ++a; ++b;
+        }
+    }
+
+    return same;
+}
+
 const KeyIdentifierValue& X509Certificate::GetAuthorityKeyIdentifier() const
 {
     // OCTET STRING, encapsulates {
@@ -1122,7 +1204,7 @@ void X509Certificate::GetIdentitiesFromSubjectAltName(IdentityValueArray& identi
               SecByteBlock value(len);
               seq.Get(value, value.size());
 
-              IdentityValue::IdentitySource src = IdentityValue::InvalidIdentitySource;
+              IdentityValue::IdentitySource src;
 
               switch (choice)
               {
@@ -1163,6 +1245,7 @@ void X509Certificate::GetIdentitiesFromSubjectAltName(IdentityValueArray& identi
                     break;
 
                   default:
+                    src = IdentityValue::InvalidIdentitySource;
                     break;
               }
 
@@ -1232,6 +1315,9 @@ std::ostream& X509Certificate::Print(std::ostream& out) const
 
     oss << "Authority KeyId: " << GetAuthorityKeyIdentifier() << std::endl;
     oss << "Subject KeyId: " << GetSubjectKeyIdentifier() << std::endl;
+
+    oss << "CA Certificate: " << IsCertificateAuthority() << ", ";
+    oss << "Self Signed: " << IsSelfSigned() << std::endl;
 
     // Format signature
     std::string signature;
