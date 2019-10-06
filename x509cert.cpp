@@ -625,6 +625,54 @@ void IdentityValue::ConvertOtherName()
     }
 }
 
+KeyUsageValue::KeyUsageValue(const OID& oid)
+    : m_oid(oid), m_usage(InvalidKeyUsage)
+{
+    if (oid == OID(1)+3+6+1+5+5+7+3+1)
+        { m_usage = KeyUsageValue::serverAuth; }
+    else if (oid == OID(1)+3+6+1+5+5+7+3+2)
+        { m_usage = KeyUsageValue::clientAuth; }
+    else if (oid == OID(1)+3+6+1+5+5+7+3+3)
+        { m_usage = KeyUsageValue::codeSigning; }
+    else if (oid == OID(1)+3+6+1+5+5+7+3+4)
+        { m_usage = KeyUsageValue::emailProtection; }
+    else if (oid == OID(1)+3+6+1+5+5+7+3+5)
+        { m_usage = KeyUsageValue::ipsecEndSystem; }
+    else if (oid == OID(1)+3+6+1+5+5+7+3+6)
+        { m_usage = KeyUsageValue::ipsecTunnel; }
+    else if (oid == OID(1)+3+6+1+5+5+7+3+7)
+        { m_usage = KeyUsageValue::ipsecUser; }
+    else if (oid == OID(1)+3+6+1+5+5+7+3+8)
+        { m_usage = KeyUsageValue::timeStamping; }
+    else if (oid == OID(1)+3+6+1+5+5+7+3+9)
+        { m_usage = KeyUsageValue::OCSPSigning; }
+    else if (oid == OID(1)+3+6+1+5+5+7+3+10)
+        { m_usage = KeyUsageValue::dvcs; }
+    else if (oid == OID(1)+3+6+1+5+5+7+3+13)
+        { m_usage = KeyUsageValue::eapOverPPP; }
+    else if (oid == OID(1)+3+6+1+5+5+7+3+14)
+        { m_usage = KeyUsageValue::eapOverLAN; }
+    else if (oid == OID(1)+3+6+1+5+5+7+3+17)
+        { m_usage = KeyUsageValue::ipsecIKE; }
+    else if (oid == OID(1)+3+6+1+5+5+7+3+20)
+        { m_usage = KeyUsageValue::sipDomain; }
+    else if (oid == OID(1)+3+6+1+5+5+7+3+21)
+        { m_usage = KeyUsageValue::secureShellClient; }
+    else if (oid == OID(1)+3+6+1+5+5+7+3+22)
+        { m_usage = KeyUsageValue::secureShellServer; }
+    else if (oid == OID(1)+3+6+1+5+5+7+3+27)
+        { m_usage = KeyUsageValue::cmcCA; }
+    else if (oid == OID(1)+3+6+1+5+5+7+3+28)
+        { m_usage = KeyUsageValue::cmcRA; }
+    else if (oid == OID(1)+3+6+1+5+5+7+3+29)
+        { m_usage = KeyUsageValue::cmcArchive; }
+}
+
+KeyUsageValue::KeyUsageValue(const OID& oid, KeyUsageEnum usage)
+    : m_oid(oid), m_usage(usage)
+{
+}
+
 void KeyUsageValue::BERDecode(BufferedTransformation &bt)
 {
     CRYPTOPP_UNUSED(bt);
@@ -1563,50 +1611,8 @@ const KeyUsageValueArray& X509Certificate::GetSubjectKeyUsage() const
                 OID oid;
                 oid.BERDecode(seq);
 
-                KeyUsageValue::KeyUsageEnum eku;
-                if (oid == OID(1)+3+6+1+5+5+7+3+1)
-                    { eku = KeyUsageValue::serverAuth; }
-                else if (oid == OID(1)+3+6+1+5+5+7+3+2)
-                    { eku = KeyUsageValue::clientAuth; }
-                else if (oid == OID(1)+3+6+1+5+5+7+3+3)
-                    { eku = KeyUsageValue::codeSigning; }
-                else if (oid == OID(1)+3+6+1+5+5+7+3+4)
-                    { eku = KeyUsageValue::emailProtection; }
-                else if (oid == OID(1)+3+6+1+5+5+7+3+5)
-                    { eku = KeyUsageValue::ipsecEndSystem; }
-                else if (oid == OID(1)+3+6+1+5+5+7+3+6)
-                    { eku = KeyUsageValue::ipsecTunnel; }
-                else if (oid == OID(1)+3+6+1+5+5+7+3+7)
-                    { eku = KeyUsageValue::ipsecUser; }
-                else if (oid == OID(1)+3+6+1+5+5+7+3+8)
-                    { eku = KeyUsageValue::timeStamping; }
-                else if (oid == OID(1)+3+6+1+5+5+7+3+9)
-                    { eku = KeyUsageValue::OCSPSigning; }
-                else if (oid == OID(1)+3+6+1+5+5+7+3+10)
-                    { eku = KeyUsageValue::dvcs; }
-                else if (oid == OID(1)+3+6+1+5+5+7+3+13)
-                    { eku = KeyUsageValue::eapOverPPP; }
-                else if (oid == OID(1)+3+6+1+5+5+7+3+14)
-                    { eku = KeyUsageValue::eapOverLAN; }
-                else if (oid == OID(1)+3+6+1+5+5+7+3+17)
-                    { eku = KeyUsageValue::ipsecIKE; }
-                else if (oid == OID(1)+3+6+1+5+5+7+3+20)
-                    { eku = KeyUsageValue::sipDomain; }
-                else if (oid == OID(1)+3+6+1+5+5+7+3+21)
-                    { eku = KeyUsageValue::secureShellClient; }
-                else if (oid == OID(1)+3+6+1+5+5+7+3+22)
-                    { eku = KeyUsageValue::secureShellServer; }
-                else if (oid == OID(1)+3+6+1+5+5+7+3+27)
-                    { eku = KeyUsageValue::cmcCA; }
-                else if (oid == OID(1)+3+6+1+5+5+7+3+28)
-                    { eku = KeyUsageValue::cmcRA; }
-                else if (oid == OID(1)+3+6+1+5+5+7+3+29)
-                    { eku = KeyUsageValue::cmcArchive; }
-                else
-                    { eku = KeyUsageValue::InvalidKeyUsage; }
-
-                KeyUsageValue ku(oid, eku);
-                keyUsages.push_back(ku);
+                KeyUsageValue eku(oid);
+                keyUsages.push_back(eku);
               }
             seq.MessageEnd();
         }

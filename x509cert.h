@@ -259,8 +259,16 @@ struct KeyUsageValue : public ASN1Object
     static const KeyUsageEnum InvalidKeyUsage = static_cast<KeyUsageEnum>(128);
 
     virtual ~KeyUsageValue() {}
-    KeyUsageValue() {}
-    KeyUsageValue(const OID& oid, KeyUsageEnum usage) : m_oid(oid), m_usage(usage) {}
+
+    /// \brief Construct a KeyUsageValue
+    /// \details Use this ctor for Extended Key Usage (EKU).
+    ///  KeyUsageEnum can be looked up based on a unique OID.
+    KeyUsageValue(const OID& oid);
+
+    /// \brief Construct a KeyUsageValue
+    /// \details Use this ctor for Key Usage (KU). KeyUsageEnum
+    ///  bitmask is a value of a common OID.
+    KeyUsageValue(const OID& oid, KeyUsageEnum usage);
 
     void BERDecode(BufferedTransformation &bt);
     void DEREncode(BufferedTransformation &bt) const;
