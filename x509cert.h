@@ -336,31 +336,31 @@ struct IdentityValue
         /// \details Optional part of X.509 v3 specification
         SubjectPKI,
         /// \brief SAN otherName
-        /// \details Optional SubjectAlternateName (SAN)
+        /// \details Optional Subject Alternate Name (SAN)
         otherName,
         /// \brief SAN rfc822Name
-        /// \details Optional SubjectAlternateName (SAN)
+        /// \details Optional Subject Alternate Name (SAN)
         rfc822Name,
         /// \brief SAN dNSName
-        /// \details Optional SubjectAlternateName (SAN)
+        /// \details Optional Subject Alternate Name (SAN)
         dNSName,
         /// \brief SAN x400Address
-        /// \details Optional SubjectAlternateName (SAN)
+        /// \details Optional Subject Alternate Name (SAN)
         x400Address,
         /// \brief SAN directoryName
-        /// \details Optional SubjectAlternateName (SAN)
+        /// \details Optional Subject Alternate Name (SAN)
         directoryName,
         /// \brief SAN ediPartyName
-        /// \details Optional SubjectAlternateName (SAN)
+        /// \details Optional Subject Alternate Name (SAN)
         ediPartyName,
         /// \brief SAN uniformResourceIdentifier
-        /// \details Optional SubjectAlternateName (SAN)
+        /// \details Optional Subject Alternate Name (SAN)
         uniformResourceIdentifier,
         /// \brief SAN iPAddress
-        /// \details Optional SubjectAlternateName (SAN)
+        /// \details Optional Subject Alternate Name (SAN)
         iPAddress,
         /// \brief SAN registeredID
-        /// \details Optional SubjectAlternateName (SAN)
+        /// \details Optional Subject Alternate Name (SAN)
         registeredID,
         /// \brief nsServer
         /// \details Optional part of origianl Netscape specification
