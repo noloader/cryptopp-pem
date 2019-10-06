@@ -322,15 +322,16 @@ struct IdentityValue
         /// \details Optional part of X.509 v2 specification
         UniqueId=1,
         /// \brief Subject Distinguished Name
+        /// \details Subject Distinguished Name (DN), which is a mashup of the RDNs
         SubjectDN,
         /// \brief Subject Common Name
-        /// \details RDN, optional part of Subject Distinguished Name (DN)
+        /// \details Common Name RDN, optional part of Subject Distinguished Name (DN)
         SubjectCN,
         /// \brief Subject Unique Identifier
-        /// \details RDN, optional part of Subject Distinguished Name (DN)
+        /// \details Subject Unique Identifier RDN, optional part of Subject Distinguished Name (DN)
         SubjectUID,
         /// \brief PKCS #9 email address
-        /// \details RDN, optional part of Subject Distinguished Name (DN)
+        /// \details PKCS #9 Email RDN, optional part of Subject Distinguished Name (DN)
         SubjectEmail,
         /// \brief Subject Public Key Identifier (SPKI)
         /// \details Optional part of X.509 v3 specification
@@ -363,7 +364,7 @@ struct IdentityValue
         /// \details Optional Subject Alternate Name (SAN)
         registeredID,
         /// \brief nsServer
-        /// \details Optional part of origianl Netscape specification
+        /// \details Optional part of original Netscape specification
         nsServer,
         /// \brief msOtherNameUPN
         /// \details Microsoft Kerberos UserPrincipalName extracted from SAN otherName
@@ -372,7 +373,7 @@ struct IdentityValue
     static const IdentityEnum InvalidIdentityEnum = static_cast<IdentityEnum>(0);
 
     virtual ~IdentityValue() {}
-    IdentityValue() : m_src(InvalidIdentityEnum) {}
+
     IdentityValue(const SecByteBlock &value, IdentityEnum src);
     IdentityValue(const std::string &value, IdentityEnum src);
     IdentityValue(const OID &oid, const SecByteBlock &value, IdentityEnum src);
