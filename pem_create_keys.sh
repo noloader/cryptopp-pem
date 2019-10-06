@@ -53,6 +53,14 @@ if ! $CXX $CXXFLAGS pem_test.cxx ./libcryptopp.a -o pem_test.exe; then
     exit 1
 fi
 
+# Build the reproducer program in case test program crashes
+# The reproducer loads badcert.der.
+
+if ! $CXX $CXXFLAGS badcert.cxx ./libcryptopp.a -o badcert.exe; then
+    echo "Failed to build badcert.exe"
+    exit 1
+fi
+
 ##################################
 # test keys
 
