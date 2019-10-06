@@ -443,6 +443,7 @@ void KeyIdentifierValue::BERDecode(BufferedTransformation &bt)
     {
         // Subject key identifier
         BERDecodeOctetString(bt, m_value);
+
         m_type = KeyIdentifierValue::Hash;
         m_oid = id_subjectPublicKeyIdentifier;
     }

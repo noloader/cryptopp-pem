@@ -265,8 +265,9 @@ int main(int argc, char* argv[])
 
     // Read the OpenSSL generated self-signed end-entity cert for example.com
     {
-        std::cout << "Load X.509 example-com.cert.pem certificate" << std::endl;
         try {
+            std::cout << "Load X.509 example-com.cert.pem certificate" << std::endl;
+
             X509Certificate cert;
             FileSource fs1("example-com.cert.pem", true);
             PEM_Load(fs1, cert);
@@ -283,6 +284,25 @@ int main(int argc, char* argv[])
             std::cout << "Caught exception: " << ex.what() << std::endl;
             fail = true;
         }
+    }
+
+    // Malformed.
+    try
+    {
+        X509Certificate cert;
+        std::cout << "\nLoad malformed X.509 certificate" << std::endl;
+        const std::string pem =
+            "-----BEGIN CERTIFICATE-----\r\n"
+            "MIIE+TCCA+GgAwIBAgIURIR"
+            "-----END CERTIFICATE-----\r\n";
+        ArraySource source(pem, true);
+        PEM_Load(source, cert);
+        std::cout << "  - Failed" << std::endl;
+        fail = true;
+    }
+    catch(const Exception& ex)
+    {
+        std::cout << "  - OK" << std::endl;
     }
 
     // Test cacert.pem. There should be ~130 to ~150 certs in it.
