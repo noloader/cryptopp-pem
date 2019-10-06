@@ -635,6 +635,8 @@ public:
 protected:
     // Crib away the original certificate
     void SaveCertificateBytes(BufferedTransformation &bt);
+    // Clear old certificate data
+    void Reset();
 
     void BERDecodeVersion(BufferedTransformation &bt, Version &version);
     void BERDecodeSignatureAlgorithm(BufferedTransformation &bt, OID &algorithm);

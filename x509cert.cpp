@@ -910,6 +910,29 @@ void X509Certificate::Load(BufferedTransformation &bt)
     BERDecode(bt);
 }
 
+void X509Certificate::Reset()
+{
+    m_origCertificate.New(0);
+    m_certSignature.New(0);
+
+    m_toBeSigned.release();
+    m_keyUsage.release();
+    m_identities.release();
+    m_extensions.release();
+    m_subjectUid.release();
+    m_issuerUid.release();
+    m_subjectPublicKey.release();
+    m_subjectKeyIdentifier.release();
+    m_authorityKeyIdentifier.release();
+
+    m_subjectName.clear();
+    m_issuerName.clear();
+
+    m_certSignatureAlgortihm = OID();
+    m_subjectSignatureAlgortihm = OID();
+    m_notBefore = m_notAfter = DateValue();
+}
+
 void X509Certificate::SaveCertificateBytes(BufferedTransformation &bt)
 {
     m_origCertificate.resize(bt.MaxRetrievable());
@@ -951,6 +974,9 @@ const SecByteBlock& X509Certificate::GetToBeSigned() const
 // RFC 5280, Appendix A, pp. 112-116
 void X509Certificate::BERDecode(BufferedTransformation &bt)
 {
+    // Clear old certificate data
+    Reset();
+
     // Stash a copy of the certificate.
     SaveCertificateBytes(bt);
 
