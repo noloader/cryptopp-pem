@@ -250,9 +250,9 @@ struct KeyUsageValue : public ASN1Object
         cmcRA,
         /// \brief Certificate Management over CMS
         cmcArchive,
-        /// \brief Border gateway router
+        /// \brief BGPsec Router Certificates, Certificate Revocation Lists, and Certification Requests
         bgpsecRouter,
-        /// \brief Brand indicator
+        /// \briefCertificate profile for carrying logotypes
         brandIndicatorforMessageIdentification
     };
     /// \brief Invalid key usage

@@ -24,6 +24,14 @@ if [[ -z $(command -v perl) ]]; then
     exit 1
 fi
 
+# We need OpenSSL 1.0.2 or above
+MODERN_OPENSSL=$(openssl version | grep -v -E '(OpenSSL 0.[0-9]|OpenSSL 1.0.0|OpenSSL 1.0.1)' | wc -l)
+
+if [[ "$MODERN_OPENSSL" -eq 0 ]]; then
+    echo "Please install OpenSSL 1.0.2 or above"
+    exit 1
+fi
+
 ##################################
 # test program
 
