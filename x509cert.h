@@ -74,6 +74,8 @@ struct RdnValue : public ASN1Object
 };
 
 /// \brief Array of Relative Distinguished Name values
+/// \details Vector or RdnValue
+/// \sa RdnValue
 typedef std::vector<RdnValue> RdnValueArray;
 
 /// \brief X.690 Date value
@@ -125,6 +127,8 @@ struct ExtensionValue : public ASN1Object
 };
 
 /// \brief Array of X.509 Extension values
+/// \details Vector or ExtensionValue
+/// \sa ExtensionValue
 typedef std::vector<ExtensionValue> ExtensionValueArray;
 
 /// \brief X.509 KeyIdentifier value
@@ -398,6 +402,9 @@ struct IdentityValue
     IdentityEnum m_src;
 };
 
+/// \brief Array of Identity values
+/// \details Vector or IdentityValue
+/// \sa IdentityValue
 typedef std::vector<IdentityValue> IdentityValueArray;
 
 /// \brief X.509 Certificate
