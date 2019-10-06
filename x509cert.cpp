@@ -1222,10 +1222,12 @@ bool X509Certificate::Validate(RandomNumberGenerator &rng, unsigned int level) c
 
 void X509Certificate::AssignFrom(const NameValuePairs &source)
 {
-    CRYPTOPP_UNUSED(source);
-
-    // TODO: Implement this function
-    throw NotImplemented("X509Certificate::AssignFrom");
+    ConstByteArrayParameter val;
+    if (source.GetValue("Certificate", val))
+    {
+        ArraySource certificate(val.begin(), val.size(), true);
+        Load(certificate);
+    }
 }
 
 bool X509Certificate::GetVoidValue(const char *name, const std::type_info &valueType, void *pValue) const
