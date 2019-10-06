@@ -700,9 +700,11 @@ private:
     // KU and EKU
     mutable member_ptr<KeyUsageValueArray> m_keyUsage;  // lazy
 
-    // Hack so we can examine the octets and verify the signature
-    SecByteBlock m_origCertificate;
+    // To be signed
     mutable member_ptr<SecByteBlock> m_toBeSigned;  // lazy
+
+    // Hack so we can examine the octets. Also see WriteCertificateBytes.
+    SecByteBlock m_origCertificate;
 };
 
 inline std::ostream& operator<<(std::ostream& out, const X509Certificate &cert)
