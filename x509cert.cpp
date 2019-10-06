@@ -60,9 +60,6 @@ private:
 
 bool HasOptionalAttribute(const BufferedTransformation &bt, byte tag)
 {
-    if (! bt.AnyRetrievable())
-        return false;
-
     byte b;
     if (bt.Peek(b) && b == tag)
         return true;
