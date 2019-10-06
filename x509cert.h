@@ -316,11 +316,58 @@ struct BasicConstraintValue : public ASN1Object
 /// \details IdentityValue holds an identity and provides a textual representation of it.
 struct IdentityValue
 {
+    /// \brief Identity source
     enum IdentityEnum {
-        UniqueId=1, SubjectDN, SubjectCN, SubjectUID, SubjectEmail, SubjectPKI,
-        otherName, rfc822Name, dNSName, x400Address, directoryName,        // SAN
-        ediPartyName, uniformResourceIdentifier, iPAddress, registeredID,  // SAN
-        nsServer, msOtherNameUPN
+        /// \brief Subject Unique Identifier
+        /// \details Optional part of X.509 v2 specification
+        UniqueId=1,
+        /// \brief Subject Distinguished Name
+        SubjectDN,
+        /// \brief Subject Common Name
+        /// \details RDN, optional part of Subject Distinguished Name
+        SubjectCN,
+        /// \brief Subject Unique Identifier
+        /// \details RDN, optional part of Subject Distinguished Name
+        SubjectUID,
+        /// \brief PKCS #9 email address
+        /// \details RDN, optional part of Subject Distinguished Name
+        SubjectEmail,
+        /// \brief Subject Public Key Identifier (SPKI)
+        /// \details Optional part of X.509 v3 specification
+        SubjectPKI,
+        /// \brief SAN otherName
+        /// \details Optional SubjectAlternateName (SAN)
+        otherName,
+        /// \brief SAN rfc822Name
+        /// \details Optional SubjectAlternateName (SAN)
+        rfc822Name,
+        /// \brief SAN dNSName
+        /// \details Optional SubjectAlternateName (SAN)
+        dNSName,
+        /// \brief SAN x400Address
+        /// \details Optional SubjectAlternateName (SAN)
+        x400Address,
+        /// \brief SAN directoryName
+        /// \details Optional SubjectAlternateName (SAN)
+        directoryName,
+        /// \brief SAN ediPartyName
+        /// \details Optional SubjectAlternateName (SAN)
+        ediPartyName,
+        /// \brief SAN uniformResourceIdentifier
+        /// \details Optional SubjectAlternateName (SAN)
+        uniformResourceIdentifier,
+        /// \brief SAN iPAddress
+        /// \details Optional SubjectAlternateName (SAN)
+        iPAddress,
+        /// \brief SAN registeredID
+        /// \details Optional SubjectAlternateName (SAN)
+        registeredID,
+        /// \brief nsServer
+        /// \details Optional part of origianl Netscape specification
+        nsServer,
+        /// \brief msOtherNameUPN
+        /// \details Microsoft Kerberos UserPrincipalName extracted from SAN otherName
+        msOtherNameUPN
     };
     static const IdentityEnum InvalidIdentityEnum = static_cast<IdentityEnum>(0);
 
