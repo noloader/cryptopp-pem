@@ -119,6 +119,8 @@ const OID id_uniqueIdentifier = OID(2)+5+4+45;
 const OID id_email = OID(1)+2+840+113549+1+9+1;
 const OID id_subjectAltName = OID(2)+5+29+17;
 const OID id_netscapeServerName = OID(2)+16+840+1+113730+1+12;
+const OID id_keyUsage = OID(2)+5+29+15;
+const OID id_extendedKeyUsage = OID(2)+5+29+37;
 
 struct OidToName
 {
@@ -129,100 +131,115 @@ struct OidToName
     std::string name;
 };
 
+struct OidToNameCompare
+{
+    bool operator() (const OidToName& first, const OidToName& second)
+        { return (first.oid < second.oid); }
+};
+
+typedef std::vector<OidToName> OidToNameArray;
+
+OidToNameArray GetOidToNameTable()
+{
+    // The names are mostly standard. Also see the various RFCs, and
+    // X.520, Section 6, for a partial list of LDAP Names, and
+    // https://www.iana.org/assignments/smi-numbers/smi-numbers.xhtml
+    OidToNameArray table;
+    table.reserve(96);
+
+    table.push_back(OidToName(OID(1)+2+840+10045+2+1,   "ecPublicKey"));
+    table.push_back(OidToName(OID(1)+2+840+10045+3+1+1, "secp192v1"));
+    table.push_back(OidToName(OID(1)+2+840+10045+3+1+2, "secp192v2"));
+    table.push_back(OidToName(OID(1)+2+840+10045+3+1+3, "secp192v3"));
+    table.push_back(OidToName(OID(1)+2+840+10045+3+1+7, "secp256v1"));
+    table.push_back(OidToName(OID(1)+2+840+10045+4+3+2, "ecdsaWithSHA256"));
+    table.push_back(OidToName(OID(1)+2+840+10045+4+3+3, "ecdsaWithSHA384"));
+    table.push_back(OidToName(OID(1)+2+840+10045+4+3+4, "ecdsaWithSHA512"));
+
+    table.push_back(OidToName(OID(1)+3+132+0+33, "secp224r1"));
+    table.push_back(OidToName(OID(1)+3+132+0+34, "secp384r1"));
+    table.push_back(OidToName(OID(1)+3+132+0+35, "secp521r1"));
+
+    table.push_back(OidToName(OID(1)+2+840+113549+1+1+1, "rsaEncryption"));
+    table.push_back(OidToName(OID(1)+2+840+113549+1+1+2, "md2WithRSAEncryption"));
+    table.push_back(OidToName(OID(1)+2+840+113549+1+1+3, "md4WithRSAEncryption"));
+    table.push_back(OidToName(OID(1)+2+840+113549+1+1+4, "md5WithRSAEncryption"));
+    table.push_back(OidToName(OID(1)+2+840+113549+1+1+5, "sha1WithRSASignature"));
+    table.push_back(OidToName(OID(1)+2+840+113549+1+1+6, "rsaOAEPEncryption"));
+    table.push_back(OidToName(OID(1)+2+840+113549+1+1+7, "rsaAESOAEP"));
+    table.push_back(OidToName(OID(1)+2+840+113549+1+1+10, "rsaSSAPSS"));
+    table.push_back(OidToName(OID(1)+2+840+113549+1+1+11, "sha256WithRSAEncryption"));
+    table.push_back(OidToName(OID(1)+2+840+113549+1+1+12, "sha384WithRSAEncryption"));
+    table.push_back(OidToName(OID(1)+2+840+113549+1+1+13, "sha512WithRSAEncryption"));
+    table.push_back(OidToName(OID(1)+2+840+113549+1+1+14, "sha224WithRSAEncryption"));
+    table.push_back(OidToName(OID(1)+2+840+113549+1+1+15, "sha512-224WithRSAEncryption"));
+    table.push_back(OidToName(OID(1)+2+840+113549+1+1+16, "sha512-256WithRSAEncryption"));
+
+    table.push_back(OidToName(id_commonName,  "CN"));     // Common name
+    table.push_back(OidToName(OID(2)+5+4+ 4,  "SN"));     // Surname
+    table.push_back(OidToName(OID(2)+5+4+ 5,  "SERIALNUMBER"));  // Serial number
+    table.push_back(OidToName(OID(2)+5+4+ 6,  "C"));      // Country
+    table.push_back(OidToName(OID(2)+5+4+ 7,  "L"));      // Locality
+    table.push_back(OidToName(OID(2)+5+4+ 8,  "ST"));     // State or province
+    table.push_back(OidToName(OID(2)+5+4+ 9,  "STREET")); // Street address
+    table.push_back(OidToName(OID(2)+5+4+10,  "O"));      // Organization
+    table.push_back(OidToName(OID(2)+5+4+11,  "OU"));     // Organization unit
+    table.push_back(OidToName(OID(2)+5+4+12,  "TITLE"));  // Title
+    table.push_back(OidToName(OID(2)+5+4+13,  "DESCRIPTION"));    // Description
+    table.push_back(OidToName(OID(2)+5+4+16,  "POSTALADDRESS"));  // Postal address
+    table.push_back(OidToName(OID(2)+5+4+17,  "POSTALCODE"));     // Postal code
+    table.push_back(OidToName(OID(2)+5+4+18,  "POSTOFFICEBOX"));  // Postal office box
+    table.push_back(OidToName(OID(2)+5+4+20,  "TEL"));    // Phone number
+    table.push_back(OidToName(OID(2)+5+4+23,  "FAX"));    // Fax number
+    table.push_back(OidToName(OID(2)+5+4+35,   "USERPASSWORD"));        // User password
+    table.push_back(OidToName(OID(2)+5+4+35+2, "ENCUSERPASSWORD"));     // Encrypted user password
+    table.push_back(OidToName(OID(2)+5+4+36,   "USERCERTIFICATE"));     // User certificate
+    table.push_back(OidToName(OID(2)+5+4+36+2, "ENCUSERCERTIFICATE"));  // Encrypted user certificate
+    table.push_back(OidToName(OID(2)+5+4+37,   "CACERTIFICATE"));       // CA certificate
+    table.push_back(OidToName(OID(2)+5+4+37+2, "ENCCACERTIFICATE"));    // Encrypted CA certificate
+    table.push_back(OidToName(OID(2)+5+4+41,  "NAME"));   // Name
+    table.push_back(OidToName(OID(2)+5+4+42,  "GN"));     // Given name
+    table.push_back(OidToName(OID(2)+5+4+43,  "I"));      // Initials
+    table.push_back(OidToName(OID(2)+5+4+44,  "GENERATION"));  // Generation qualifier+ Jr.+ Sr.+ etc
+    table.push_back(OidToName(id_uniqueIdentifier, "UID"));    // X.500 Unique identifier
+    table.push_back(OidToName(OID(2)+5+4+49,  "DN"));          // Distinguished name
+    table.push_back(OidToName(OID(2)+5+4+51,  "HOUSE"));       // House identifier
+    table.push_back(OidToName(OID(2)+5+4+65,  "PSEUDONYM"));   // Pseudonym
+    table.push_back(OidToName(OID(2)+5+4+78,  "OID"));         // Object identifier
+    table.push_back(OidToName(OID(2)+5+4+83,  "URI"));         // Uniform Resource Identifier
+    table.push_back(OidToName(OID(2)+5+4+85,  "USERPWD"));     // URI user password
+    table.push_back(OidToName(OID(2)+5+4+86,  "URN"));         // Uniform Resource Name
+    table.push_back(OidToName(OID(2)+5+4+87,  "URL"));         // Uniform Resource Locator
+
+    table.push_back(OidToName(id_subjectPublicKeyIdentifier, "SPKI")); // Subject public key identifier
+    table.push_back(OidToName(id_keyUsage, "KU"));                     // Key use
+    table.push_back(OidToName(id_subjectAltName, "SAN"));              // Subject alternate names
+    table.push_back(OidToName(id_basicConstraints, "BC"));             // Basic constraints
+    table.push_back(OidToName(OID(2)+5+29+30, "NC"));                  // Name constraints
+    table.push_back(OidToName(id_authorityKeyIdentifier, "AKI"));      // Authority key identifier
+    table.push_back(OidToName(id_extendedKeyUsage, "EKU"));            // Extended key use
+
+    table.push_back(OidToName(id_netscapeServerName, "ssl-server-name"));   // Netscape server name
+    table.push_back(OidToName(OID(2)+16+840+1+113730+1+13, "ns-comment"));  // Netscape comment
+
+    table.push_back(OidToName(OID(0)+9+2342+19200300+100+1+1, "UID"));   // User Id
+    table.push_back(OidToName(OID(0)+9+2342+19200300+100+1+25, "DC"));   // Domain component
+    table.push_back(OidToName(id_email, "EMAIL"));              // Email address+ part of DN+ deprecated
+    table.push_back(OidToName(id_msUserPrincipalName, "UPN"));  // Microsoft User Principal Name (UPN)
+                                                                // Found in the SAN as [1] otherName
+
+    std::sort(table.begin(), table.end(), OidToNameCompare());
+
+    return table;
+}
+
 std::string OidToNameLookup(const OID& oid, const char *defaultName)
 {
-    // Must be sorted by oid. The names are mostly standard.
-    // Also see X.520, Section 6, for a partial list of LDAP Names.
-    static const OidToName table[] =
-    {
-        { OID(0)+9+2342+19200300+100+1+ 1, "UID" },  // User Id
-        { OID(0)+9+2342+19200300+100+1+25, "DC" },   // Domain component
-
-        { OID(1)+2+840+10045+2+1,   "ecPublicKey" },
-        { OID(1)+2+840+10045+3+1+1, "secp192v1" },
-        { OID(1)+2+840+10045+3+1+2, "secp192v2" },
-        { OID(1)+2+840+10045+3+1+3, "secp192v3" },
-        { OID(1)+2+840+10045+3+1+7, "secp256v1" },
-        { OID(1)+2+840+10045+4+3+2, "ecdsaWithSHA256" },
-        { OID(1)+2+840+10045+4+3+3, "ecdsaWithSHA384" },
-        { OID(1)+2+840+10045+4+3+4, "ecdsaWithSHA512" },
-
-        { OID(1)+2+840+113549+1+1+1, "rsaEncryption" },
-        { OID(1)+2+840+113549+1+1+2, "md2WithRSAEncryption" },
-        { OID(1)+2+840+113549+1+1+3, "md4WithRSAEncryption" },
-        { OID(1)+2+840+113549+1+1+4, "md5WithRSAEncryption" },
-        { OID(1)+2+840+113549+1+1+5, "sha1WithRSASignature" },
-        { OID(1)+2+840+113549+1+1+6, "rsaOAEPEncryption" },
-        { OID(1)+2+840+113549+1+1+7, "rsaAESOAEP" },
-        { OID(1)+2+840+113549+1+1+10, "rsaSSAPSS" },
-        { OID(1)+2+840+113549+1+1+11, "sha256WithRSAEncryption" },
-        { OID(1)+2+840+113549+1+1+12, "sha384WithRSAEncryption" },
-        { OID(1)+2+840+113549+1+1+13, "sha512WithRSAEncryption" },
-        { OID(1)+2+840+113549+1+1+14, "sha224WithRSAEncryption" },
-        { OID(1)+2+840+113549+1+1+15, "sha512-224WithRSAEncryption" },
-        { OID(1)+2+840+113549+1+1+16, "sha512-256WithRSAEncryption" },
-
-        { id_email, "EMAIL" },  // Email address, part of DN, deprecated
-
-        { id_msUserPrincipalName, "UPN" },  // Microsoft User Principal Name (UPN)
-                                            // Found in the SAN as [1] otherName
-
-        { OID(1)+3+132+0+33, "secp224r1" },
-        { OID(1)+3+132+0+34, "secp384r1" },
-        { OID(1)+3+132+0+35, "secp521r1" },
-
-        { id_commonName,  "CN" },     // Common name
-        { OID(2)+5+4+ 4,  "SN" },     // Surname
-        { OID(2)+5+4+ 5,  "SERIALNUMBER" },  // Serial number
-        { OID(2)+5+4+ 6,  "C" },      // Country
-        { OID(2)+5+4+ 7,  "L" },      // Locality
-        { OID(2)+5+4+ 8,  "ST" },     // State or province
-        { OID(2)+5+4+ 9,  "STREET" }, // Street address
-        { OID(2)+5+4+10,  "O" },      // Organization
-        { OID(2)+5+4+11,  "OU" },     // Organization unit
-        { OID(2)+5+4+12,  "TITLE" },  // Title
-        { OID(2)+5+4+13,  "DESCRIPTION" },    // Description
-        { OID(2)+5+4+16,  "POSTALADDRESS" },  // Postal address
-        { OID(2)+5+4+17,  "POSTALCODE" },     // Postal code
-        { OID(2)+5+4+18,  "POSTOFFICEBOX" },  // Postal office box
-        { OID(2)+5+4+20,  "TEL" },    // Phone number
-        { OID(2)+5+4+23,  "FAX" },    // Fax number
-        { OID(2)+5+4+35,   "USERPASSWORD" },        // User password
-        { OID(2)+5+4+35+2, "ENCUSERPASSWORD" },     // Encrypted user password
-        { OID(2)+5+4+36,   "USERCERTIFICATE" },     // User certificate
-        { OID(2)+5+4+36+2, "ENCUSERCERTIFICATE" },  // Encrypted user certificate
-        { OID(2)+5+4+37,   "CACERTIFICATE" },       // CA certificate
-        { OID(2)+5+4+37+2, "ENCCACERTIFICATE" },    // Encrypted CA certificate
-        { OID(2)+5+4+41,  "NAME" },   // Name
-        { OID(2)+5+4+42,  "GN" },     // Given name
-        { OID(2)+5+4+43,  "I" },      // Initials
-        { OID(2)+5+4+44,  "GENERATION" },  // Generation qualifier, Jr., Sr., etc
-        { id_uniqueIdentifier,  "UID" },   // X.500 Unique identifier
-        { OID(2)+5+4+49,  "DN" },          // Distinguished name
-        { OID(2)+5+4+51,  "HOUSE" },       // House identifier
-        { OID(2)+5+4+65,  "PSEUDONYM" },   // Pseudonym
-        { OID(2)+5+4+78,  "OID" },         // Object identifier
-        { OID(2)+5+4+83,  "URI" },         // Uniform Resource Identifier
-        { OID(2)+5+4+85,  "USERPWD" },     // URI user password
-        { OID(2)+5+4+86,  "URN" },         // Uniform Resource Name
-        { OID(2)+5+4+87,  "URL" },         // Uniform Resource Locator
-
-        { id_subjectPublicKeyIdentifier, "SPKI" }, // Subject public key identifier
-        { OID(2)+5+29+15, "KU" },                  // Key usage
-        { id_subjectAltName, "SAN" },              // Subject alternate names
-        { id_basicConstraints, "BC" },             // Basic constraints
-        { OID(2)+5+29+30, "NC" },                  // Name constraints
-        { id_authorityKeyIdentifier, "AKI" },      // Authority key identifier
-        { OID(2)+5+29+37, "EKU" },                 // Extended key usage
-
-        { id_netscapeServerName, "ssl-server-name" },  // Netscape server name
-        { OID(2)+16+840+1+113730+1+13, "ns-comment" }  // Netscape comment
-    };
-    static const size_t elements = COUNTOF(table);
+    static const OidToNameArray table = GetOidToNameTable();
 
     // Binary search
     size_t first  = 0;
-    size_t last   = elements - 1;
+    size_t last   = table.size() - 1;
     size_t middle = (first+last)/2;
 
     while (first <= last)
@@ -480,28 +497,28 @@ std::string KeyIdentifierValue::EncodeValue() const
     return val;
 }
 
-IdentityValue::IdentityValue(const SecByteBlock& value, IdentitySource src)
+IdentityValue::IdentityValue(const SecByteBlock& value, IdentityEnum src)
     : m_value(value), m_src(src)
 {
     if (m_src == otherName)
         { ConvertOtherName(); }
 }
 
-IdentityValue::IdentityValue(const std::string &value, IdentitySource src)
+IdentityValue::IdentityValue(const std::string &value, IdentityEnum src)
     : m_value(ConstBytePtr(value), BytePtrSize(value)), m_src(src)
 {
     if (m_src == otherName)
         { ConvertOtherName(); }
 }
 
-IdentityValue::IdentityValue(const OID& oid, const SecByteBlock& value, IdentitySource src)
+IdentityValue::IdentityValue(const OID& oid, const SecByteBlock& value, IdentityEnum src)
     : m_oid(oid), m_value(value), m_src(src)
 {
     if (m_src == otherName)
         { ConvertOtherName(); }
 }
 
-IdentityValue::IdentityValue(const OID& oid, const std::string &value, IdentitySource src)
+IdentityValue::IdentityValue(const OID& oid, const std::string &value, IdentityEnum src)
     : m_oid(oid), m_value(ConstBytePtr(value), BytePtrSize(value)), m_src(src)
 {
     if (m_src == otherName)
@@ -606,6 +623,202 @@ void IdentityValue::ConvertOtherName()
             }
         }
     }
+}
+
+void KeyUsageValue::BERDecode(BufferedTransformation &bt)
+{
+    CRYPTOPP_UNUSED(bt);
+
+    // TODO: Implement this function
+    throw NotImplemented("KeyUsageValue::BERDecode");
+}
+
+void KeyUsageValue::DEREncode(BufferedTransformation &bt) const
+{
+    CRYPTOPP_UNUSED(bt);
+
+    // TODO: Implement this function
+    throw NotImplemented("KeyUsageValue::DEREncode");
+}
+
+std::ostream& KeyUsageValue::Print(std::ostream& out) const
+{
+    return out << EncodeValue();
+}
+
+std::string KeyUsageValue::EncodeValue() const
+{
+    std::string val;
+
+    switch (m_usage)
+    {
+        case digitalSignature:
+            val = "digitalSignature";
+            break;
+
+        case nonRepudiation:
+            val = "nonRepudiation";
+            break;
+
+        case keyEncipherment:
+            val = "keyEncipherment";
+            break;
+
+        case dataEncipherment:
+            val = "dataEncipherment";
+            break;
+
+        case keyAgreement:
+            val = "keyAgreement";
+            break;
+
+        case keyCertSign:
+            val = "keyCertSign";
+            break;
+
+        case cRLSign:
+            val = "cRLSign";
+            break;
+
+        case encipherOnly:
+            val = "encipherOnly";
+            break;
+
+        case decipherOnly:
+            val = "decipherOnly";
+            break;
+
+        case serverAuth:
+            val = "serverAuth";
+            break;
+
+        case clientAuth:
+            val = "clientAuth";
+            break;
+
+        case codeSigning:
+            val = "codeSigning";
+            break;
+
+        case emailProtection:
+            val = "emailProtection";
+            break;
+
+        case ipsecEndSystem:
+            val = "ipsecEndSystem";
+            break;
+
+        case ipsecTunnel:
+            val = "ipsecTunnel";
+            break;
+
+        case ipsecUser:
+            val = "ipsecUser";
+            break;
+
+        case timeStamping:
+            val = "timeStamping";
+            break;
+
+        case OCSPSigning:
+            val = "OCSPSigning";
+            break;
+
+        case dvcs:
+            val = "dvcs";
+            break;
+
+        case sbgpCertAAServerAuth:
+            val = "sbgpCertAAServerAuth";
+            break;
+
+        case scvpResponder:
+            val = "scvpResponder";
+            break;
+
+        case eapOverPPP:
+            val = "eapOverPPP";
+            break;
+
+        case eapOverLAN:
+            val = "eapOverLAN";
+            break;
+
+        case scvpServer:
+            val = "scvpServer";
+            break;
+
+        case scvpClient:
+            val = "scvpClient";
+            break;
+
+        case ipsecIKE:
+            val = "ipsecIKE";
+            break;
+
+        case capwapAC:
+            val = "capwapAC";
+            break;
+
+        case capwapWTP:
+            val = "capwapWTP";
+            break;
+
+        case sipDomain:
+            val = "sipDomain";
+            break;
+
+        case secureShellClient:
+            val = "secureShellClient";
+            break;
+
+        case secureShellServer:
+            val = "secureShellServer";
+            break;
+
+        case sendRouter:
+            val = "sendRouter";
+            break;
+
+        case sendProxiedRouter:
+            val = "sendProxiedRouter";
+            break;
+
+        case sendOwner:
+            val = "sendOwner";
+            break;
+
+        case sendProxiedOwner:
+            val = "sendProxiedOwner";
+            break;
+
+        case cmcCA:
+            val = "cmcCA";
+            break;
+
+        case cmcRA:
+            val = "cmcRA";
+            break;
+
+        case bgpsecRouter:
+            val = "bgpsecRouter";
+            break;
+
+        case brandIndicatorforMessageIdentification:
+            val = "brandIndicatorforMessageIdentification";
+            break;
+
+        default:
+        {
+            std::ostringstream oss;
+            oss << m_oid;
+            val = oss.str();
+
+            break;
+        }
+    }
+
+    return val;
 }
 
 void BasicConstraintValue::BERDecode(BufferedTransformation &bt)
@@ -996,7 +1209,7 @@ bool X509Certificate::IsCertificateAuthority() const
     if (FindExtension(id_basicConstraints, loc))
     {
         const ExtensionValue& ext = *loc;
-        BasicConstraintValue basicConstraints;
+        BasicConstraintValue basicConstraints(ext.m_critical);
 
         ArraySource source(ext.m_value, ext.m_value.size(), true);
         basicConstraints.BERDecode(source);
@@ -1203,7 +1416,7 @@ void X509Certificate::GetIdentitiesFromSubjectAltName(IdentityValueArray& identi
               SecByteBlock value(len);
               seq.Get(value, value.size());
 
-              IdentityValue::IdentitySource src;
+              IdentityValue::IdentityEnum src;
 
               switch (choice)
               {
@@ -1244,7 +1457,7 @@ void X509Certificate::GetIdentitiesFromSubjectAltName(IdentityValueArray& identi
                     break;
 
                   default:
-                    src = IdentityValue::InvalidIdentitySource;
+                    src = IdentityValue::InvalidIdentityEnum;
                     break;
               }
 
@@ -1295,6 +1508,115 @@ const IdentityValueArray& X509Certificate::GetSubjectIdentities() const
     return *m_identities.get();
 }
 
+const KeyUsageValueArray& X509Certificate::GetSubjectKeyUsage() const
+{
+    if (m_keyUsage.get() == NULLPTR)
+    {
+        m_keyUsage.reset(new KeyUsageValueArray);
+        KeyUsageValueArray keyUsages;
+
+        ExtensionValueArray::const_iterator loc;
+        if (FindExtension(id_keyUsage, loc))
+        {
+            const ExtensionValue& ext = *loc;
+            ArraySource source(ConstBytePtr(ext.m_value), BytePtrSize(ext.m_value), true);
+
+            SecByteBlock values;
+            word32 unused;
+            BERDecodeBitString(source, values, unused);
+
+            // The bit string is one octet, with the bit mask blocked-left.
+            CRYPTOPP_ASSERT(values.size() == 1);
+            word32 mask = (values[0] >> unused);
+
+            const KeyUsageValue::KeyUsageEnum usageEnum[] = {
+                KeyUsageValue::digitalSignature,    // pos 0
+                KeyUsageValue::nonRepudiation,
+                KeyUsageValue::keyEncipherment,
+                KeyUsageValue::dataEncipherment,
+                KeyUsageValue::keyAgreement,
+                KeyUsageValue::keyCertSign,
+                KeyUsageValue::cRLSign,
+                KeyUsageValue::encipherOnly,
+                KeyUsageValue::decipherOnly
+            };
+
+            for (size_t i=0; i<COUNTOF(usageEnum); ++i)
+            {
+                if ((1 << i) & mask)
+                {
+                    KeyUsageValue ku(id_keyUsage, usageEnum[i]);
+                    keyUsages.push_back(ku);
+                }
+            }
+        }
+
+        if (FindExtension(id_extendedKeyUsage, loc))
+        {
+            const ExtensionValue& ext = *loc;
+            ArraySource source(ConstBytePtr(ext.m_value), BytePtrSize(ext.m_value), true);
+
+            BERSequenceDecoder seq(source);
+
+              while (! seq.EndReached())
+              {
+                OID oid;
+                oid.BERDecode(seq);
+
+                KeyUsageValue::KeyUsageEnum eku;
+                if (oid == OID(1)+3+6+1+5+5+7+3+1)
+                    { eku = KeyUsageValue::serverAuth; }
+                else if (oid == OID(1)+3+6+1+5+5+7+3+2)
+                    { eku = KeyUsageValue::clientAuth; }
+                else if (oid == OID(1)+3+6+1+5+5+7+3+3)
+                    { eku = KeyUsageValue::codeSigning; }
+                else if (oid == OID(1)+3+6+1+5+5+7+3+4)
+                    { eku = KeyUsageValue::emailProtection; }
+                else if (oid == OID(1)+3+6+1+5+5+7+3+5)
+                    { eku = KeyUsageValue::ipsecEndSystem; }
+                else if (oid == OID(1)+3+6+1+5+5+7+3+6)
+                    { eku = KeyUsageValue::ipsecTunnel; }
+                else if (oid == OID(1)+3+6+1+5+5+7+3+7)
+                    { eku = KeyUsageValue::ipsecUser; }
+                else if (oid == OID(1)+3+6+1+5+5+7+3+8)
+                    { eku = KeyUsageValue::timeStamping; }
+                else if (oid == OID(1)+3+6+1+5+5+7+3+9)
+                    { eku = KeyUsageValue::OCSPSigning; }
+                else if (oid == OID(1)+3+6+1+5+5+7+3+10)
+                    { eku = KeyUsageValue::dvcs; }
+                else if (oid == OID(1)+3+6+1+5+5+7+3+13)
+                    { eku = KeyUsageValue::eapOverPPP; }
+                else if (oid == OID(1)+3+6+1+5+5+7+3+14)
+                    { eku = KeyUsageValue::eapOverLAN; }
+                else if (oid == OID(1)+3+6+1+5+5+7+3+17)
+                    { eku = KeyUsageValue::ipsecIKE; }
+                else if (oid == OID(1)+3+6+1+5+5+7+3+20)
+                    { eku = KeyUsageValue::sipDomain; }
+                else if (oid == OID(1)+3+6+1+5+5+7+3+21)
+                    { eku = KeyUsageValue::secureShellClient; }
+                else if (oid == OID(1)+3+6+1+5+5+7+3+22)
+                    { eku = KeyUsageValue::secureShellServer; }
+                else if (oid == OID(1)+3+6+1+5+5+7+3+27)
+                    { eku = KeyUsageValue::cmcCA; }
+                else if (oid == OID(1)+3+6+1+5+5+7+3+28)
+                    { eku = KeyUsageValue::cmcRA; }
+                else if (oid == OID(1)+3+6+1+5+5+7+3+29)
+                    { eku = KeyUsageValue::cmcArchive; }
+                else
+                    { eku = KeyUsageValue::InvalidKeyUsage; }
+
+                KeyUsageValue ku(oid, eku);
+                keyUsages.push_back(ku);
+              }
+            seq.MessageEnd();
+        }
+
+        std::swap(*m_keyUsage.get(), keyUsages);
+    }
+
+    return *m_keyUsage.get();
+}
+
 std::ostream& X509Certificate::Print(std::ostream& out) const
 {
     std::ostringstream oss;
@@ -1312,6 +1634,8 @@ std::ostream& X509Certificate::Print(std::ostream& out) const
 
     oss << "Authority KeyId: " << GetAuthorityKeyIdentifier() << std::endl;
     oss << "Subject KeyId: " << GetSubjectKeyIdentifier() << std::endl;
+
+    oss << "Key Usage: " << GetSubjectKeyUsage() << std::endl;
 
     oss << "CA Certificate: " << IsCertificateAuthority() << ", ";
     oss << "Self Signed: " << IsSelfSigned() << std::endl;

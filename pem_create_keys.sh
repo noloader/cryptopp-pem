@@ -111,6 +111,7 @@ req_extensions      = req_ext
 x509_extensions     = x509_ext
 string_mask         = utf8only
 
+# CA/B requires a domain name in the Common Name
 [ subject ]
 countryName          = US
 stateOrProvinceName  = NY
@@ -119,23 +120,27 @@ organizationName     = Example, LLC
 commonName           = Example Company
 emailAddress         = support@example.com
 
+# A real server cert usually does not need clientAuth or secureShellServer
 [ x509_ext ]
 subjectKeyIdentifier    = hash
 authorityKeyIdentifier  = keyid,issuer
 basicConstraints        = critical,CA:FALSE
-keyUsage                = digitalSignature, keyEncipherment
-extendedKeyUsage        = serverAuth
+keyUsage                = digitalSignature
+extendedKeyUsage        = serverAuth, clientAuth, secureShellServer
 subjectAltName          = @alternate_names
 nsComment               = "OpenSSL Generated Certificate"
 
+# A real server cert usually does not need clientAuth or secureShellServer
 [ req_ext ]
 subjectKeyIdentifier    = hash
 basicConstraints        = critical,CA:FALSE
-keyUsage                = digitalSignature, keyEncipherment
-extendedKeyUsage        = serverAuth
+keyUsage                = digitalSignature
+extendedKeyUsage        = serverAuth, clientAuth, secureShellServer
 subjectAltName          = @alternate_names
 nsComment               = "OpenSSL Generated Certificate"
 
+# A real server cert should not have email addresses
+# CA/B forbids IP addresses
 [ alternate_names ]
 DNS.1  = example.com
 DNS.2  = www.example.com

@@ -130,14 +130,14 @@ typedef std::vector<ExtensionValue> ExtensionValueArray;
 /// \brief X.509 KeyIdentifier value
 struct KeyIdentifierValue : public ASN1Object
 {
-    enum KeyIdentifierType {
+    enum KeyIdentifierEnum {
         /// \brief Hash of the public key
         Hash=1,
         /// \brief Distinguised name and serial number
         DnAndSn
     };
     /// \brief Invalid identifier
-    static const KeyIdentifierType InvalidKeyIdentifier = static_cast<KeyIdentifierType>(0);
+    static const KeyIdentifierEnum InvalidKeyIdentifier = static_cast<KeyIdentifierEnum>(0);
 
     virtual ~KeyIdentifierValue() {}
     KeyIdentifierValue() : m_type(InvalidKeyIdentifier) {}
@@ -157,14 +157,137 @@ struct KeyIdentifierValue : public ASN1Object
 
     OID m_oid;
     SecByteBlock m_value;
-    KeyIdentifierType m_type;
+    KeyIdentifierEnum m_type;
 };
 
-/// \brief X.509 Extension value
+/// \brief X.509 KU and EKU value
+/// \details KeyUsageValue represents Key Usage and Extended Key Usage values
+/// \sa KeyUsageValueArray
+struct KeyUsageValue : public ASN1Object
+{
+    // https://www.iana.org/assignments/smi-numbers/smi-numbers.xhtml#smi-numbers-1.3.6.1.5.5.7.3
+    enum KeyUsageEnum {
+        /// \brief Digital signature
+        digitalSignature=0,
+        /// \brief Signature verification
+        /// \details nonRepudiation applies to non-certificate data
+        nonRepudiation=1,
+        /// \brief Signature verification
+        /// \details contentCommitment is nonRepudiation and applies to non-certificate data
+        contentCommitment=nonRepudiation,
+        /// \brief Key transport
+        keyEncipherment,
+        /// \brief Data encryption
+        /// \details Encryption occurs with the public key, and not a symmetric key
+        dataEncipherment,
+        /// \brief Key agreement
+        keyAgreement,
+        /// \brief Certificate signature verification
+        keyCertSign,
+        /// \brief Certificate revocation list signature verification
+        cRLSign,
+        /// \brief Data encryption
+        /// \details Data encryption occurs with a key agreement key
+        encipherOnly,
+        /// \brief Data decryption
+        /// \details Data decryption occurs with a key agreement key
+        decipherOnly,
+        /// \brief TLS server authentication
+        serverAuth,
+        /// \brief TLS client authentication
+        clientAuth,
+        /// \brief Code signing
+        codeSigning,
+        /// \brief Email protection
+        emailProtection,
+        /// \brief IPsec end system
+        ipsecEndSystem,
+        /// \brief IPsec tunnel
+        ipsecTunnel,
+        /// \brief IPsec user
+        ipsecUser,
+        /// \brief Time stamping
+        timeStamping,
+        /// \brief OCSP signing
+        OCSPSigning,
+        /// \brief Data Validation and Certification Server
+        dvcs,
+        /// \brief Border gateway CA server
+        sbgpCertAAServerAuth,
+        /// \brief SCVP responder
+        scvpResponder,
+        /// \brief Extensible Authentication Protocol (EAP) over PPP
+        eapOverPPP,
+        /// \brief Extensible Authentication Protocol (EAP) over LAN
+        eapOverLAN,
+        /// \brief Server-Based Certificate Validation Protocol
+        scvpServer,
+        /// \brief Server-Based Certificate Validation Protocol
+        scvpClient,
+        /// \brief IPsec Internet Key Exchange
+        ipsecIKE,
+        /// \brief Control And Provisioning of Wireless Access Points (CAPWAP) Protocol
+        capwapAC,
+        /// \brief Control And Provisioning of Wireless Access Points (CAPWAP) Protocol
+        capwapWTP,
+        /// \brief Session Initiation Protocol (SIP) X.509 Certificates
+        sipDomain,
+        /// \brief X.509v3 Certificates for Secure Shell Authentication
+        secureShellClient,
+        /// \brief X.509v3 Certificates for Secure Shell Authentication
+        secureShellServer,
+        /// \brief Certificate Profile and Certificate Management for SEcure Neighbor Discovery (SEND)
+        sendRouter,
+        /// \brief Certificate Profile and Certificate Management for SEcure Neighbor Discovery (SEND)
+        sendProxiedRouter,
+        /// \brief Certificate Profile and Certificate Management for SEcure Neighbor Discovery (SEND)
+        sendOwner,
+        /// \brief Certificate Profile and Certificate Management for SEcure Neighbor Discovery (SEND)
+        sendProxiedOwner,
+        /// \brief Certificate Management over CMS
+        cmcCA,
+        /// \brief Certificate Management over CMS
+        cmcRA,
+        /// \brief Certificate Management over CMS
+        cmcArchive,
+        /// \brief Border gateway router
+        bgpsecRouter,
+        /// \brief Brand indicator
+        brandIndicatorforMessageIdentification
+    };
+    /// \brief Invalid key usage
+    static const KeyUsageEnum InvalidKeyUsage = static_cast<KeyUsageEnum>(128);
+
+    virtual ~KeyUsageValue() {}
+    KeyUsageValue() {}
+    KeyUsageValue(const OID& oid, KeyUsageEnum usage) : m_oid(oid), m_usage(usage) {}
+
+    void BERDecode(BufferedTransformation &bt);
+    void DEREncode(BufferedTransformation &bt) const;
+
+    /// \brief Print an Extension value
+    /// \returns ostream reference
+    std::ostream& Print(std::ostream& out) const;
+
+    /// \brief Textual representation
+    /// \returns string representing the value
+    std::string EncodeValue() const;
+
+    OID m_oid;
+    SecByteBlock m_unused;
+    KeyUsageEnum m_usage;
+};
+
+/// \brief Array of X.509 Key usage values
+/// \details Vector or KeyUsageValue
+/// \sa KeyUsageValue
+typedef std::vector<KeyUsageValue> KeyUsageValueArray;
+
+/// \brief X.509 Basic Constraint
 struct BasicConstraintValue : public ASN1Object
 {
     virtual ~BasicConstraintValue() {}
-    BasicConstraintValue() : m_pathLen(0), m_critical(false), m_ca(false) {}
+    BasicConstraintValue(bool critical=true) : m_pathLen(0), m_critical(critical), m_ca(false) {}
 
     void BERDecode(BufferedTransformation &bt);
     void DEREncode(BufferedTransformation &bt) const;
@@ -185,20 +308,20 @@ struct BasicConstraintValue : public ASN1Object
 /// \details IdentityValue holds an identity and provides a textual representation of it.
 struct IdentityValue
 {
-    enum IdentitySource {
+    enum IdentityEnum {
         UniqueId=1, SubjectDN, SubjectCN, SubjectUID, SubjectEmail, SubjectPKI,
         otherName, rfc822Name, dNSName, x400Address, directoryName,        // SAN
         ediPartyName, uniformResourceIdentifier, iPAddress, registeredID,  // SAN
         nsServer, msOtherNameUPN
     };
-    static const IdentitySource InvalidIdentitySource = static_cast<IdentitySource>(0);
+    static const IdentityEnum InvalidIdentityEnum = static_cast<IdentityEnum>(0);
 
     virtual ~IdentityValue() {}
-    IdentityValue() : m_src(InvalidIdentitySource) {}
-    IdentityValue(const SecByteBlock &value, IdentitySource src);
-    IdentityValue(const std::string &value, IdentitySource src);
-    IdentityValue(const OID &oid, const SecByteBlock &value, IdentitySource src);
-    IdentityValue(const OID &oid, const std::string &value, IdentitySource src);
+    IdentityValue() : m_src(InvalidIdentityEnum) {}
+    IdentityValue(const SecByteBlock &value, IdentityEnum src);
+    IdentityValue(const std::string &value, IdentityEnum src);
+    IdentityValue(const OID &oid, const SecByteBlock &value, IdentityEnum src);
+    IdentityValue(const OID &oid, const std::string &value, IdentityEnum src);
 
     /// \brief Print an Identity value
     /// \returns ostream reference
@@ -216,7 +339,7 @@ struct IdentityValue
 
     OID m_oid;
     SecByteBlock m_value;  // Raw value from source
-    IdentitySource m_src;
+    IdentityEnum m_src;
 };
 
 typedef std::vector<IdentityValue> IdentityValueArray;
@@ -426,6 +549,11 @@ public:
     /// \details GetSubjectIdentities() collects the identities in the certificate.
     const IdentityValueArray& GetSubjectIdentities() const;
 
+    /// \brief Identities
+    /// \returns Identities
+    /// \details GetSubjectIdentities() collects the identities in the certificate.
+    const KeyUsageValueArray& GetSubjectKeyUsage() const;
+
     /// \brief Print a certificate
     /// \param out ostream object
     /// \returns ostream reference
@@ -499,12 +627,15 @@ private:
     // Certificate v3, optional
     ASNOptional<ExtensionValueArray> m_extensions;
 
-    // SKI and AKI extensions
-    mutable member_ptr<KeyIdentifierValue> m_subjectKeyIdentifier;    // lazy
+    // AKI and SPKI extensions
     mutable member_ptr<KeyIdentifierValue> m_authorityKeyIdentifier;  // lazy
+    mutable member_ptr<KeyIdentifierValue> m_subjectKeyIdentifier;    // lazy
 
     // Identities
     mutable member_ptr<IdentityValueArray> m_identities;  // lazy
+
+    // KU and EKU
+    mutable member_ptr<KeyUsageValueArray> m_keyUsage;  // lazy
 
     // Hack so we can examine the octets and verify the signature
     SecByteBlock m_origCertificate;
@@ -518,6 +649,8 @@ inline std::ostream& operator<<(std::ostream& out, const RdnValue &value)
 inline std::ostream& operator<<(std::ostream& out, const DateValue &value)
     { return value.Print(out); }
 inline std::ostream& operator<<(std::ostream& out, const KeyIdentifierValue &value)
+    { return value.Print(out); }
+inline std::ostream& operator<<(std::ostream& out, const KeyUsageValue &value)
     { return value.Print(out); }
 inline std::ostream& operator<<(std::ostream& out, const IdentityValue &value)
     { return value.Print(out); }
@@ -548,6 +681,21 @@ inline std::ostream& operator<<(std::ostream& out, const IdentityValueArray &val
         oss << *beg;
         if (++beg != end)
             { oss << "\n"; }
+    }
+    return out << oss.str();
+}
+
+inline std::ostream& operator<<(std::ostream& out, const KeyUsageValueArray &values)
+{
+    KeyUsageValueArray::const_iterator beg = values.begin();
+    KeyUsageValueArray::const_iterator end = values.end();
+    std::ostringstream oss;
+
+    while (beg != end)
+    {
+        oss << *beg;
+        if (++beg != end)
+            { oss << ", "; }
     }
     return out << oss.str();
 }
