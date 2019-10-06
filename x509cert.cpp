@@ -1232,12 +1232,12 @@ void X509Certificate::AssignFrom(const NameValuePairs &source)
 
 bool X509Certificate::GetVoidValue(const char *name, const std::type_info &valueType, void *pValue) const
 {
-    CRYPTOPP_UNUSED(name); CRYPTOPP_UNUSED(valueType);
-    CRYPTOPP_UNUSED(pValue);
-
-    // TODO: Implement this function
-    throw NotImplemented("X509Certificate::GetVoidValue");
-
+    if (std::strcmp(name, "Certificate") == 0)
+    {
+        this->ThrowIfTypeMismatch(name, typeid(ConstByteArrayParameter), valueType);
+        reinterpret_cast<ConstByteArrayParameter*>(pValue)->Assign(m_origCertificate, m_origCertificate.size(), false);
+        return true;
+    }
     return false;
 }
 
