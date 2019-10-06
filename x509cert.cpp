@@ -305,6 +305,9 @@ bool RdnValue::ValidateTag(byte tag) const
 
 std::ostream& RdnValue::Print(std::ostream& out) const
 {
+    if (m_value.empty())
+        { return out; }
+
     std::ostringstream oss;
     oss << OidToNameLookup(m_oid);
     oss << "=";
@@ -531,7 +534,8 @@ std::ostream& IdentityValue::Print(std::ostream& out) const
         { return out; }
 
     std::ostringstream oss;
-    oss << OidToNameLookup(m_oid) << ": ";
+    oss << OidToNameLookup(m_oid);
+    oss << ": ";
     oss << EncodeValue();
 
     return out << oss.str();
@@ -691,6 +695,9 @@ void KeyUsageValue::DEREncode(BufferedTransformation &bt) const
 
 std::ostream& KeyUsageValue::Print(std::ostream& out) const
 {
+    if (m_oid.Empty())
+        { return out; }
+
     return out << EncodeValue();
 }
 
