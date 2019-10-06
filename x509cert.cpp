@@ -958,6 +958,8 @@ void X509Certificate::BERDecode(BufferedTransformation &bt)
 
       BERSequenceDecoder tbsCertificate(certificate);
 
+        // NULL length handled in BERDecodeVersion and friends.
+        // Also see https://stackoverflow.com/a/56008778/608639.
         if (HasOptionalAttribute(tbsCertificate, CONTEXT_SPECIFIC|CONSTRUCTED|0))
             BERDecodeVersion(tbsCertificate, m_version);
         else
@@ -1020,8 +1022,11 @@ void X509Certificate::BERDecodeIssuerUniqueId(BufferedTransformation &bt)
     SecByteBlock temp;
 
     BERGeneralDecoder seq(bt, CONTEXT_SPECIFIC|CONSTRUCTED|1);
-      word32 unused;
-      BERDecodeBitString(bt, temp, unused);
+      if (! seq.EndReached())  // Guard for a1:00
+      {
+          word32 unused;
+          BERDecodeBitString(bt, temp, unused);
+      }
     seq.MessageEnd();
 
     std::swap(temp, *m_issuerUid.get());
@@ -1035,8 +1040,11 @@ void X509Certificate::BERDecodeSubjectUniqueId(BufferedTransformation &bt)
     SecByteBlock temp;
 
     BERGeneralDecoder seq(bt, CONTEXT_SPECIFIC|CONSTRUCTED|2);
-      word32 unused;
-      BERDecodeBitString(bt, temp, unused);
+      if (! seq.EndReached())  // Guard for a2:00
+      {
+          word32 unused;
+          BERDecodeBitString(bt, temp, unused);
+      }
     seq.MessageEnd();
 
     std::swap(temp, *m_subjectUid.get());
@@ -1050,17 +1058,17 @@ void X509Certificate::BERDecodeExtensions(BufferedTransformation &bt)
     ExtensionValueArray temp;
 
     BERGeneralDecoder extensions(bt, CONTEXT_SPECIFIC|CONSTRUCTED|3);
-
-      BERSequenceDecoder seq(extensions);
-
-        while (! seq.EndReached())
-        {
-            ExtensionValue value;
-            value.BERDecode(seq);
-            temp.push_back(value);
-        }
-
-      seq.MessageEnd();
+      if (! extensions.EndReached())  // Guard for a3:00
+      {
+          BERSequenceDecoder seq(extensions);
+            while (! seq.EndReached())
+            {
+                ExtensionValue value;
+                value.BERDecode(seq);
+                temp.push_back(value);
+            }
+          seq.MessageEnd();
+      }
 
     extensions.MessageEnd();
 
@@ -1195,11 +1203,13 @@ void X509Certificate::BERDecodeVersion(BufferedTransformation &bt, Version &vers
 {
     CRYPTOPP_ASSERT(HasOptionalAttribute(bt, CONTEXT_SPECIFIC|CONSTRUCTED|0));
 
-    word32 value;
-
-    BERGeneralDecoder ctx(bt, CONTEXT_SPECIFIC|CONSTRUCTED|0);
-      BERDecodeUnsigned<word32>(ctx, value, INTEGER, 0, 2);  // check version
-    ctx.MessageEnd();
+    word32 value = v1;  // Default per RFC
+    BERGeneralDecoder seq(bt, CONTEXT_SPECIFIC|CONSTRUCTED|0);
+      if (! seq.EndReached())  // Guard for a0:00
+      {
+          BERDecodeUnsigned<word32>(seq, value, INTEGER, 0, 2);  // check version
+      }
+    seq.MessageEnd();
 
     version = static_cast<Version>(value);
 }
