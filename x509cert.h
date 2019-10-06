@@ -286,7 +286,7 @@ struct KeyUsageValue : public ASN1Object
     std::string EncodeValue() const;
 
     OID m_oid;
-    SecByteBlock m_unused;
+    // SecByteBlock m_value;
     KeyUsageEnum m_usage;
 };
 
