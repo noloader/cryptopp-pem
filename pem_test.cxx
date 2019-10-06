@@ -326,20 +326,6 @@ int main(int argc, char* argv[])
                 throw;
             }
 
-#if 0
-            const OID& algorithm = cert.GetCertificateSignatureAlgorithm();
-            if (algorithm == ASN1::sha1WithRSAEncryption())
-            {
-                std::cerr << "*********************************************************" << std::endl;
-                std::cerr << OidToNameLookup(algorithm) << " found!" << std::endl;
-                std::cerr << cert.GetSubjectDistinguishedName() << std::endl;
-                std::cerr << "0x" << std::hex << cert.GetSerialNumber() << std::dec << std::endl;
-                std::cerr << "*********************************************************" << std::endl;
-
-                std::cerr << std::endl;
-            }
-#endif
-
             AutoSeededRandomPool prng;
             if (cert.Validate(prng, 2) == false)
             {
