@@ -324,13 +324,13 @@ struct IdentityValue
         /// \brief Subject Distinguished Name
         SubjectDN,
         /// \brief Subject Common Name
-        /// \details RDN, optional part of Subject Distinguished Name
+        /// \details RDN, optional part of Subject Distinguished Name (DN)
         SubjectCN,
         /// \brief Subject Unique Identifier
-        /// \details RDN, optional part of Subject Distinguished Name
+        /// \details RDN, optional part of Subject Distinguished Name (DN)
         SubjectUID,
         /// \brief PKCS #9 email address
-        /// \details RDN, optional part of Subject Distinguished Name
+        /// \details RDN, optional part of Subject Distinguished Name (DN)
         SubjectEmail,
         /// \brief Subject Public Key Identifier (SPKI)
         /// \details Optional part of X.509 v3 specification
