@@ -812,14 +812,14 @@ inline bool operator==(const KeyIdentifierValue &first, const KeyIdentifierValue
 
 inline std::ostream& operator<<(std::ostream& out, const RdnValueArray &values)
 {
-    RdnValueArray::const_iterator beg = values.begin();
-    RdnValueArray::const_iterator end = values.end();
+    RdnValueArray::const_iterator first = values.begin();
+    RdnValueArray::const_iterator last = values.end();
     std::ostringstream oss;
 
-    while (beg != end)
+    while (first != last)
     {
-        oss << *beg;
-        if (++beg != end)
+        oss << *first;
+        if (++first != last)
             { oss << "; "; }
     }
     return out << oss.str();
@@ -827,14 +827,14 @@ inline std::ostream& operator<<(std::ostream& out, const RdnValueArray &values)
 
 inline std::ostream& operator<<(std::ostream& out, const IdentityValueArray &values)
 {
-    IdentityValueArray::const_iterator beg = values.begin();
-    IdentityValueArray::const_iterator end = values.end();
+    IdentityValueArray::const_iterator first = values.begin();
+    IdentityValueArray::const_iterator last = values.end();
     std::ostringstream oss;
 
-    while (beg != end)
+    while (first != last)
     {
-        oss << *beg;
-        if (++beg != end)
+        oss << *first;
+        if (++first != last)
             { oss << "\n"; }
     }
     return out << oss.str();
@@ -842,14 +842,14 @@ inline std::ostream& operator<<(std::ostream& out, const IdentityValueArray &val
 
 inline std::ostream& operator<<(std::ostream& out, const KeyUsageValueArray &values)
 {
-    KeyUsageValueArray::const_iterator beg = values.begin();
-    KeyUsageValueArray::const_iterator end = values.end();
+    KeyUsageValueArray::const_iterator first = values.begin();
+    KeyUsageValueArray::const_iterator last = values.end();
     std::ostringstream oss;
 
-    while (beg != end)
+    while (first != last)
     {
-        oss << *beg;
-        if (++beg != end)
+        oss << *first;
+        if (++first != last)
             { oss << ", "; }
     }
     return out << oss.str();
