@@ -720,43 +720,43 @@ protected:
     bool FindExtension(const OID& oid, ExtensionValueArray::const_iterator& loc) const;
 
 private:
-    // Mandatory
+    // Version and serial number, required v1
     Version m_version;
     Integer m_serialNumber;
 
-    // Certificate algorithm and signature, mandatory
+    // Certificate algorithm and signature, required v1
     OID m_certSignatureAlgortihm;
     SecByteBlock m_certSignature;
 
-    // Issuer and subject DNs, mandatory
+    // Issuer and subject DNs, required v1
     RdnValueArray m_issuerName;
     RdnValueArray m_subjectName;
 
-    // Mandatory
+    // Validity dates, required v1
     DateValue m_notBefore, m_notAfter;
 
-    // The subject's key and algorithm, mandatory
+    // The subject's key and algorithm, required v1
     OID m_subjectSignatureAlgortihm;
     member_ptr<X509PublicKey> m_subjectPublicKey;
 
-    // Certificate v2, optional
+    // Issue and Subject UniqueId, optional v2
     ASNOptional<SecByteBlock> m_issuerUid;
     ASNOptional<SecByteBlock> m_subjectUid;
 
-    // Certificate v3, optional
+    // Extensions, optional v3
     ASNOptional<ExtensionValueArray> m_extensions;
 
-    // AKI and SPKI extensions, optional
+    // AKI and SPKI extensions, optional v3
     mutable member_ptr<KeyIdentifierValue> m_authorityKeyIdentifier;  // lazy
     mutable member_ptr<KeyIdentifierValue> m_subjectKeyIdentifier;    // lazy
 
-    // KU and EKU, optional
+    // KU and EKU, optional v3
     mutable member_ptr<KeyUsageValueArray> m_keyUsage;  // lazy
 
     // Identities
     mutable member_ptr<IdentityValueArray> m_identities;  // lazy
 
-    // To be signed, mandatory
+    // To be signed, required v1
     mutable member_ptr<SecByteBlock> m_toBeSigned;  // lazy
 
     // Hack so we can examine the octets. Also see WriteCertificateBytes.
