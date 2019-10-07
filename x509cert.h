@@ -857,17 +857,17 @@ inline std::ostream& operator<<(std::ostream& out, const KeyUsageValueArray &val
 
 //////////////////////////////////////////////////
 
-extern const OID id_sha1WithRSASignature;
-extern const OID id_sha256WithRSAEncryption;
-extern const OID id_sha384WithRSAEncryption;
-extern const OID id_sha512WithRSAEncryption;
+// Make these defines to avoid global objects
+#define id_sha1WithRSASignature     (OID(1)+2+840+113549+1+1+5)
+#define id_sha256WithRSAEncryption  (OID(1)+2+840+113549+1+1+11)
+#define id_sha384WithRSAEncryption  (OID(1)+2+840+113549+1+1+12)
+#define id_sha512WithRSAEncryption  (OID(1)+2+840+113549+1+1+13)
 
-extern const OID id_ecPublicKey;
-extern const OID id_secp256v1;
-extern const OID id_ecdsaWithSHA1;
-extern const OID id_ecdsaWithSHA256;
-extern const OID id_ecdsaWithSHA384;
-extern const OID id_ecdsaWithSHA512;
+#define id_secp256v1        (OID(1)+2+840+10045+3+1+7)
+#define id_ecdsaWithSHA1    (OID(1)+2+840+10045+4+1)
+#define id_ecdsaWithSHA256  (OID(1)+2+840+10045+4+3+2)
+#define id_ecdsaWithSHA384  (OID(1)+2+840+10045+4+3+3)
+#define id_ecdsaWithSHA512  (OID(1)+2+840+10045+4+3+4)
 
 NAMESPACE_END
 

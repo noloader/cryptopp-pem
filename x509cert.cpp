@@ -34,6 +34,20 @@
 #include <string>
 #include <vector>
 
+// Make these defines to avoid global objects
+#define id_basicConstraints            (OID(2)+5+29+19)
+#define id_authorityKeyIdentifier      (OID(2)+5+29+35)
+#define id_msUserPrincipalName         (OID(1)+3+6+1+4+1+311+20+2+3)
+#define id_subjectPublicKeyIdentifier  (OID(2)+5+29+14)
+#define id_distinguishedName           (OID(2)+5+4+49)
+#define id_commonName                  (OID(2)+5+4+3)
+#define id_uniqueIdentifier            (OID(2)+5+4+45)
+#define id_email                       (OID(1)+2+840+113549+1+9+1)
+#define id_subjectAltName              (OID(2)+5+29+17)
+#define id_netscapeServerName          (OID(2)+16+840+1+113730+1+12)
+#define id_keyUsage                    (OID(2)+5+29+15)
+#define id_extendedKeyUsage            (OID(2)+5+29+37)
+
 ANONYMOUS_NAMESPACE_BEGIN
 
 using namespace CryptoPP;
@@ -110,32 +124,6 @@ inline bool IsECBinaryFieldAlgorithm(const OID& alg, const OID& field)
 ANONYMOUS_NAMESPACE_END
 
 NAMESPACE_BEGIN(CryptoPP)
-
-// Named OIDs used in the code below
-const OID id_basicConstraints = OID(2)+5+29+19;
-const OID id_authorityKeyIdentifier = OID(2)+5+29+35;
-const OID id_msUserPrincipalName = OID(1)+3+6+1+4+1+311+20+2+3;
-const OID id_subjectPublicKeyIdentifier = OID(2)+5+29+14;
-const OID id_distinguishedName = OID(2)+5+4+49;
-const OID id_commonName = OID(2)+5+4+3;
-const OID id_uniqueIdentifier = OID(2)+5+4+45;
-const OID id_email = OID(1)+2+840+113549+1+9+1;
-const OID id_subjectAltName = OID(2)+5+29+17;
-const OID id_netscapeServerName = OID(2)+16+840+1+113730+1+12;
-const OID id_keyUsage = OID(2)+5+29+15;
-const OID id_extendedKeyUsage = OID(2)+5+29+37;
-
-const OID id_sha1WithRSASignature    = OID(1)+2+840+113549+1+1+5;
-const OID id_sha256WithRSAEncryption = OID(1)+2+840+113549+1+1+11;
-const OID id_sha384WithRSAEncryption = OID(1)+2+840+113549+1+1+12;
-const OID id_sha512WithRSAEncryption = OID(1)+2+840+113549+1+1+13;
-
-const OID id_ecPublicKey     = OID(1)+2+840+10045+2+1;
-const OID id_secp256v1       = OID(1)+2+840+10045+3+1+7;
-const OID id_ecdsaWithSHA1   = OID(1)+2+840+10045+4+1;
-const OID id_ecdsaWithSHA256 = OID(1)+2+840+10045+4+3+2;
-const OID id_ecdsaWithSHA384 = OID(1)+2+840+10045+4+3+3;
-const OID id_ecdsaWithSHA512 = OID(1)+2+840+10045+4+3+4;
 
 struct OidToName
 {
