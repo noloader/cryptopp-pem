@@ -475,9 +475,17 @@ public:
     virtual bool Validate (RandomNumberGenerator &rng, unsigned int level) const;
 
     /// \brief Validate signature on this certificate
-    /// \param rng a RandomNumberGenerator for objects which use randomized testing
+    /// \param rng a RandomNumberGenerator for objects which use randomized
+    ///  testing
     /// \param key the public key of the keypair used to sign this certificate
     /// \returns true if the test succeeds, false otherwise
+    /// \details If this certificate is self-signed then the signature can be
+    ///  verified using the public key in this certificate. In this case call
+    ///  ValidateSignature() with GetSubjectPublicKey().
+    /// \details If this certificate is signed by a CA certificate, then call
+    ///  ValidateSignature() using signing CA's public key. The CA's public
+    ///  key is found in the CA certificate using GetSubjectPublicKey().
+    /// \sa GetSubjectPublicKey
     bool ValidateSignature (RandomNumberGenerator &rng, const X509PublicKey &key) const;
 
     //@}
