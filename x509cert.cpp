@@ -1073,6 +1073,7 @@ void X509Certificate::BERDecode(BufferedTransformation &bt)
 
       word32 unused;
       BERDecodeBitString(certificate, m_certSignature, unused);
+      CRYPTOPP_ASSERT(unused == 0);
 
     certificate.MessageEnd();
 }
@@ -1097,6 +1098,7 @@ void X509Certificate::BERDecodeIssuerUniqueId(BufferedTransformation &bt)
       {
           word32 unused;
           BERDecodeBitString(bt, temp, unused);
+          CRYPTOPP_ASSERT(unused == 0);
       }
     seq.MessageEnd();
 
@@ -1115,6 +1117,7 @@ void X509Certificate::BERDecodeSubjectUniqueId(BufferedTransformation &bt)
       {
           word32 unused;
           BERDecodeBitString(bt, temp, unused);
+          CRYPTOPP_ASSERT(unused == 0);
       }
     seq.MessageEnd();
 
