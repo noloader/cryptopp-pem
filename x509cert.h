@@ -11,7 +11,7 @@
 ///  and subjectPublicKeyInfo exposed as a X509PubliKey ready for use in
 ///  Crypto++ library algorithms.
 /// \details This is a library add-on. You must download and compile it
-///  yourself.
+///  yourself as part of the library.
 /// \since Crypto++ 8.3
 /// \sa <A HREF="http://www.cryptopp.com/wiki/X509Certificate">X509Certificate</A>
 ///  and <A HREF="http://www.cryptopp.com/wiki/PEM_Pack">PEM Pack</A> on the
@@ -436,10 +436,9 @@ typedef std::vector<IdentityValue> IdentityValueArray;
 ///  result in NotImplemented exception. Future versions of the X509Certificate
 ///  can provide them.
 /// \throws NotImplemented if a particular function has not been cut-in. Member
-///  functions that will throw NotImplemented include Save, AssignFrom,
-///  GetVoidValue, and Validate.
+///  functions that throw NotImplemented include <tt>DEREncode*</tt>.
 /// \details This is a library add-on. You must download and compile it
-///  yourself.
+///  yourself as part of the library.
 /// \since Crypto++ 8.3
 /// \sa <A HREF="http://www.cryptopp.com/wiki/X509Certificate">X509Certificate</A>
 ///  and <A HREF="http://www.cryptopp.com/wiki/PEM_Pack">PEM Pack</A> on the

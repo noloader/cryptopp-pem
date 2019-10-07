@@ -1362,9 +1362,10 @@ bool X509Certificate::ValidateSignature (RandomNumberGenerator &rng, const X509P
 
         if (ecSignature)
         {
-            size_t size = verifier->MaxSignatureLength();
+            size_t size = verifier->SignatureLength();
             SecByteBlock ecSignature(size);
 
+            // https://www.cryptopp.com/wiki/DSAConvertSignatureFormat
             size = DSAConvertSignatureFormat(ecSignature, ecSignature.size(),
                       DSA_P1363, signature, signature.size(), DSA_DER);
             ecSignature.resize(size);
