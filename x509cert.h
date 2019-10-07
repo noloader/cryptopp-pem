@@ -462,36 +462,32 @@ public:
     virtual ~X509Certificate() {}
     X509Certificate() {}
 
+    // NameValuePairs
+    virtual void AssignFrom (const NameValuePairs &source);
+    virtual bool GetVoidValue (const char *name, const std::type_info &valueType, void *pValue) const;
+
+    /// \name VALIDATION
+    //@{
+
     // CryptoMaterial
     virtual bool Validate (RandomNumberGenerator &rng, unsigned int level) const;
+
+    //@}
+
+    /// \name ENCODE/DECODE
+    //@{
 
     // ASN1CryptoMaterial
     virtual void Save (BufferedTransformation &bt) const;
     virtual void Load (BufferedTransformation &bt);
 
-    // NameValuePairs
-    virtual void AssignFrom (const NameValuePairs &source);
-    virtual bool GetVoidValue (const char *name, const std::type_info &valueType, void *pValue) const;
-
     // ASN1Object
     virtual void BERDecode (BufferedTransformation &bt);
     virtual void DEREncode (BufferedTransformation &bt) const;
 
-    /// \brief Decode algorithm parameters
-    /// \param bt BufferedTransformation object
-    /// \sa BERDecodePublicKey, <A HREF="http://www.ietf.org/rfc/rfc2459.txt">RFC
-    ///  2459, section 7.3.1</A>
-    virtual bool BERDecodeAlgorithmParameters (BufferedTransformation &bt)
-        {BERDecodeNull(bt); return false;}
+    //@}
 
-    /// \brief Encode algorithm parameters
-    /// \param bt BufferedTransformation object
-    /// \sa DEREncodePublicKey, <A HREF="http://www.ietf.org/rfc/rfc2459.txt">RFC
-    ///  2459, section 7.3.1</A>
-    virtual bool DEREncodeAlgorithmParameters (BufferedTransformation &bt) const
-        {DEREncodeNull(bt); return false;}
-
-    /// \name OPTIONAL ATTRIBUTES
+    /// \name ASN.1 OPTIONAL
     //@{
 
     /// \brief Determine if Issuer UniqueId is present
@@ -687,6 +683,14 @@ protected:
     void SaveCertificateBytes(BufferedTransformation &bt);
     // Clear old certificate data
     void Reset();
+
+    // RFC 2459, section 7.3.1, http://www.ietf.org/rfc/rfc2459.txt
+    virtual bool BERDecodeAlgorithmParameters (BufferedTransformation &bt)
+        {BERDecodeNull(bt); return false;}
+
+    // RFC 2459, section 7.3.1, http://www.ietf.org/rfc/rfc2459.txt
+    virtual bool DEREncodeAlgorithmParameters (BufferedTransformation &bt) const
+        {DEREncodeNull(bt); return false;}
 
     void BERDecodeVersion(BufferedTransformation &bt, Version &version);
     void BERDecodeSerialNumber(BufferedTransformation &bt, Integer &serno);
