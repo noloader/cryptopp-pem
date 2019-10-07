@@ -1293,9 +1293,13 @@ void X509Certificate::BERDecodeSerialNumber(BufferedTransformation &bt, Integer 
 bool X509Certificate::Validate(RandomNumberGenerator &rng, unsigned int level) const
 {
     // TODO: add more tests
-    bool valid = m_subjectPublicKey->Validate(rng, level);
+    bool valid = true, fail;
 
-    if (IsSelfSigned() && level >= 2)
+    fail = m_subjectPublicKey->Validate(rng, level);
+    valid = !fail && valid;
+    CRYPTOPP_ASSERT(!fail);
+
+    if (IsSelfSigned() && level >= 1)
     {
         const SecByteBlock& signature = GetCertificateSignature();
         const SecByteBlock& toBeSigned = GetToBeSigned();
@@ -1348,17 +1352,19 @@ bool X509Certificate::Validate(RandomNumberGenerator &rng, unsigned int level) c
                 size_t size = verifier->MaxSignatureLength();
                 SecByteBlock ecSignature(size);
 
-                size = DSAConvertSignatureFormat(
-                    ecSignature, ecSignature.size(), DSA_P1363,
-                    signature, signature.size(), DSA_DER);
+                size = DSAConvertSignatureFormat(ecSignature, ecSignature.size(),
+                          DSA_P1363, signature, signature.size(), DSA_DER);
                 ecSignature.resize(size);
 
-                valid = verifier->VerifyMessage(toBeSigned, toBeSigned.size(), ecSignature, ecSignature.size()) && valid;
+                fail = verifier->VerifyMessage(toBeSigned, toBeSigned.size(), ecSignature, ecSignature.size());
             }
             else
             {
-                valid = verifier->VerifyMessage(toBeSigned, toBeSigned.size(), signature, signature.size()) && valid;
+                fail = verifier->VerifyMessage(toBeSigned, toBeSigned.size(), signature, signature.size());
             }
+
+            valid = !fail && valid;
+            CRYPTOPP_ASSERT(!fail);
         }
     }
 
