@@ -188,5 +188,5 @@ openssl x509 -in example-com.cert.pem -inform PEM -out example-com.cert.der -out
 # cacert.pem
 
 if [ ! -e "cacert.pem" ]; then
-    curl -o cacert.pem http://curl.haxx.se/ca/cacert.pem
+    curl -o cacert.pem https://curl.haxx.se/ca/cacert.pem
 fi
