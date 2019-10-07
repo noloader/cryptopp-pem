@@ -49,6 +49,8 @@ std::string OidToNameLookup(const OID& oid, const char *defaultName=NULLPTR);
 /// \details 0 is an invalid tag value
 const ASNTag InvalidTag = static_cast<ASNTag>(0);
 
+//////////////////////////////////////////////////
+
 /// \brief X.500 Relative Distinguished Name value
 struct RdnValue : public ASN1Object
 {
@@ -78,6 +80,8 @@ struct RdnValue : public ASN1Object
 /// \sa RdnValue
 typedef std::vector<RdnValue> RdnValueArray;
 
+//////////////////////////////////////////////////
+
 /// \brief X.690 Date value
 struct DateValue : public ASN1Object
 {
@@ -100,6 +104,8 @@ struct DateValue : public ASN1Object
     SecByteBlock m_value;
     ASNTag m_tag;
 };
+
+//////////////////////////////////////////////////
 
 /// \brief X.509 Extension value
 struct ExtensionValue : public ASN1Object
@@ -130,6 +136,8 @@ struct ExtensionValue : public ASN1Object
 /// \details Vector or ExtensionValue
 /// \sa ExtensionValue
 typedef std::vector<ExtensionValue> ExtensionValueArray;
+
+//////////////////////////////////////////////////
 
 /// \brief X.509 KeyIdentifier value
 struct KeyIdentifierValue : public ASN1Object
@@ -163,6 +171,8 @@ struct KeyIdentifierValue : public ASN1Object
     SecByteBlock m_value;
     KeyIdentifierEnum m_type;
 };
+
+//////////////////////////////////////////////////
 
 /// \brief X.509 KU and EKU value
 /// \details KeyUsageValue represents Key Usage and Extended Key Usage values
@@ -295,6 +305,8 @@ struct KeyUsageValue : public ASN1Object
 /// \sa KeyUsageValue
 typedef std::vector<KeyUsageValue> KeyUsageValueArray;
 
+//////////////////////////////////////////////////
+
 /// \brief X.509 Basic Constraint
 struct BasicConstraintValue : public ASN1Object
 {
@@ -315,6 +327,8 @@ struct BasicConstraintValue : public ASN1Object
     word32 m_pathLen;
     bool m_critical, m_ca;
 };
+
+//////////////////////////////////////////////////
 
 /// \brief Identity value
 /// \details IdentityValue holds an identity and provides a textual representation of it.
@@ -407,6 +421,8 @@ struct IdentityValue
 /// \sa IdentityValue
 typedef std::vector<IdentityValue> IdentityValueArray;
 
+//////////////////////////////////////////////////
+
 /// \brief X.509 Certificate
 /// \details X509Certificate is a partial implementation of X.509 certificate
 ///  support. The class loads a DER encoded certificate and presents many of
@@ -475,6 +491,44 @@ public:
     virtual bool DEREncodeAlgorithmParameters (BufferedTransformation &bt) const
         {DEREncodeNull(bt); return false;}
 
+    /// \name OPTIONAL ATTRIBUTES
+    //@{
+
+    /// \brief Determine if Issuer UniqueId is present
+    /// \returns true if Issuer UniqueId is present, false otherwise
+    /// \details Issuer UniqueId is optional and available with X.509 v2.
+    /// \sa HasSubjectUniqueId, GetIssuerUniqueId
+    bool HasIssuerUniqueId() const;
+
+    /// \brief Determine if Subject UniqueId is present
+    /// \returns true if Subject UniqueId is present, false otherwise
+    /// \details Subject UniqueId is optional and available with X.509 v2.
+    /// \sa HasIssuerUniqueId, GetSubjectUniqueId
+    bool HasSubjectUniqueId() const;
+
+    /// \brief Determine if Extensions are present
+    /// \returns true if Extensions are present, false otherwise
+    /// \details Extensions are optional and available with X.509 v3.
+    /// \sa GetExtensions
+    bool HasExtensions() const;
+
+    /// \brief Determine if AKI is present
+    /// \returns true if Authority Key Identifier is present, false otherwise
+    /// \details AKI is an optional extension and available with X.509 v3.
+    /// \sa HasSubjectKeyIdentifier, GetAuthorityKeyIdentifier
+    bool HasAuthorityKeyIdentifier() const;
+
+    /// \brief Determine if SPKI is present
+    /// \returns true if Subject Public Key Identifier is present, false otherwise
+    /// \details SPKI is an optional extension and available with X.509 v3.
+    /// \sa HasAuthorityKeyIdentifier, GetSubjectKeyIdentifier
+    bool HasSubjectKeyIdentifier() const;
+
+    //@}
+
+    /// \name ACCESSORS
+    //@{
+
     /// \brief Retrieve complete DER encoded certicate
     /// \returns the certificate data
     /// \sa GetToBeSigned
@@ -536,21 +590,21 @@ public:
     /// \details Issuer UniqueId is optional and available with X.509 v2.
     /// \sa HasIssuerUniqueId
     const SecByteBlock& GetIssuerUniqueId() const
-        { return *m_issuerUid.get(); }
+        { return m_issuerUid.get() ? *m_issuerUid.get() : g_nullByteBlock; }
 
     /// \brief Subject UniqueId
     /// \returns Subject UniqueId
     /// \details Subject UniqueId is optional and available with X.509 v2.
     /// \sa HasSubjectUniqueId
     const SecByteBlock& GetSubjectUniqueId() const
-        { return *m_subjectUid.get(); }
+        { return m_subjectUid.get() ? *m_subjectUid.get() : g_nullByteBlock; }
 
     /// \brief Certificate extensions
     /// \returns Certificate extensions array
     /// \details Certificate extensions are available with X.509 v3.
     /// \sa HasExtensions
     const ExtensionValueArray& GetExtensions() const
-        { return *m_extensions.get(); }
+        { return m_extensions.get() ? *m_extensions.get() : g_nullExtensions; }
 
     /// \brief Subject public key algorithm
     /// \returns Subject public key algorithm
@@ -564,47 +618,16 @@ public:
     const X509PublicKey& GetSubjectPublicKey() const
         { return *m_subjectPublicKey.get(); }
 
-    /// \brief Determine if Issuer UniqueId is present
-    /// \returns true if Issuer UniqueId is present, false otherwise
-    /// \details Issuer UniqueId is optional and available with X.509 v2.
-    /// \sa HasSubjectUniqueId, GetIssuerUniqueId
-    bool HasIssuerUniqueId() const
-        { return m_issuerUid.get() != NULLPTR; }
-
-    /// \brief Determine if Subject UniqueId is present
-    /// \returns true if Subject UniqueId is present, false otherwise
-    /// \details Subject UniqueId is optional and available with X.509 v2.
-    /// \sa HasIssuerUniqueId, GetSubjectUniqueId
-    bool HasSubjectUniqueId() const
-        { return m_subjectUid.get() != NULLPTR; }
-
-    /// \brief Determine if Extensions are present
-    /// \returns true if Extensions are present, false otherwise
-    /// \details Extensions are optional and available with X.509 v3.
-    /// \sa GetExtensions
-    bool HasExtensions() const
-        { return m_extensions.get() != NULLPTR; }
-
-    /// \brief Determine if certificate is a CA
-    /// \returns true if the certificate is a CA, false otherwise
-    /// \sa IsSelfSigned
-    bool IsCertificateAuthority() const;
-
-    /// \brief Determine if certificate is self-signed
-    /// \returns true if the certificate is self-signed, false otherwise
-    /// \sa IsCertificateAuthority
-    bool IsSelfSigned() const;
-
     /// \brief Authority key identifier
     /// \returns Authority key identifier
     /// \details Authority key identifier is optional and available with X.509 v3.
-    /// \sa GetSubjectKeyIdentifier
+    /// \sa HasAuthorityKeyIdentifier, GetSubjectKeyIdentifier
     const KeyIdentifierValue& GetAuthorityKeyIdentifier() const;
 
     /// \brief Subject key identifier
     /// \returns Subject key identifier
     /// \details Subject key identifier is optional and available with X.509 v3.
-    /// \sa GetAuthorityKeyIdentifier
+    /// \sa HasSubjectKeyIdentifier, GetAuthorityKeyIdentifier
     const KeyIdentifierValue& GetSubjectKeyIdentifier() const;
 
     /// \brief Identities
@@ -616,6 +639,31 @@ public:
     /// \returns Identities
     /// \details GetSubjectIdentities() collects the identities in the certificate.
     const KeyUsageValueArray& GetSubjectKeyUsage() const;
+
+    //@}
+
+    /// \name CERTIFICATE
+    //@{
+
+    /// \brief Determine if certificate is a CA
+    /// \returns true if the certificate is a CA, false otherwise
+    /// \details There are two types of certificates. The first is a CA certificate and
+    ///  signaled with <tt>basicConstraint, CA:TRUE</tt>. The second is an end entity
+    ///  certificate and signaled with <tt>basicConstraint, CA:FALSE</tt>.
+    ///  CA certificates can certify other certificates, while end entity certificates
+    ///  cannot. End entity certificates are leaf certificates.
+    /// \sa IsSelfSigned
+    bool IsCertificateAuthority() const;
+
+    /// \brief Determine if certificate is self-signed
+    /// \returns true if the certificate is self-signed, false otherwise
+    /// \sa IsCertificateAuthority
+    bool IsSelfSigned() const;
+
+    //@}
+
+    /// \name DEBUG
+    //@{
 
     /// \brief Print a certificate
     /// \param out ostream object
@@ -632,6 +680,8 @@ public:
     ///  also sets up a try/catch and silently swallows exceptions.
     void WriteCertificateBytes(BufferedTransformation &bt) const;
 
+    //@}
+
 protected:
     // Crib away the original certificate
     void SaveCertificateBytes(BufferedTransformation &bt);
@@ -639,6 +689,7 @@ protected:
     void Reset();
 
     void BERDecodeVersion(BufferedTransformation &bt, Version &version);
+    void BERDecodeSerialNumber(BufferedTransformation &bt, Integer &serno);
     void BERDecodeSignatureAlgorithm(BufferedTransformation &bt, OID &algorithm);
     void BERDecodeDistinguishedName(BufferedTransformation &bt, RdnValueArray &rdnArray);
     void BERDecodeValidity(BufferedTransformation &bt, DateValue &notBefore, DateValue &notAfter);
@@ -669,19 +720,22 @@ protected:
     bool FindExtension(const OID& oid, ExtensionValueArray::const_iterator& loc) const;
 
 private:
+    // Mandatory
     Version m_version;
     Integer m_serialNumber;
 
-    // certificate algorithm and signature
+    // Certificate algorithm and signature, mandatory
     OID m_certSignatureAlgortihm;
     SecByteBlock m_certSignature;
 
+    // Issuer and subject DNs, mandatory
     RdnValueArray m_issuerName;
     RdnValueArray m_subjectName;
 
+    // Mandatory
     DateValue m_notBefore, m_notAfter;
 
-    // The subject's key and algorithm
+    // The subject's key and algorithm, mandatory
     OID m_subjectSignatureAlgortihm;
     member_ptr<X509PublicKey> m_subjectPublicKey;
 
@@ -692,22 +746,28 @@ private:
     // Certificate v3, optional
     ASNOptional<ExtensionValueArray> m_extensions;
 
-    // AKI and SPKI extensions
+    // AKI and SPKI extensions, optional
     mutable member_ptr<KeyIdentifierValue> m_authorityKeyIdentifier;  // lazy
     mutable member_ptr<KeyIdentifierValue> m_subjectKeyIdentifier;    // lazy
+
+    // KU and EKU, optional
+    mutable member_ptr<KeyUsageValueArray> m_keyUsage;  // lazy
 
     // Identities
     mutable member_ptr<IdentityValueArray> m_identities;  // lazy
 
-    // KU and EKU
-    mutable member_ptr<KeyUsageValueArray> m_keyUsage;  // lazy
-
-    // To be signed
+    // To be signed, mandatory
     mutable member_ptr<SecByteBlock> m_toBeSigned;  // lazy
 
     // Hack so we can examine the octets. Also see WriteCertificateBytes.
     SecByteBlock m_origCertificate;
+
+    // Null values so we can return something
+    static const SecByteBlock  g_nullByteBlock;
+    static const ExtensionValueArray g_nullExtensions;
 };
+
+//////////////////////////////////////////////////
 
 inline std::ostream& operator<<(std::ostream& out, const X509Certificate &cert)
     { return cert.Print(out); }
@@ -721,6 +781,11 @@ inline std::ostream& operator<<(std::ostream& out, const KeyUsageValue &value)
     { return value.Print(out); }
 inline std::ostream& operator<<(std::ostream& out, const IdentityValue &value)
     { return value.Print(out); }
+
+inline bool operator==(const RdnValue &first, const RdnValue &second)
+    { return first.m_value == second.m_value; }
+inline bool operator==(const KeyIdentifierValue &first, const KeyIdentifierValue &second)
+    { return first.m_value == second.m_value; }
 
 inline std::ostream& operator<<(std::ostream& out, const RdnValueArray &values)
 {
@@ -766,6 +831,19 @@ inline std::ostream& operator<<(std::ostream& out, const KeyUsageValueArray &val
     }
     return out << oss.str();
 }
+
+//////////////////////////////////////////////////
+
+extern const OID id_sha1WithRSASignature;
+extern const OID id_sha256WithRSAEncryption;
+extern const OID id_sha384WithRSAEncryption;
+extern const OID id_sha512WithRSAEncryption;
+
+extern const OID id_ecPublicKey;
+extern const OID id_secp256v1;
+extern const OID id_ecdsaWithSHA256;
+extern const OID id_ecdsaWithSHA384;
+extern const OID id_ecdsaWithSHA512;
 
 NAMESPACE_END
 

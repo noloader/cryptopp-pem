@@ -119,6 +119,17 @@ const OID id_netscapeServerName = OID(2)+16+840+1+113730+1+12;
 const OID id_keyUsage = OID(2)+5+29+15;
 const OID id_extendedKeyUsage = OID(2)+5+29+37;
 
+const OID id_sha1WithRSASignature = OID(1)+2+840+113549+1+1+5;
+const OID id_sha256WithRSAEncryption = OID(1)+2+840+113549+1+1+11;
+const OID id_sha384WithRSAEncryption = OID(1)+2+840+113549+1+1+12;
+const OID id_sha512WithRSAEncryption = OID(1)+2+840+113549+1+1+13;
+
+const OID id_ecPublicKey = OID(1)+2+840+10045+2+1;
+const OID id_secp256v1 = OID(1)+2+840+10045+3+1+7;
+const OID id_ecdsaWithSHA256 = OID(1)+2+840+10045+4+3+2;
+const OID id_ecdsaWithSHA384 = OID(1)+2+840+10045+4+3+3;
+const OID id_ecdsaWithSHA512 = OID(1)+2+840+10045+4+3+4;
+
 struct OidToName
 {
     virtual ~OidToName() {};
@@ -148,10 +159,10 @@ OidToNameArray GetOidToNameTable()
     table.push_back(OidToName(OID(1)+2+840+10045+3+1+1, "secp192v1"));
     table.push_back(OidToName(OID(1)+2+840+10045+3+1+2, "secp192v2"));
     table.push_back(OidToName(OID(1)+2+840+10045+3+1+3, "secp192v3"));
-    table.push_back(OidToName(OID(1)+2+840+10045+3+1+7, "secp256v1"));
-    table.push_back(OidToName(OID(1)+2+840+10045+4+3+2, "ecdsaWithSHA256"));
-    table.push_back(OidToName(OID(1)+2+840+10045+4+3+3, "ecdsaWithSHA384"));
-    table.push_back(OidToName(OID(1)+2+840+10045+4+3+4, "ecdsaWithSHA512"));
+    table.push_back(OidToName(id_secp256v1, "secp256v1"));
+    table.push_back(OidToName(id_ecdsaWithSHA256, "ecdsaWithSHA256"));
+    table.push_back(OidToName(id_ecdsaWithSHA384, "ecdsaWithSHA384"));
+    table.push_back(OidToName(id_ecdsaWithSHA512, "ecdsaWithSHA512"));
 
     table.push_back(OidToName(OID(1)+3+132+0+33, "secp224r1"));
     table.push_back(OidToName(OID(1)+3+132+0+34, "secp384r1"));
@@ -161,13 +172,13 @@ OidToNameArray GetOidToNameTable()
     table.push_back(OidToName(OID(1)+2+840+113549+1+1+2, "md2WithRSAEncryption"));
     table.push_back(OidToName(OID(1)+2+840+113549+1+1+3, "md4WithRSAEncryption"));
     table.push_back(OidToName(OID(1)+2+840+113549+1+1+4, "md5WithRSAEncryption"));
-    table.push_back(OidToName(OID(1)+2+840+113549+1+1+5, "sha1WithRSASignature"));
+    table.push_back(OidToName(id_sha1WithRSASignature,   "sha1WithRSASignature"));
     table.push_back(OidToName(OID(1)+2+840+113549+1+1+6, "rsaOAEPEncryption"));
     table.push_back(OidToName(OID(1)+2+840+113549+1+1+7, "rsaAESOAEP"));
     table.push_back(OidToName(OID(1)+2+840+113549+1+1+10, "rsaSSAPSS"));
-    table.push_back(OidToName(OID(1)+2+840+113549+1+1+11, "sha256WithRSAEncryption"));
-    table.push_back(OidToName(OID(1)+2+840+113549+1+1+12, "sha384WithRSAEncryption"));
-    table.push_back(OidToName(OID(1)+2+840+113549+1+1+13, "sha512WithRSAEncryption"));
+    table.push_back(OidToName(id_sha256WithRSAEncryption, "sha256WithRSAEncryption"));
+    table.push_back(OidToName(id_sha384WithRSAEncryption, "sha384WithRSAEncryption"));
+    table.push_back(OidToName(id_sha512WithRSAEncryption, "sha512WithRSAEncryption"));
     table.push_back(OidToName(OID(1)+2+840+113549+1+1+14, "sha224WithRSAEncryption"));
     table.push_back(OidToName(OID(1)+2+840+113549+1+1+15, "sha512-224WithRSAEncryption"));
     table.push_back(OidToName(OID(1)+2+840+113549+1+1+16, "sha512-256WithRSAEncryption"));
@@ -429,10 +440,31 @@ void KeyIdentifierValue::BERDecode(BufferedTransformation &bt)
         BERSequenceDecoder seq(bt);
           if (HasOptionalAttribute(seq, CONTEXT_SPECIFIC|0))
           {
-              BERGeneralDecoder dec(seq, CONTEXT_SPECIFIC|0);
+              BERSequenceDecoder dec(seq, CONTEXT_SPECIFIC|0);
                 m_value.New(dec.MaxRetrievable());
                 dec.Get(BytePtr(m_value), BytePtrSize(m_value));
               dec.MessageEnd();
+          }
+#if 0
+          if (HasOptionalAttribute(seq, CONSTRUCTED|CONTEXT_SPECIFIC|1))
+          {
+              BERGeneralDecoder dec(seq, CONSTRUCTED|CONTEXT_SPECIFIC|1);
+                RdnValueArray dn;
+                while (! dec.EndReached())
+                {
+                    BERSetDecoder set(dec);
+                      RdnValue value;
+                      value.BERDecode(set);
+                      dn.push_back(value);
+                    set.MessageEnd();
+                }
+              dec.MessageEnd();
+          }
+#endif
+          if (seq.EndReached() == false)
+          {
+              // TODO: add distinguished name [1] and serno [2]
+              seq.SkipAll();
           }
         seq.MessageEnd();
 
@@ -574,8 +606,8 @@ std::string IdentityValue::EncodeValue() const
         case registeredID:
         {
             OID oid;
-            ArraySource source(ConstBytePtr(m_value), BytePtrSize(m_value), true);
-            oid.BERDecode(source);
+            ArraySource store(ConstBytePtr(m_value), BytePtrSize(m_value), true);
+            oid.BERDecode(store);
 
             std::ostringstream oss;
             oss << oid;
@@ -603,15 +635,15 @@ void IdentityValue::ConvertOtherName()
     if (m_value[0] == OBJECT_IDENTIFIER)
     {
         SecByteBlock temp(m_value);
-        ArraySource source(ConstBytePtr(temp), BytePtrSize(temp), true);
-        OID oid; oid.BERDecode(source);
+        ArraySource store(ConstBytePtr(temp), BytePtrSize(temp), true);
+        OID oid; oid.BERDecode(store);
 
         const OID msUPN = id_msUserPrincipalName;
         if (oid == msUPN)  // Turn this object into a MS UPN
         {
             try
             {
-                BERSequenceDecoder seq(source);
+                BERSequenceDecoder seq(store);
                   BERDecodeTextString(seq, m_value, UTF8_STRING);
                 seq.MessageEnd();
 
@@ -905,6 +937,10 @@ void BasicConstraintValue::DEREncode(BufferedTransformation &bt) const
     throw NotImplemented("BasicConstraintValue::DEREncode");
 }
 
+// Null values so some accessors can return something
+const SecByteBlock  X509Certificate::g_nullByteBlock;
+const ExtensionValueArray X509Certificate::g_nullExtensions;
+
 void X509Certificate::Save(BufferedTransformation &bt) const
 {
     DEREncode(bt);
@@ -936,6 +972,9 @@ void X509Certificate::Reset()
     m_certSignatureAlgortihm = OID();
     m_subjectSignatureAlgortihm = OID();
     m_notBefore = m_notAfter = DateValue();
+
+    m_version = v1;
+    m_serialNumber = 0;
 }
 
 void X509Certificate::SaveCertificateBytes(BufferedTransformation &bt)
@@ -959,11 +998,11 @@ const SecByteBlock& X509Certificate::GetToBeSigned() const
         m_toBeSigned.reset(new SecByteBlock);
         SecByteBlock &toBeSigned = *m_toBeSigned.get();
 
-        ArraySource source(m_origCertificate, m_origCertificate.size(), true);
+        ArraySource store(m_origCertificate, m_origCertificate.size(), true);
         SecByteBlockSink sink(toBeSigned);
 
         // The extra gyrations below are due to the ctor removing the tag and length
-        BERSequenceDecoder cert(source);   // Certifcate octets, without tag and length
+        BERSequenceDecoder cert(store);   // Certifcate octets, without tag and length
           BERSequenceDecoder tbs(cert);    // TBSCertifcate octets, without tag and length
             DERSequenceEncoder seq(sink);  // TBSCertifcate octets, with tag and length
               tbs.TransferTo(seq);         // Re-encoded TBSCertifcate, ready to verify
@@ -989,18 +1028,19 @@ void X509Certificate::BERDecode(BufferedTransformation &bt)
 
       BERSequenceDecoder tbsCertificate(certificate);
 
-        // NULL length handled in BERDecodeVersion and friends.
-        // Also see https://stackoverflow.com/a/56008778/608639.
         if (HasOptionalAttribute(tbsCertificate, CONTEXT_SPECIFIC|CONSTRUCTED|0))
             BERDecodeVersion(tbsCertificate, m_version);
         else
             m_version = v1;  // Default per RFC
 
-        m_serialNumber.BERDecode(tbsCertificate);
+        BERDecodeSerialNumber(tbsCertificate, m_serialNumber);
+
         BERDecodeSignatureAlgorithm(tbsCertificate, m_subjectSignatureAlgortihm);
 
         BERDecodeDistinguishedName(tbsCertificate, m_issuerName);
+
         BERDecodeValidity(tbsCertificate, m_notBefore, m_notAfter);
+
         BERDecodeDistinguishedName(tbsCertificate, m_subjectName);
 
         BERDecodeSubjectPublicKeyInfo(tbsCertificate, m_subjectPublicKey);
@@ -1245,10 +1285,84 @@ void X509Certificate::BERDecodeVersion(BufferedTransformation &bt, Version &vers
     version = static_cast<Version>(value);
 }
 
+void X509Certificate::BERDecodeSerialNumber(BufferedTransformation &bt, Integer &serno)
+{
+    serno.BERDecode(bt);
+}
+
 bool X509Certificate::Validate(RandomNumberGenerator &rng, unsigned int level) const
 {
     // TODO: add more tests
-    return m_subjectPublicKey->Validate(rng, level);
+    bool valid = m_subjectPublicKey->Validate(rng, level);
+
+    if (IsSelfSigned() && level >= 2)
+    {
+        const SecByteBlock& signature = GetCertificateSignature();
+        const SecByteBlock& toBeSigned = GetToBeSigned();
+        const X509PublicKey& publicKey = GetSubjectPublicKey();
+        const OID &signAlgorithm = GetCertificateSignatureAlgorithm();
+
+        member_ptr<PK_Verifier> verifier;
+        bool ecSignature = false;
+
+        if (signAlgorithm == id_sha1WithRSASignature)
+        {
+            verifier.reset(new RSASS<PKCS1v15, SHA1>::Verifier(publicKey));
+        }
+        else if (signAlgorithm == id_sha256WithRSAEncryption)
+        {
+            verifier.reset(new RSASS<PKCS1v15, SHA256>::Verifier(publicKey));
+        }
+        else if (signAlgorithm == id_sha384WithRSAEncryption)
+        {
+            verifier.reset(new RSASS<PKCS1v15, SHA384>::Verifier(publicKey));
+        }
+        else if (signAlgorithm == id_sha512WithRSAEncryption)
+        {
+            verifier.reset(new RSASS<PKCS1v15, SHA512>::Verifier(publicKey));
+        }
+        else if (signAlgorithm == id_ecdsaWithSHA256)
+        {
+            verifier.reset(new ECDSA<ECP, SHA256>::Verifier(publicKey));
+            ecSignature = true;
+        }
+        else if (signAlgorithm == id_ecdsaWithSHA384)
+        {
+            verifier.reset(new ECDSA<ECP, SHA384>::Verifier(publicKey));
+            ecSignature = true;
+        }
+        else if (signAlgorithm == id_ecdsaWithSHA512)
+        {
+            verifier.reset(new ECDSA<ECP, SHA512>::Verifier(publicKey));
+            ecSignature = true;
+        }
+        else
+        {
+            CRYPTOPP_ASSERT(0);
+        }
+
+        if (verifier.get())
+        {
+            if (ecSignature)
+            {
+                size_t size = verifier->MaxSignatureLength();
+                SecByteBlock ecSignature(size);
+
+                size = DSAConvertSignatureFormat(
+                    ecSignature, ecSignature.size(), DSA_P1363,
+                    signature, signature.size(), DSA_DER);
+                ecSignature.resize(size);
+
+                valid = verifier->VerifyMessage(toBeSigned, toBeSigned.size(), ecSignature, ecSignature.size()) && valid;
+            }
+            else
+            {
+                valid = verifier->VerifyMessage(toBeSigned, toBeSigned.size(), signature, signature.size()) && valid;
+            }
+        }
+    }
+
+    return valid;
 }
 
 void X509Certificate::AssignFrom(const NameValuePairs &source)
@@ -1274,6 +1388,13 @@ bool X509Certificate::GetVoidValue(const char *name, const std::type_info &value
 
 bool X509Certificate::FindExtension(const OID& oid, ExtensionValueArray::const_iterator& loc) const
 {
+    if (HasExtensions() == false)
+    {
+        // Set loc to something
+        loc = g_nullExtensions.end();
+        return false;
+    }
+
     ExtensionValueArray::const_iterator first = m_extensions.get()->begin();
     ExtensionValueArray::const_iterator last = m_extensions.get()->end();
 
@@ -1289,6 +1410,39 @@ bool X509Certificate::FindExtension(const OID& oid, ExtensionValueArray::const_i
     return false;
 }
 
+bool X509Certificate::HasIssuerUniqueId() const
+{
+    return m_issuerUid.get() != NULLPTR;
+}
+
+bool X509Certificate::HasSubjectUniqueId() const
+{
+    return m_subjectUid.get() != NULLPTR;
+}
+
+bool X509Certificate::HasExtensions() const
+{
+    return m_extensions.get() != NULLPTR;
+}
+
+bool X509Certificate::HasAuthorityKeyIdentifier() const
+{
+    if (HasExtensions() == false)
+        { return false; }
+
+    ExtensionValueArray::const_iterator unused;
+    return FindExtension(id_authorityKeyIdentifier, unused);
+}
+
+bool X509Certificate::HasSubjectKeyIdentifier() const
+{
+    if (HasExtensions() == false)
+        { return false; }
+
+    ExtensionValueArray::const_iterator unused;
+    return FindExtension(id_subjectPublicKeyIdentifier, unused);
+}
+
 bool X509Certificate::IsCertificateAuthority() const
 {
     // BasicConstraints ::= SEQUENCE {
@@ -1302,8 +1456,8 @@ bool X509Certificate::IsCertificateAuthority() const
         const ExtensionValue& ext = *loc;
         BasicConstraintValue basicConstraints(ext.m_critical);
 
-        ArraySource source(ext.m_value, ext.m_value.size(), true);
-        basicConstraints.BERDecode(source);
+        ArraySource store(ext.m_value, ext.m_value.size(), true);
+        basicConstraints.BERDecode(store);
 
         return basicConstraints.m_ca;
     }
@@ -1314,13 +1468,16 @@ bool X509Certificate::IsCertificateAuthority() const
 bool X509Certificate::IsSelfSigned() const
 {
     // IssuerUID and SubjectUID are optional
-    if (HasIssuerUniqueId() && HasSubjectUniqueId() && GetIssuerUniqueId() == GetSubjectUniqueId())
+    if (HasIssuerUniqueId() && HasSubjectUniqueId() &&
+        GetIssuerUniqueId() == GetSubjectUniqueId())
         return true;
 
-    // AKI and SPKI are lazy, use accessor
-    if (GetAuthorityKeyIdentifier().m_value == GetSubjectKeyIdentifier().m_value)
+    // AKI and SPKI are optional
+    if (HasAuthorityKeyIdentifier() && HasSubjectKeyIdentifier() &&
+        GetAuthorityKeyIdentifier() == GetSubjectKeyIdentifier())
         return true;
 
+    // Distinguished Names
     bool same = false;
     if (m_issuerName.size() == m_subjectName.size())
     {
@@ -1360,8 +1517,8 @@ const KeyIdentifierValue& X509Certificate::GetAuthorityKeyIdentifier() const
                 const ExtensionValue& ext = *loc;
                 KeyIdentifierValue& identifier = *m_authorityKeyIdentifier.get();
 
-                ArraySource source(ext.m_value, ext.m_value.size(), true);
-                identifier.BERDecode(source);
+                ArraySource store(ext.m_value, ext.m_value.size(), true);
+                identifier.BERDecode(store);
             }
         }
     }
@@ -1389,8 +1546,8 @@ const KeyIdentifierValue& X509Certificate::GetSubjectKeyIdentifier() const
                 const ExtensionValue& ext = *loc;
                 KeyIdentifierValue& identifier = *m_subjectKeyIdentifier.get();
 
-                ArraySource source(ext.m_value, ext.m_value.size(), true);
-                identifier.BERDecode(source);
+                ArraySource store(ext.m_value, ext.m_value.size(), true);
+                identifier.BERDecode(store);
             }
         }
     }
@@ -1487,9 +1644,9 @@ void X509Certificate::GetIdentitiesFromSubjectAltName(IdentityValueArray& identi
     if (FindExtension(id_subjectAltName, loc))
     {
         const ExtensionValue& ext = *loc;
-        ArraySource source(ext.m_value, ext.m_value.size(), true);
+        ArraySource store(ext.m_value, ext.m_value.size(), true);
 
-        BERSequenceDecoder seq(source);
+        BERSequenceDecoder seq(store);
           while (! seq.EndReached())
           {
               byte choice;
@@ -1565,9 +1722,9 @@ void X509Certificate::GetIdentitiesFromNetscapeServer(IdentityValueArray& identi
     if (FindExtension(id_netscapeServerName, loc))
     {
         const ExtensionValue& ext = *loc;
-        ArraySource source(ext.m_value, ext.m_value.size(), true);
+        ArraySource store(ext.m_value, ext.m_value.size(), true);
 
-        BERSequenceDecoder seq(source);
+        BERSequenceDecoder seq(store);
 
           SecByteBlock temp;
           temp.resize(seq.MaxRetrievable());
@@ -1610,11 +1767,11 @@ const KeyUsageValueArray& X509Certificate::GetSubjectKeyUsage() const
         if (FindExtension(id_keyUsage, loc))
         {
             const ExtensionValue& ext = *loc;
-            ArraySource source(ConstBytePtr(ext.m_value), BytePtrSize(ext.m_value), true);
+            ArraySource store(ConstBytePtr(ext.m_value), BytePtrSize(ext.m_value), true);
 
             SecByteBlock values;
             word32 unused;
-            BERDecodeBitString(source, values, unused);
+            BERDecodeBitString(store, values, unused);
 
             // The bit string is one octet, with the bit mask blocked-left.
             CRYPTOPP_ASSERT(values.size() == 1);
@@ -1645,9 +1802,9 @@ const KeyUsageValueArray& X509Certificate::GetSubjectKeyUsage() const
         if (FindExtension(id_extendedKeyUsage, loc))
         {
             const ExtensionValue& ext = *loc;
-            ArraySource source(ConstBytePtr(ext.m_value), BytePtrSize(ext.m_value), true);
+            ArraySource store(ConstBytePtr(ext.m_value), BytePtrSize(ext.m_value), true);
 
-            BERSequenceDecoder seq(source);
+            BERSequenceDecoder seq(store);
 
               while (! seq.EndReached())
               {
