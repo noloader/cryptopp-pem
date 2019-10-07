@@ -77,6 +77,12 @@ inline bool IsDSAAlgorithm(const OID& alg)
     return alg == ASN1::id_dsa();
 }
 
+inline bool IsECDSAAlgorithm(const OID& alg)
+{
+    return alg == id_ecdsaWithSHA1 || alg == id_ecdsaWithSHA256 ||
+        alg == id_ecdsaWithSHA384 || alg == id_ecdsaWithSHA512;
+}
+
 inline bool IsEd25519Algorithm(const OID& alg)
 {
     return alg == ASN1::Ed25519();
@@ -119,13 +125,14 @@ const OID id_netscapeServerName = OID(2)+16+840+1+113730+1+12;
 const OID id_keyUsage = OID(2)+5+29+15;
 const OID id_extendedKeyUsage = OID(2)+5+29+37;
 
-const OID id_sha1WithRSASignature = OID(1)+2+840+113549+1+1+5;
+const OID id_sha1WithRSASignature    = OID(1)+2+840+113549+1+1+5;
 const OID id_sha256WithRSAEncryption = OID(1)+2+840+113549+1+1+11;
 const OID id_sha384WithRSAEncryption = OID(1)+2+840+113549+1+1+12;
 const OID id_sha512WithRSAEncryption = OID(1)+2+840+113549+1+1+13;
 
-const OID id_ecPublicKey = OID(1)+2+840+10045+2+1;
-const OID id_secp256v1 = OID(1)+2+840+10045+3+1+7;
+const OID id_ecPublicKey     = OID(1)+2+840+10045+2+1;
+const OID id_secp256v1       = OID(1)+2+840+10045+3+1+7;
+const OID id_ecdsaWithSHA1   = OID(1)+2+840+10045+4+1;
 const OID id_ecdsaWithSHA256 = OID(1)+2+840+10045+4+3+2;
 const OID id_ecdsaWithSHA384 = OID(1)+2+840+10045+4+3+3;
 const OID id_ecdsaWithSHA512 = OID(1)+2+840+10045+4+3+4;
@@ -160,6 +167,8 @@ OidToNameArray GetOidToNameTable()
     table.push_back(OidToName(OID(1)+2+840+10045+3+1+2, "secp192v2"));
     table.push_back(OidToName(OID(1)+2+840+10045+3+1+3, "secp192v3"));
     table.push_back(OidToName(id_secp256v1, "secp256v1"));
+
+    table.push_back(OidToName(id_ecdsaWithSHA1,   "ecdsaWithSHA1"));
     table.push_back(OidToName(id_ecdsaWithSHA256, "ecdsaWithSHA256"));
     table.push_back(OidToName(id_ecdsaWithSHA384, "ecdsaWithSHA384"));
     table.push_back(OidToName(id_ecdsaWithSHA512, "ecdsaWithSHA512"));
@@ -1071,9 +1080,7 @@ void X509Certificate::BERDecode(BufferedTransformation &bt)
 
       BERDecodeSignatureAlgorithm(certificate, m_certSignatureAlgortihm);
 
-      word32 unused;
-      BERDecodeBitString(certificate, m_certSignature, unused);
-      CRYPTOPP_ASSERT(unused == 0);
+      BERDecodeSignature(certificate, m_certSignature);
 
     certificate.MessageEnd();
 }
@@ -1084,6 +1091,32 @@ void X509Certificate::DEREncode(BufferedTransformation &bt) const
 
     // TODO: Implement this function
     throw NotImplemented("X509Certificate::DEREncode");
+}
+
+void X509Certificate::BERDecodeSignature(BufferedTransformation &bt, SecByteBlock &signature)
+{
+    word32 unused;
+    BERDecodeBitString(bt, signature, unused);
+    CRYPTOPP_ASSERT(unused == 0);
+
+    // For ECDSA, convert from DER to P1363 so the signature is ready to use.
+    const OID &algorithm = GetCertificateSignatureAlgorithm();
+    if (IsECDSAAlgorithm(algorithm))
+    {
+        const X509PublicKey &publicKey = GetSubjectPublicKey();
+        member_ptr<PK_Verifier> verifier(GetPK_VerifierObject(algorithm, publicKey));
+
+        size_t size = verifier->SignatureLength();
+        SecByteBlock p1363Signature(size);
+
+        // https://www.cryptopp.com/wiki/DSAConvertSignatureFormat
+        size = DSAConvertSignatureFormat(
+                    p1363Signature, p1363Signature.size(), DSA_P1363,
+                    signature, signature.size(), DSA_DER);
+        p1363Signature.resize(size);
+
+        std::swap(signature, p1363Signature);
+    }
 }
 
 void X509Certificate::BERDecodeIssuerUniqueId(BufferedTransformation &bt)
@@ -1314,12 +1347,10 @@ bool X509Certificate::Validate(RandomNumberGenerator &rng, unsigned int level) c
     return valid;
 }
 
-bool X509Certificate::ValidateSignature (RandomNumberGenerator &rng, const X509PublicKey &key) const
+// Get the verifier object for an algorithm and key. ecPublicKey is an out parameter.
+PK_Verifier* X509Certificate::GetPK_VerifierObject(const OID &algorithm, const X509PublicKey &key) const
 {
-    const OID &algorithm = GetCertificateSignatureAlgorithm();
     member_ptr<PK_Verifier> verifier;
-
-    bool valid = true, ecSignature = false;
 
     if (algorithm == id_sha1WithRSASignature)
     {
@@ -1337,50 +1368,44 @@ bool X509Certificate::ValidateSignature (RandomNumberGenerator &rng, const X509P
     {
         verifier.reset(new RSASS<PKCS1v15, SHA512>::Verifier(key));
     }
+    else if (algorithm == id_ecdsaWithSHA1)
+    {
+        verifier.reset(new ECDSA<ECP, SHA1>::Verifier(key));
+    }
     else if (algorithm == id_ecdsaWithSHA256)
     {
         verifier.reset(new ECDSA<ECP, SHA256>::Verifier(key));
-        ecSignature = true;
     }
     else if (algorithm == id_ecdsaWithSHA384)
     {
         verifier.reset(new ECDSA<ECP, SHA384>::Verifier(key));
-        ecSignature = true;
     }
     else if (algorithm == id_ecdsaWithSHA512)
     {
         verifier.reset(new ECDSA<ECP, SHA512>::Verifier(key));
-        ecSignature = true;
     }
     else
     {
         CRYPTOPP_ASSERT(0);
-        valid = false;
     }
+
+    return verifier.release();
+}
+
+bool X509Certificate::ValidateSignature (RandomNumberGenerator &rng, const X509PublicKey &key) const
+{
+    bool valid = true;
+
+    const OID &algorithm = GetCertificateSignatureAlgorithm();
+    member_ptr<PK_Verifier> verifier(GetPK_VerifierObject(algorithm, key));
 
     if (verifier.get())
     {
         const SecByteBlock &signature = GetCertificateSignature();
         const SecByteBlock &toBeSigned = GetToBeSigned();
 
-        if (ecSignature)
-        {
-            size_t size = verifier->SignatureLength();
-            SecByteBlock ecSignature(size);
-
-            // https://www.cryptopp.com/wiki/DSAConvertSignatureFormat
-            size = DSAConvertSignatureFormat(ecSignature, ecSignature.size(),
-                      DSA_P1363, signature, signature.size(), DSA_DER);
-            ecSignature.resize(size);
-
-            valid = verifier->VerifyMessage(toBeSigned, toBeSigned.size(), ecSignature, ecSignature.size());
-            CRYPTOPP_ASSERT(valid);
-        }
-        else
-        {
-            valid = verifier->VerifyMessage(toBeSigned, toBeSigned.size(), signature, signature.size());
-            CRYPTOPP_ASSERT(valid);
-        }
+        valid = verifier->VerifyMessage(toBeSigned, toBeSigned.size(), signature, signature.size());
+        CRYPTOPP_ASSERT(valid);
     }
 
     return valid;

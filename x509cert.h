@@ -703,13 +703,13 @@ protected:
     // RFC 2459, section 7.3.1, http://www.ietf.org/rfc/rfc2459.txt
     virtual bool BERDecodeAlgorithmParameters (BufferedTransformation &bt)
         {BERDecodeNull(bt); return false;}
-
-    // RFC 2459, section 7.3.1, http://www.ietf.org/rfc/rfc2459.txt
     virtual bool DEREncodeAlgorithmParameters (BufferedTransformation &bt) const
         {DEREncodeNull(bt); return false;}
 
+    // X509Certificate
     void BERDecodeVersion(BufferedTransformation &bt, Version &version);
     void BERDecodeSerialNumber(BufferedTransformation &bt, Integer &serno);
+    void BERDecodeSignature(BufferedTransformation &bt, SecByteBlock &signature);
     void BERDecodeSignatureAlgorithm(BufferedTransformation &bt, OID &algorithm);
     void BERDecodeDistinguishedName(BufferedTransformation &bt, RdnValueArray &rdnArray);
     void BERDecodeValidity(BufferedTransformation &bt, DateValue &notBefore, DateValue &notAfter);
@@ -738,6 +738,9 @@ protected:
 
     // Find an extension with the OID. Returns false and end() if not found.
     bool FindExtension(const OID& oid, ExtensionValueArray::const_iterator& loc) const;
+
+    // Get the verifier object for an algorithm and key
+    PK_Verifier* GetPK_VerifierObject(const OID &algorithm, const X509PublicKey &key) const;
 
 private:
     // Version and serial number, required v1
@@ -861,6 +864,7 @@ extern const OID id_sha512WithRSAEncryption;
 
 extern const OID id_ecPublicKey;
 extern const OID id_secp256v1;
+extern const OID id_ecdsaWithSHA1;
 extern const OID id_ecdsaWithSHA256;
 extern const OID id_ecdsaWithSHA384;
 extern const OID id_ecdsaWithSHA512;

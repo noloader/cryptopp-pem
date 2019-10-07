@@ -39,7 +39,6 @@ int main(int argc, char* argv[])
     bool result1 = publicKey.Validate(prng, 3);
 
     member_ptr<PK_Verifier> verifier;
-    bool ecSignature = false, result2;
 
     if (signAlgorithm == id_sha1WithRSASignature)
     {
@@ -57,42 +56,28 @@ int main(int argc, char* argv[])
     {
         verifier.reset(new RSASS<PKCS1v15, SHA512>::Verifier(publicKey));
     }
+    else if (signAlgorithm == id_ecdsaWithSHA1)
+    {
+        verifier.reset(new ECDSA<ECP, SHA1>::Verifier(publicKey));
+    }
     else if (signAlgorithm == id_ecdsaWithSHA256)
     {
         verifier.reset(new ECDSA<ECP, SHA256>::Verifier(publicKey));
-        ecSignature = true;
     }
     else if (signAlgorithm == id_ecdsaWithSHA384)
     {
         verifier.reset(new ECDSA<ECP, SHA384>::Verifier(publicKey));
-        ecSignature = true;
     }
     else if (signAlgorithm == id_ecdsaWithSHA512)
     {
         verifier.reset(new ECDSA<ECP, SHA512>::Verifier(publicKey));
-        ecSignature = true;
     }
     else
     {
         CRYPTOPP_ASSERT(0);
     }
 
-    if (ecSignature)
-    {
-        size_t size = verifier->MaxSignatureLength();
-        SecByteBlock ecSignature(size);
-
-        size = DSAConvertSignatureFormat(
-            ecSignature, ecSignature.size(), DSA_P1363,
-            signature, signature.size(), DSA_DER);
-        ecSignature.resize(size);
-
-        result2 = verifier->VerifyMessage(toBeSigned, toBeSigned.size(), ecSignature, ecSignature.size());
-    }
-    else
-    {
-        result2 = verifier->VerifyMessage(toBeSigned, toBeSigned.size(), signature, signature.size());
-    }
+    bool result2 = verifier->VerifyMessage(toBeSigned, toBeSigned.size(), signature, signature.size());
 
     if (result1)
         std::cout << "Verified public key" << std::endl;
