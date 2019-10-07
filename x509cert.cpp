@@ -1105,6 +1105,7 @@ void X509Certificate::BERDecodeSignature(BufferedTransformation &bt, SecByteBloc
     {
         const X509PublicKey &publicKey = GetSubjectPublicKey();
         member_ptr<PK_Verifier> verifier(GetPK_VerifierObject(algorithm, publicKey));
+        CRYPTOPP_ASSERT(verifier.get());
 
         size_t size = verifier->SignatureLength();
         SecByteBlock p1363Signature(size);
@@ -1329,10 +1330,10 @@ void X509Certificate::BERDecodeSerialNumber(BufferedTransformation &bt, Integer 
 bool X509Certificate::Validate(RandomNumberGenerator &rng, unsigned int level) const
 {
     // TODO: add more tests
-    bool valid = true, pass;
+    bool pass = true, valid;
 
-    pass = m_subjectPublicKey->Validate(rng, level);
-    valid = pass && valid;
+    valid = m_subjectPublicKey->Validate(rng, level);
+    pass = valid && pass;
     CRYPTOPP_ASSERT(pass);
 
     if (IsSelfSigned() && level >= 1)
@@ -1340,14 +1341,29 @@ bool X509Certificate::Validate(RandomNumberGenerator &rng, unsigned int level) c
         const X509PublicKey &publicKey = GetSubjectPublicKey();
 
         pass = ValidateSignature(rng, publicKey);
-        valid = pass && valid;
+        pass = pass && pass;
         CRYPTOPP_ASSERT(pass);
     }
+
+    return pass;
+}
+
+bool X509Certificate::ValidateSignature (RandomNumberGenerator &rng, const X509PublicKey &key) const
+{
+    const OID &algorithm = GetCertificateSignatureAlgorithm();
+    member_ptr<PK_Verifier> verifier(GetPK_VerifierObject(algorithm, key));
+    CRYPTOPP_ASSERT(verifier.get());
+
+    const SecByteBlock &signature = GetCertificateSignature();
+    const SecByteBlock &toBeSigned = GetToBeSigned();
+
+    bool valid = verifier->VerifyMessage(toBeSigned, toBeSigned.size(), signature, signature.size());
+    CRYPTOPP_ASSERT(valid);
 
     return valid;
 }
 
-// Get the verifier object for an algorithm and key. ecPublicKey is an out parameter.
+// Get the verifier object for an algorithm and key.
 PK_Verifier* X509Certificate::GetPK_VerifierObject(const OID &algorithm, const X509PublicKey &key) const
 {
     member_ptr<PK_Verifier> verifier;
@@ -1390,25 +1406,6 @@ PK_Verifier* X509Certificate::GetPK_VerifierObject(const OID &algorithm, const X
     }
 
     return verifier.release();
-}
-
-bool X509Certificate::ValidateSignature (RandomNumberGenerator &rng, const X509PublicKey &key) const
-{
-    bool valid = true;
-
-    const OID &algorithm = GetCertificateSignatureAlgorithm();
-    member_ptr<PK_Verifier> verifier(GetPK_VerifierObject(algorithm, key));
-
-    if (verifier.get())
-    {
-        const SecByteBlock &signature = GetCertificateSignature();
-        const SecByteBlock &toBeSigned = GetToBeSigned();
-
-        valid = verifier->VerifyMessage(toBeSigned, toBeSigned.size(), signature, signature.size());
-        CRYPTOPP_ASSERT(valid);
-    }
-
-    return valid;
 }
 
 void X509Certificate::AssignFrom(const NameValuePairs &source)
