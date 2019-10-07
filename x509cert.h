@@ -543,13 +543,13 @@ public:
 
     /// \brief Retrieve complete DER encoded certicate
     /// \returns the certificate data
-    /// \sa GetToBeSigned
+    /// \sa GetToBeSigned, GetCertificateSignature
     const SecByteBlock& GetCertificate () const
         { return m_origCertificate; }
 
     /// \brief Retrieve DER encoded ToBeSigned
     /// \returns the toBeSigned data
-    /// \sa GetCertificate
+    /// \sa GetCertificate, GetCertificateSignature
     const SecByteBlock& GetToBeSigned () const;
 
     /// \brief Version number
@@ -565,13 +565,13 @@ public:
 
     /// \brief Certificate signature algorithm
     /// \returns Certificate signature algorithm
-    /// \sa GetCertificateSignature
+    /// \sa GetCertificate, GetToBeSigned, GetCertificateSignature
     const OID& GetCertificateSignatureAlgorithm() const
         { return m_certSignatureAlgortihm; }
 
     /// \brief Certificate signature
     /// \returns Certificate signature
-    /// \sa GetCertificateSignatureAlgorithm
+    /// \sa GetCertificate, GetToBeSigned, GetCertificateSignatureAlgorithm
     const SecByteBlock& GetCertificateSignature() const
         { return m_certSignature; }
 
