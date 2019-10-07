@@ -167,8 +167,11 @@ struct KeyIdentifierValue : public ASN1Object
     /// \returns string representing the value
     std::string EncodeValue() const;
 
+    // The hash of the key is placed in m_value.
+    // The remaining bits, like DN and Serno, are placed in m_other.
     OID m_oid;
     SecByteBlock m_value;
+    SecByteBlock m_other;  // raw
     KeyIdentifierEnum m_type;
 };
 

@@ -463,8 +463,8 @@ void KeyIdentifierValue::BERDecode(BufferedTransformation &bt)
 #endif
           if (seq.EndReached() == false)
           {
-              // TODO: add distinguished name [1] and serno [2]
-              seq.SkipAll();
+              m_other.New(seq.MaxRetrievable());
+              seq.Get(BytePtr(m_other), BytePtrSize(m_other));
           }
         seq.MessageEnd();
 
