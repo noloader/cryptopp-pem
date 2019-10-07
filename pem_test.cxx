@@ -316,24 +316,43 @@ int main(int argc, char* argv[])
 
         while (PEM_NextObject(fs, t))
         {
+            count++;  // 1-based
+
             X509Certificate cert;
+            std::ostringstream oss;
+
             try {
                 PEM_Load(t, cert);
+                oss << cert << std::endl;
             }
             catch (const Exception&) {
+                std::cerr << "Failed to parse certificate " << count << std::endl;
+
+                std::cerr << "\nWriting certificate badcert.der" << std::endl;
                 FileSink x("badcert.der");
                 cert.WriteCertificateBytes(x);
+
+                std::cerr << "\nDumping certificate" << std::endl;
+                std::cerr << oss.str() << std::endl;
                 throw;
             }
 
             AutoSeededRandomPool prng;
             if (cert.Validate(prng, 2) == false)
             {
-                std::ostringstream oss;
-                oss << "Failed to validate public key for " << cert.GetSubjectDistinguishedName();
-                throw Exception(Exception::OTHER_ERROR, oss.str());
+                std::ostringstream message;
+                message << "Failed to validate public key for " << cert.GetSubjectDistinguishedName();
+                std::cerr << message.str() << std::endl;;
+
+                std::cerr << "\nWriting certificate badcert.der" << std::endl;
+                FileSink x("badcert.der");
+                cert.WriteCertificateBytes(x);
+
+                std::cerr << "\nDumping certificate" << std::endl;
+                std::cerr << oss.str() << std::endl;
+
+                throw Exception(Exception::OTHER_ERROR, message.str());
             }
-            count++;
         }
 
         if (count >= 120)
