@@ -472,6 +472,12 @@ public:
     // CryptoMaterial
     virtual bool Validate (RandomNumberGenerator &rng, unsigned int level) const;
 
+    /// \brief Validate signature on this certificate
+    /// \param rng a RandomNumberGenerator for objects which use randomized testing
+    /// \param key the public key of the keypair used to sign this certificate
+    /// \returns true if the test succeeds, false otherwise
+    bool ValidateSignature (RandomNumberGenerator &rng, const X509PublicKey &key) const;
+
     //@}
 
     /// \name ENCODE/DECODE

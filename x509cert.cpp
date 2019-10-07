@@ -1293,78 +1293,89 @@ void X509Certificate::BERDecodeSerialNumber(BufferedTransformation &bt, Integer 
 bool X509Certificate::Validate(RandomNumberGenerator &rng, unsigned int level) const
 {
     // TODO: add more tests
-    bool valid = true, fail;
+    bool valid = true, pass;
 
-    fail = m_subjectPublicKey->Validate(rng, level);
-    valid = !fail && valid;
-    CRYPTOPP_ASSERT(!fail);
+    pass = m_subjectPublicKey->Validate(rng, level);
+    valid = pass && valid;
+    CRYPTOPP_ASSERT(pass);
 
     if (IsSelfSigned() && level >= 1)
     {
-        const SecByteBlock& signature = GetCertificateSignature();
-        const SecByteBlock& toBeSigned = GetToBeSigned();
-        const X509PublicKey& publicKey = GetSubjectPublicKey();
-        const OID &signAlgorithm = GetCertificateSignatureAlgorithm();
+        const X509PublicKey &publicKey = GetSubjectPublicKey();
 
-        member_ptr<PK_Verifier> verifier;
-        bool ecSignature = false;
+        pass = ValidateSignature(rng, publicKey);
+        valid = pass && valid;
+        CRYPTOPP_ASSERT(pass);
+    }
 
-        if (signAlgorithm == id_sha1WithRSASignature)
+    return valid;
+}
+
+bool X509Certificate::ValidateSignature (RandomNumberGenerator &rng, const X509PublicKey &key) const
+{
+    const OID &algorithm = GetCertificateSignatureAlgorithm();
+    member_ptr<PK_Verifier> verifier;
+
+    bool valid = true, ecSignature = false;
+
+    if (algorithm == id_sha1WithRSASignature)
+    {
+        verifier.reset(new RSASS<PKCS1v15, SHA1>::Verifier(key));
+    }
+    else if (algorithm == id_sha256WithRSAEncryption)
+    {
+        verifier.reset(new RSASS<PKCS1v15, SHA256>::Verifier(key));
+    }
+    else if (algorithm == id_sha384WithRSAEncryption)
+    {
+        verifier.reset(new RSASS<PKCS1v15, SHA384>::Verifier(key));
+    }
+    else if (algorithm == id_sha512WithRSAEncryption)
+    {
+        verifier.reset(new RSASS<PKCS1v15, SHA512>::Verifier(key));
+    }
+    else if (algorithm == id_ecdsaWithSHA256)
+    {
+        verifier.reset(new ECDSA<ECP, SHA256>::Verifier(key));
+        ecSignature = true;
+    }
+    else if (algorithm == id_ecdsaWithSHA384)
+    {
+        verifier.reset(new ECDSA<ECP, SHA384>::Verifier(key));
+        ecSignature = true;
+    }
+    else if (algorithm == id_ecdsaWithSHA512)
+    {
+        verifier.reset(new ECDSA<ECP, SHA512>::Verifier(key));
+        ecSignature = true;
+    }
+    else
+    {
+        CRYPTOPP_ASSERT(0);
+        valid = false;
+    }
+
+    if (verifier.get())
+    {
+        const SecByteBlock &signature = GetCertificateSignature();
+        const SecByteBlock &toBeSigned = GetToBeSigned();
+
+        if (ecSignature)
         {
-            verifier.reset(new RSASS<PKCS1v15, SHA1>::Verifier(publicKey));
-        }
-        else if (signAlgorithm == id_sha256WithRSAEncryption)
-        {
-            verifier.reset(new RSASS<PKCS1v15, SHA256>::Verifier(publicKey));
-        }
-        else if (signAlgorithm == id_sha384WithRSAEncryption)
-        {
-            verifier.reset(new RSASS<PKCS1v15, SHA384>::Verifier(publicKey));
-        }
-        else if (signAlgorithm == id_sha512WithRSAEncryption)
-        {
-            verifier.reset(new RSASS<PKCS1v15, SHA512>::Verifier(publicKey));
-        }
-        else if (signAlgorithm == id_ecdsaWithSHA256)
-        {
-            verifier.reset(new ECDSA<ECP, SHA256>::Verifier(publicKey));
-            ecSignature = true;
-        }
-        else if (signAlgorithm == id_ecdsaWithSHA384)
-        {
-            verifier.reset(new ECDSA<ECP, SHA384>::Verifier(publicKey));
-            ecSignature = true;
-        }
-        else if (signAlgorithm == id_ecdsaWithSHA512)
-        {
-            verifier.reset(new ECDSA<ECP, SHA512>::Verifier(publicKey));
-            ecSignature = true;
+            size_t size = verifier->MaxSignatureLength();
+            SecByteBlock ecSignature(size);
+
+            size = DSAConvertSignatureFormat(ecSignature, ecSignature.size(),
+                      DSA_P1363, signature, signature.size(), DSA_DER);
+            ecSignature.resize(size);
+
+            valid = verifier->VerifyMessage(toBeSigned, toBeSigned.size(), ecSignature, ecSignature.size());
+            CRYPTOPP_ASSERT(valid);
         }
         else
         {
-            CRYPTOPP_ASSERT(0);
-        }
-
-        if (verifier.get())
-        {
-            if (ecSignature)
-            {
-                size_t size = verifier->MaxSignatureLength();
-                SecByteBlock ecSignature(size);
-
-                size = DSAConvertSignatureFormat(ecSignature, ecSignature.size(),
-                          DSA_P1363, signature, signature.size(), DSA_DER);
-                ecSignature.resize(size);
-
-                fail = verifier->VerifyMessage(toBeSigned, toBeSigned.size(), ecSignature, ecSignature.size());
-            }
-            else
-            {
-                fail = verifier->VerifyMessage(toBeSigned, toBeSigned.size(), signature, signature.size());
-            }
-
-            valid = !fail && valid;
-            CRYPTOPP_ASSERT(!fail);
+            valid = verifier->VerifyMessage(toBeSigned, toBeSigned.size(), signature, signature.size());
+            CRYPTOPP_ASSERT(valid);
         }
     }
 
