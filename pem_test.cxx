@@ -310,7 +310,7 @@ int main(int argc, char* argv[])
     {
         std::cout << "\nLoad certificates from cacert.pem" << std::endl;
 
-        FileSource fs("cacert.pem", true);
+        FileSource fs("./cacert.pem", true);
         ByteQueue t;
         size_t count=0;
 
@@ -358,7 +358,7 @@ int main(int argc, char* argv[])
         if (count >= 120)
             std::cout << "  - OK (" << count << " certificates)" << std::endl;
         else {
-            std::cout << "  - Failed (died at certificate" << count << ")" << std::endl;
+            std::cout << "  - Failed (died at certificate " << count << ")" << std::endl;
             fail = true;
         }
     }

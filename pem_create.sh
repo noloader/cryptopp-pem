@@ -24,6 +24,11 @@ if [[ -z $(command -v perl) ]]; then
     exit 1
 fi
 
+if [[ -z $(command -v curl) ]]; then
+    echo "Please install perl package"
+    exit 1
+fi
+
 # We need OpenSSL 1.0.2 or above
 MODERN_OPENSSL=$(openssl version | grep -v -E '(OpenSSL 0.[0-9]|OpenSSL 1.0.0|OpenSSL 1.0.1)' | wc -l)
 
@@ -111,7 +116,7 @@ sed 's/\r//g' rsa-pub.pem > rsa-eol-lf.pem
 sed 's/\r//g; s/\n//g' rsa-pub.pem > rsa-eol-none.pem
 
 echo "-----BEGIN FOO-----" > foobar.pem
-head -c 180 /dev/urandom | base64 -w 64 >> foobar.pem
+head -c 180 /dev/urandom | base64 | fold -w 64 >> foobar.pem
 echo "-----END BAR-----" >> foobar.pem
 
 ##################################
@@ -142,7 +147,7 @@ subjectKeyIdentifier    = hash
 authorityKeyIdentifier  = keyid,issuer
 basicConstraints        = critical,CA:FALSE
 keyUsage                = digitalSignature
-extendedKeyUsage        = serverAuth, clientAuth, secureShellServer
+extendedKeyUsage        = serverAuth, clientAuth
 subjectAltName          = @alternate_names
 nsComment               = "OpenSSL Generated Certificate"
 
@@ -151,7 +156,7 @@ nsComment               = "OpenSSL Generated Certificate"
 subjectKeyIdentifier    = hash
 basicConstraints        = critical,CA:FALSE
 keyUsage                = digitalSignature
-extendedKeyUsage        = serverAuth, clientAuth, secureShellServer
+extendedKeyUsage        = serverAuth, clientAuth
 subjectAltName          = @alternate_names
 nsComment               = "OpenSSL Generated Certificate"
 
@@ -183,5 +188,5 @@ openssl x509 -in example-com.cert.pem -inform PEM -out example-com.cert.der -out
 # cacert.pem
 
 if [ ! -e "cacert.pem" ]; then
-    wget http://curl.haxx.se/ca/cacert.pem -O cacert.pem
+    curl -o cacert.pem http://curl.haxx.se/ca/cacert.pem
 fi
