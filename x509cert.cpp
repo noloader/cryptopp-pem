@@ -1219,7 +1219,7 @@ void X509Certificate::BERDecodeSubjectPublicKeyInfo(BufferedTransformation &bt, 
 // (prime vs. binary). We need a field to instantiate a key. For example,
 // subjectPublicKeyAlgorithm==ecdsa_with_sha384() does not contain enough
 // information to determine PublicKey_EC<ECP> or PublicKey_EC<EC2N>.
-void X509Certificate::GetSubjectPublicKeyInfoOids(BufferedTransformation &bt, OID& algorithm, OID& field) const
+void X509Certificate::GetSubjectPublicKeyInfoOids(const BufferedTransformation &bt, OID& algorithm, OID& field) const
 {
     try
     {
