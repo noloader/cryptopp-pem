@@ -42,7 +42,7 @@
 #define id_distinguishedName           (OID(2)+5+4+49)
 #define id_commonName                  (OID(2)+5+4+3)
 #define id_uniqueIdentifier            (OID(2)+5+4+45)
-#define id_email                       (OID(1)+2+840+113549+1+9+1)
+#define id_pkcsEmail                   (OID(1)+2+840+113549+1+9+1)
 #define id_subjectAltName              (OID(2)+5+29+17)
 #define id_netscapeServerName          (OID(2)+16+840+1+113730+1+12)
 #define id_keyUsage                    (OID(2)+5+29+15)
@@ -229,7 +229,7 @@ OidToNameArray GetOidToNameTable()
 
     table.push_back(OidToName(OID(0)+9+2342+19200300+100+1+1, "UID"));   // User Id
     table.push_back(OidToName(OID(0)+9+2342+19200300+100+1+25, "DC"));   // Domain component
-    table.push_back(OidToName(id_email, "EMAIL"));              // Email address+ part of DN+ deprecated
+    table.push_back(OidToName(id_pkcsEmail, "EMAIL"));          // Email address+ part of DN+ deprecated
     table.push_back(OidToName(id_msUserPrincipalName, "UPN"));  // Microsoft User Principal Name (UPN)
                                                                 // Found in the SAN as [1] otherName
 
@@ -996,16 +996,24 @@ const SecByteBlock& X509Certificate::GetToBeSigned() const
         SecByteBlock &toBeSigned = *m_toBeSigned.get();
 
         ArraySource store(m_origCertificate, m_origCertificate.size(), true);
-        SecByteBlockSink sink(toBeSigned);
+        BERSequenceDecoder cert(store);
 
-        // The extra gyrations below are due to the ctor removing the tag and length
-        BERSequenceDecoder cert(store);   // Certifcate octets, without tag and length
-          BERSequenceDecoder tbs(cert);    // TBSCertifcate octets, without tag and length
-            DERSequenceEncoder seq(sink);  // TBSCertifcate octets, with tag and length
-              tbs.TransferTo(seq);         // Re-encoded TBSCertifcate, ready to verify
-            seq.MessageEnd();
-          tbs.MessageEnd();
-        cert.SkipAll();
+          // This gyration determines how many octets are used for
+          // tag and length under DER encoding. Then, len octets
+          // are transferred to toBeSigned. If tbsCertificate is not
+          // DER encoded, then this could break. Note the RFC requires
+          // DER encoding, so it is not a problem in practice.
+          size_t len = BERDecodePeekLength(cert);
+               if (len > 0xffffff) {len += 2+4;}  // SEQ + 0x84 + len1,len2,len3,len4
+          else if (len > 0xffff)   {len += 2+3;}  // SEQ + 0x83 + len1,len2,len3
+          else if (len > 0xff)     {len += 2+2;}  // SEQ + 0x82 + len1,len2
+          else if (len > 0x7f)     {len += 2+1;}  // SEQ + 0x81 + len1
+          else                     {len += 1+1;}  // SEQ + len1
+
+          toBeSigned.New(len);
+          cert.Get(BytePtr(toBeSigned), BytePtrSize(toBeSigned));
+          // Skip remaining octets
+          cert.SkipAll();
         cert.MessageEnd();
     }
 
@@ -1658,9 +1666,9 @@ void X509Certificate::GetIdentitiesFromSubjectDistName(IdentityValueArray& ident
 
         while (first != last)
         {
-            if (first->m_oid == id_email)
+            if (first->m_oid == id_pkcsEmail)
             {
-                IdentityValue identity(id_email, first->m_value, IdentityValue::SubjectEmail);
+                IdentityValue identity(id_pkcsEmail, first->m_value, IdentityValue::SubjectEmail);
                 identityArray.push_back(identity);
                 // Don't break due to multiple emails
             }
