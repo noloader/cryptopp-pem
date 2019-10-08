@@ -263,14 +263,37 @@ int main(int argc, char* argv[])
         std::cout << "  - OK" << std::endl;
     }
 
+    // Read the Let's Encrypt cert for www.cryptopp.com
+    {
+        try {
+            std::cout << "\nLoad Let's Encrypt cert for www.cryptopp.com" << std::endl;
+
+            X509Certificate cert;
+            FileSource fs("www-cryptopp-com.cert.pem", true);
+            PEM_Load(fs, cert);
+
+            std::cout << "  - OK" << std::endl;
+
+            std::cout << "\nDumping certificate:" << std::endl;
+            std::cout << cert << std::endl;
+
+            std::cout << "\nDumping identities:" << std::endl;
+            std::cout << cert.GetSubjectIdentities() << std::endl;
+        }
+        catch(const Exception& ex) {
+            std::cout << "Caught exception: " << ex.what() << std::endl;
+            fail = true;
+        }
+    }
+
     // Read the OpenSSL generated self-signed end-entity cert for example.com
     {
         try {
-            std::cout << "Load X.509 example-com.cert.pem certificate" << std::endl;
+            std::cout << "\nLoad X.509 example-com.cert.pem certificate" << std::endl;
 
             X509Certificate cert;
-            FileSource fs1("example-com.cert.pem", true);
-            PEM_Load(fs1, cert);
+            FileSource fs("example-com.cert.pem", true);
+            PEM_Load(fs, cert);
 
             std::cout << "  - OK" << std::endl;
 

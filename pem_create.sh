@@ -190,3 +190,5 @@ openssl x509 -in example-com.cert.pem -inform PEM -out example-com.cert.der -out
 if [ ! -e "cacert.pem" ]; then
     curl -o cacert.pem https://curl.haxx.se/ca/cacert.pem
 fi
+
+echo -e "GET / HTTP/1.1\r\nHost: www.cryptopp.com\r\n\r\n" | openssl s_client -showcerts -servername www.cryptopp.com -connect www.cryptopp.com:443 2>/dev/null | openssl x509 > www-cryptopp-com.cert.pem
