@@ -1235,10 +1235,10 @@ void X509Certificate::GetSubjectPublicKeyInfoOids(const BufferedTransformation &
                 { field.BERDecode(seq2); }
             seq2.SkipAll();
           seq2.MessageEnd();
-        seq1.SkipAll();
+          seq1.SkipAll();
         seq1.MessageEnd();
     }
-    catch (const Exception&)
+    catch (const BERDecodeErr&)
     {
     }
 }
