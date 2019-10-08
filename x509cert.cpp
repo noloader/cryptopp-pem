@@ -999,21 +999,16 @@ const SecByteBlock& X509Certificate::GetToBeSigned() const
         BERSequenceDecoder cert(store);
 
           // This gyration determines how many octets are used for
-          // tag and length under DER encoding. Then, len octets
-          // are transferred to toBeSigned. If tbsCertificate is not
-          // DER encoded, then this could break. Note the RFC requires
+          // tag and length under DER encoding. Then, len octets are
+          // transferred to toBeSigned. If tbsCertificate is not DER
+          // encoded, then this could break. Note the RFC requires
           // DER encoding, so it is not a problem in practice.
           size_t len = BERDecodePeekLength(cert);
-               if (len > 0xffffff) {len += 2+4;}  // SEQ + 0x84 + len1,len2,len3,len4
-          else if (len > 0xffff)   {len += 2+3;}  // SEQ + 0x83 + len1,len2,len3
-          else if (len > 0xff)     {len += 2+2;}  // SEQ + 0x82 + len1,len2
-          else if (len > 0x7f)     {len += 2+1;}  // SEQ + 0x81 + len1
-          else                     {len += 1+1;}  // SEQ + len1
+          len += 1 /*SEQ*/ + DERLengthEncode(TheBitBucket(), len);
 
           toBeSigned.New(len);
-          cert.Get(BytePtr(toBeSigned), BytePtrSize(toBeSigned));
-          // Skip remaining octets
-          cert.SkipAll();
+          cert.Get(BytePtr(toBeSigned), BytePtrSize(toBeSigned));          
+          cert.SkipAll();  // Remaining octets are not needed.
         cert.MessageEnd();
     }
 
