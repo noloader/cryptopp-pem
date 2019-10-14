@@ -161,7 +161,7 @@ subjectAltName          = @alternate_names
 nsComment               = "OpenSSL Generated Certificate"
 
 # A real server cert should not have email addresses
-# CA/B forbids IP addresses
+# The CA/B forbids IP addresses
 [ alternate_names ]
 DNS.1  = example.com
 DNS.2  = www.example.com

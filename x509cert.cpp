@@ -407,6 +407,7 @@ void ExtensionValue::DEREncode(BufferedTransformation &bt) const
 
 bool ExtensionValue::ValidateTag(byte tag) const
 {
+    CRYPTOPP_UNUSED(tag);
     return true;
 }
 
@@ -1330,7 +1331,6 @@ bool X509Certificate::Validate(RandomNumberGenerator &rng, unsigned int level) c
     if (IsSelfSigned() && level >= 1)
     {
         const X509PublicKey &publicKey = GetSubjectPublicKey();
-
         pass = ValidateSignature(rng, publicKey);
         pass = pass && pass;
         CRYPTOPP_ASSERT(pass);
@@ -1341,6 +1341,8 @@ bool X509Certificate::Validate(RandomNumberGenerator &rng, unsigned int level) c
 
 bool X509Certificate::ValidateSignature (RandomNumberGenerator &rng, const X509PublicKey &key) const
 {
+    CRYPTOPP_UNUSED(tag);
+
     const OID &algorithm = GetCertificateSignatureAlgorithm();
     member_ptr<PK_Verifier> verifier(GetPK_VerifierObject(algorithm, key));
     CRYPTOPP_ASSERT(verifier.get());

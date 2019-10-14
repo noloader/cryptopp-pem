@@ -387,7 +387,7 @@ int main(int argc, char* argv[])
     }
     catch(const Exception& ex)
     {
-        std::cout << "Caught exception: " << ex.what() << std::endl;
+        std::cout << "  - Exception: " << ex.what() << std::endl;
         fail = true;
     }
 
