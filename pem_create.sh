@@ -60,10 +60,11 @@ fi
 
 # Build the reproducer program in case test program crashes
 # The reproducer loads badcert.der.
-
-if ! $CXX $CXXFLAGS badcert.cxx ./libcryptopp.a -o badcert.exe; then
-    echo "Failed to build badcert.exe"
-    exit 1
+if [[ -e badcert.cxx ]]; then
+    if ! $CXX $CXXFLAGS badcert.cxx ./libcryptopp.a -o badcert.exe; then
+        echo "Failed to build badcert.exe"
+        exit 1
+    fi
 fi
 
 ##################################
