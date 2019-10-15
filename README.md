@@ -6,7 +6,9 @@ To compile the source files drop them in your `cryptopp` directory and run `make
 
 The PEM format uses an encapsulation header which describes the algorithm used to encrypt or authenticate the message. The encapsulated header uses BEGIN and END to frame the message. The message is Base64 encoded, lines are limited to 64 characters, and the end-of-line is CR ('\r') and LF ('\n').
 
-The files are officialy unsupported, so use it at your own risk.
+# Testing
+
+The files are officialy unsupported, so use them at your own risk. With that said, the PEM Pack source files are tested with Crypto++ on Linux and OS X using [Travis CI](https://github.com/weidai11/cryptopp/blob/master/.travis.yml).
 
 # ZIP Files
 
