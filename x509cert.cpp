@@ -1341,7 +1341,7 @@ bool X509Certificate::Validate(RandomNumberGenerator &rng, unsigned int level) c
 
 bool X509Certificate::ValidateSignature (RandomNumberGenerator &rng, const X509PublicKey &key) const
 {
-    CRYPTOPP_UNUSED(tag);
+    CRYPTOPP_UNUSED(rng);
 
     const OID &algorithm = GetCertificateSignatureAlgorithm();
     member_ptr<PK_Verifier> verifier(GetPK_VerifierObject(algorithm, key));
