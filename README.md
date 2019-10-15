@@ -6,12 +6,24 @@ To compile the source files drop them in your `cryptopp` directory and run `make
 
 The PEM format uses an encapsulation header which describes the algorithm used to encrypt or authenticate the message. The encapsulated header uses BEGIN and END to frame the message. The message is Base64 encoded, lines are limited to 64 characters, and the end-of-line is CR ('\r') and LF ('\n').
 
-# Testing
+## Testing
 
 The files are officialy unsupported, so use them at your own risk. With that said, the PEM Pack source files are tested with Crypto++ on Linux and OS X using [Travis CI](https://github.com/weidai11/cryptopp/blob/master/.travis.yml).
 
-# ZIP Files
+In November 2019 the library added `cryptest-pem.sh` to help test the PEM gear. The script is located in Crypto++'s `TestScripts` directory. The script downloads the PEM Pack files, builds the library and then runs the self tests.
+
+If you want to use `cryptest-pem.sh` to drive things then perform the following steps.
+
+    cd cryptopp
+    cp TestScripts/cryptest-pem.sh .
+    ./cryptest-pem.sh
+
+## ZIP Files
 
 If you are working from a Crypto++ release zip file, then you should download the same cryptopp-pem release zip file. Both Crypto++ and this project use the same release tags, such as CRYPTOPP_8_2_0.
 
 If you mix and match Master with a release zip file then things may not work as expected. You may find the build project files reference a source file that is not present in the Crypto++ release.
+
+## License
+
+Everything in this repo is release under Public Domain code. If the license or terms is unpalatable for you, then don't feel obligated to use it or commit.
