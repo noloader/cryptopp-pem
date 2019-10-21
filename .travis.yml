@@ -1,0 +1,65 @@
+# DO NOT create top level (global) keys like env, arch, os, compiler.
+# The top level/global keys invoke [unwanted] matrix expansion. Also
+# see https://stackoverflow.com/q/58473000/608639 and
+# https://docs.travis-ci.com/user/reference/overview/ and
+# https://docs.travis-ci.com/user/multi-cpu-architectures and
+# https://github.com/travis-ci/travis-yml/blob/master/schema.json.
+
+language: cpp
+
+git:
+  depth: 2
+
+# Use jobs rather than matrix since we are precisely
+# specifiying our test cases. Do not move any of the
+# keys (env, os, arch, compiler, etc) into global.
+# Putting them in global invokes the matrix expansion.
+jobs:
+  include:
+    - os: linux
+      name: Linux, amd64, GCC
+      arch: amd64
+      compiler: gcc
+    - os: linux
+      name: Linux, amd64, Clang
+      arch: amd64
+      compiler: clang
+    - os: linux
+      name: Linux, arm64, GCC
+      arch: arm64
+      compiler: gcc
+    - os: linux
+      name: Linux, arm64, Clang
+      arch: arm64
+      compiler: clang
+    - os: linux
+      name: Linux, ppc64le, GCC
+      arch: ppc64le
+      compiler: gcc
+    - os: linux
+      name: Linux, ppc64le, Clang
+      arch: ppc64le
+      compiler: clang
+    - os: osx
+      name: OS X, amd64, GCC
+      arch: amd64
+      compiler: gcc
+    - os: osx
+      name: OS X, amd64, Clang
+      arch: amd64
+      compiler: clang
+
+before_script:
+    # Let travis clone cryptopp-pem, clone cryptopp
+    # copy cryptopp-pem to cryptopp, and then run
+    # the test script.
+  - |
+    cd ..
+    git clone https://github.com/weidai11/cryptopp.git
+    cp cryptopp-pem/*.* cryptopp/
+    cd cryptopp
+
+script:
+  - |
+    cp TestScripts/cryptest-pem.sh .
+    bash cryptest-pem.sh
