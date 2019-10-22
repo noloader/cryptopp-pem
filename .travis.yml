@@ -20,26 +20,32 @@ jobs:
       name: Linux, amd64, GCC
       arch: amd64
       compiler: gcc
+      dist: bionic
     - os: linux
       name: Linux, amd64, Clang
       arch: amd64
       compiler: clang
+      dist: bionic
     - os: linux
       name: Linux, arm64, GCC
       arch: arm64
       compiler: gcc
+      dist: bionic
     - os: linux
       name: Linux, arm64, Clang
       arch: arm64
       compiler: clang
+      dist: bionic
     - os: linux
       name: Linux, ppc64le, GCC
       arch: ppc64le
       compiler: gcc
+      dist: bionic
     - os: linux
       name: Linux, ppc64le, Clang
       arch: ppc64le
       compiler: clang
+      dist: bionic
     - os: osx
       name: OS X, amd64, GCC
       arch: amd64
@@ -48,6 +54,11 @@ jobs:
       name: OS X, amd64, Clang
       arch: amd64
       compiler: clang
+
+  allow_failures:
+    # OS X still supplies OpenSSL 0.9.8 or 1.0.0. The ancient
+    # OpenSSL is too old for the PEM key generation routines.
+    - os: osx
 
 before_script:
     # Let travis clone cryptopp-pem, clone cryptopp
@@ -58,8 +69,21 @@ before_script:
     git clone https://github.com/weidai11/cryptopp.git
     cp cryptopp-pem/*.* cryptopp/
     cd cryptopp
+    cp TestScripts/cryptest-pem.sh .
 
 script:
-  - |
-    cp TestScripts/cryptest-pem.sh .
+  - |    
     bash cryptest-pem.sh
+
+# Whitelist branches to avoid testing feature branches twice
+branches:
+  only:
+    - master
+    - /\/ci$/
+
+notifications:
+  email:
+    recipients:
+      - cryptopp-build@googlegroups.com
+    on_success: always # default: change
+    on_failure: always # default: always
