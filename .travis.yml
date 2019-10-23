@@ -60,6 +60,14 @@ jobs:
     # OS X still supplies OpenSSL 0.9.8 or 1.0.0. The ancient
     # OpenSSL is too old for the PEM key generation routines.
     - os: osx
+    # Clang 7.1 and below will fail on PPC64 due to
+    # https://bugs.llvm.org/show_bug.cgi?id=39704
+    - os: linux
+      arch: ppc64le
+      compiler: gcc
+    - os: linux
+      arch: ppc64le
+      compiler: clang
 
 before_script:
     # Let travis clone cryptopp-pem, clone cryptopp
