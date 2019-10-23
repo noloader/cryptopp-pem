@@ -1,5 +1,8 @@
 ## Crypto++ PEM Pack
 
+[![Build Status](https://travis-ci.org/noloader/cryptopp-pem.svg?branch=master)](https://travis-ci.org/noloader/cryptopp-pem)
+[![Build status](https://ci.appveyor.com/api/projects/status/qximuf4lv7213v8s?svg=true)](https://ci.appveyor.com/project/noloader/cryptopp-pem)
+
 This repository provides PEM parsing for Wei Dai's [Crypto++](https://github.com/weidai11/cryptopp). The source files allow you to read and write keys and parameters in PEM format. PEM is specified in RFC 1421, [Privacy Enhancement for Internet Electronic Mail](https://www.ietf.org/rfc/rfc1421.txt).
 
 To compile the source files drop them in your `cryptopp` directory and run `make`. The makefile will automatically pick them up. Visual Studio users should add the source files to the `cryptlib` project. Detailed information can be found at [PEM Pack](https://www.cryptopp.com/wiki/PEM_Pack) on the Crypto++ wiki.
