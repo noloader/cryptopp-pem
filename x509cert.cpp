@@ -1326,14 +1326,14 @@ bool X509Certificate::Validate(RandomNumberGenerator &rng, unsigned int level) c
 
     valid = m_subjectPublicKey->Validate(rng, level);
     pass = valid && pass;
-    CRYPTOPP_ASSERT(pass);
+    CRYPTOPP_ASSERT(valid);
 
     if (IsSelfSigned() && level >= 1)
     {
         const X509PublicKey &publicKey = GetSubjectPublicKey();
-        pass = ValidateSignature(rng, publicKey);
-        pass = pass && pass;
-        CRYPTOPP_ASSERT(pass);
+        valid = ValidateSignature(rng, publicKey);
+        pass = valid && pass;
+        CRYPTOPP_ASSERT(valid);
     }
 
     return pass;
