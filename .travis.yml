@@ -47,6 +47,16 @@ jobs:
       arch: ppc64le
       compiler: clang
       dist: bionic
+    - os: linux
+      name: Linux, s390x, GCC
+      arch: s390x
+      compiler: gcc
+      dist: bionic
+    - os: linux
+      name: Linux, s390x, Clang
+      arch: s390x
+      compiler: clang
+      dist: bionic
     - os: osx
       name: OS X, amd64, GCC
       arch: amd64
