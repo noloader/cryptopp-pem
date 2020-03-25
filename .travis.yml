@@ -17,69 +17,65 @@ git:
 # Putting them in global invokes the matrix expansion.
 jobs:
   include:
-    - os: linux
-      name: Linux, amd64, GCC
+    - name: Linux, amd64, GCC
+      os: linux
       arch: amd64
       compiler: gcc
       dist: bionic
-    - os: linux
-      name: Linux, amd64, Clang
+    - name: Linux, amd64, Clang
+      os: linux
       arch: amd64
       compiler: clang
       dist: bionic
-    - os: linux
-      name: Linux, arm64, GCC
+    - name: Linux, arm64, GCC
+      os: linux
       arch: arm64
       compiler: gcc
       dist: bionic
-    - os: linux
-      name: Linux, arm64, Clang
+    - name: Linux, arm64, Clang
+      os: linux
       arch: arm64
       compiler: clang
       dist: bionic
-    - os: linux
-      name: Linux, ppc64le, GCC
+    - name: Linux, ppc64le, GCC
+      os: linux
       arch: ppc64le
       compiler: gcc
       dist: bionic
-    - os: linux
-      name: Linux, ppc64le, Clang
+    - name: Linux, ppc64le, Clang
+      os: linux
       arch: ppc64le
       compiler: clang
       dist: bionic
-    - os: linux
-      name: Linux, s390x, GCC
+    - name: Linux, s390x, GCC
+      os: linux
       arch: s390x
       compiler: gcc
       dist: bionic
-    - os: linux
-      name: Linux, s390x, Clang
+    - name: Linux, s390x, Clang
+      os: linux
       arch: s390x
       compiler: clang
       dist: bionic
-    - os: osx
-      name: OS X, amd64, GCC
+    - name: OS X, amd64, GCC
+      os: osx
+      osx_image: xcode10.1
       arch: amd64
       compiler: gcc
-    - os: osx
-      name: OS X, amd64, Clang
+    - name: OS X, amd64, Clang
+      os: osx
+      osx_image: xcode10.1
       arch: amd64
       compiler: clang
 
   allow_failures:
-    # OS X still supplies OpenSSL 0.9.8 or 1.0.0. The ancient
-    # OpenSSL is too old for the PEM key generation routines.
-    - os: osx
-    # Clang 7.0 and below will likely have trouble due to
-    # https://bugs.llvm.org/show_bug.cgi?id=39704
-    - os: linux
-      arch: ppc64le
-      compiler: clang
     # Clang has a fair amount of trouble
     # on platforms Apple does not support
     - os: linux
       arch: s390x
       compiler: clang
+    # Clang 7.0 and below will likely have trouble on ppc64le
+    # due to https://bugs.llvm.org/show_bug.cgi?id=39704.
 
 before_script:
     # Let travis clone cryptopp-pem, clone cryptopp
@@ -93,7 +89,7 @@ before_script:
     cp TestScripts/cryptest-pem.sh .
 
 script:
-  - |    
+  - |
     bash cryptest-pem.sh
 
 # Whitelist branches to avoid testing feature branches twice
