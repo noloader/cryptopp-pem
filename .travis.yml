@@ -17,32 +17,32 @@ git:
 # Putting them in global invokes the matrix expansion.
 jobs:
   include:
-    - name: Linux, amd64, GCC
+    - name: Ubuntu Bionic, GCC, amd64
       os: linux
       arch: amd64
       compiler: gcc
       dist: bionic
-    - name: Linux, amd64, Clang
+    - name: Ubuntu Bionic, Clang, amd64
       os: linux
       arch: amd64
       compiler: clang
       dist: bionic
-    - name: Linux, arm64, GCC
+    - name: Ubuntu Bionic, GCC, arm64
       os: linux
       arch: arm64
       compiler: gcc
       dist: bionic
-    - name: Linux, arm64, Clang
+    - name: Ubuntu Bionic, Clang, arm64
       os: linux
       arch: arm64
       compiler: clang
       dist: bionic
-    - name: Linux, ppc64le, GCC
+    - name: Ubuntu Bionic, GCC, ppc64le
       os: linux
       arch: ppc64le
       compiler: gcc
       dist: bionic
-    - name: Linux, ppc64le, Clang
+    - name: Ubuntu Bionic, Clang, ppc64le
       os: linux
       arch: ppc64le
       compiler: clang
@@ -50,12 +50,12 @@ jobs:
       env:
         - CC=clang-8
         - CXX=clang++-8
-    - name: Linux, s390x, GCC
+    - name: Ubuntu Bionic, GCC, s390x
       os: linux
       arch: s390x
       compiler: gcc
       dist: bionic
-    - name: Linux, s390x, Clang
+    - name: Ubuntu Bionic, Clang, s390x
       os: linux
       arch: s390x
       compiler: clang
@@ -63,12 +63,12 @@ jobs:
       env:
         - CC=clang-8
         - CXX=clang++-8
-    - name: OS X, amd64, GCC
+    - name: OS X 10, GCC, Xcode 10.1
       os: osx
       osx_image: xcode10.1
       arch: amd64
       compiler: gcc
-    - name: OS X, amd64, Clang
+    - name: OS X 10, Clang, Xcode 10.1
       os: osx
       osx_image: xcode10.1
       arch: amd64
