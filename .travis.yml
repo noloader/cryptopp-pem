@@ -47,6 +47,9 @@ jobs:
       arch: ppc64le
       compiler: clang
       dist: bionic
+      env:
+        - CC=clang-8
+        - CXX=clang++-8
     - name: Linux, s390x, GCC
       os: linux
       arch: s390x
@@ -57,6 +60,9 @@ jobs:
       arch: s390x
       compiler: clang
       dist: bionic
+      env:
+        - CC=clang-8
+        - CXX=clang++-8
     - name: OS X, amd64, GCC
       os: osx
       osx_image: xcode10.1
@@ -78,6 +84,16 @@ jobs:
     # due to https://bugs.llvm.org/show_bug.cgi?id=39704.
 
 before_script:
+  - |
+    # Clang 7 compiler is completely broken on PPC64 and s390x
+    if [[ "$TRAVIS_CPU_ARCH" == "ppc64le" ]] || [[ "$TRAVIS_CPU_ARCH" == "s390x" ]]; then
+      if [[ "$TRAVIS_OS" == "linux" ]] && [[ "$TRAVIS_COMPILER" == "clang" ]]; then
+        # https://github.com/travis-ci/travis-ci/issues/9037
+        sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A145
+        sudo apt-get -qq -y install --no-install-recommends clang-8
+      fi
+    fi
+
     # Let travis clone cryptopp-pem, clone cryptopp
     # copy cryptopp-pem to cryptopp, and then run
     # the test script.
