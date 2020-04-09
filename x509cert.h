@@ -269,7 +269,7 @@ struct KeyUsageValue : public ASN1Object
         cmcArchive,
         /// \brief BGPsec Router Certificates, Certificate Revocation Lists, and Certification Requests
         bgpsecRouter,
-        /// \briefCertificate profile for carrying logotypes
+        /// \brief Certificate profile for carrying logotypes
         brandIndicatorforMessageIdentification
     };
     /// \brief Invalid key usage
