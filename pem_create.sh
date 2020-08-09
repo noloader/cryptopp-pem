@@ -6,7 +6,7 @@
 # prerequisites
 
 if [[ -z "$CXX" ]]; then
-    CXX=g++
+    CXX=c++
 fi
 
 if [[ -z $(command -v "$CXX") ]]; then
@@ -25,7 +25,7 @@ if [[ -z $(command -v perl) ]]; then
 fi
 
 if [[ -z $(command -v curl) ]]; then
-    echo "Please install perl package"
+    echo "Please install curl package"
     exit 1
 fi
 

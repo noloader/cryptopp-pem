@@ -72,7 +72,7 @@ void PEM_Base64DecodeAndDecrypt(BufferedTransformation& src, BufferedTransformat
 void PEM_Decrypt(BufferedTransformation& src, BufferedTransformation& dest,
                  member_ptr<StreamTransformation>& stream);
 
-bool PEM_IsEncrypted(const secure_string& sb);
+bool PEM_IsEncrypted(const secure_string& str);
 bool PEM_IsEncrypted(BufferedTransformation& bt);
 
 void PEM_ParseVersion(const secure_string& proctype, secure_string& version);
