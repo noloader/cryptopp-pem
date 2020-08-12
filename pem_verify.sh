@@ -19,12 +19,15 @@ fi
 echo
 echo "Crypto++ reading and writing"
 
-if [[ ! -f pem_test.exe ]]; then
+if [[ ! -x pem_test.exe ]]; then
 	echo "Failed to find pem_test.exe"
 	exit 1
 fi
 
-./pem_test.exe
+if ! ./pem_test.exe; then
+	echo "Failed to execute pem_test.exe"
+	exit 1
+fi
 
 #################
 # RSA keys
