@@ -5,11 +5,9 @@
 ##################################
 # prerequisites
 
-if [[ -z "$CXX" ]]; then
-    CXX=c++
-fi
+CXX="${CXX:-c++}"
 
-if [[ -z $(command -v "$CXX") ]]; then
+if [[ -z $(command -v "${CXX}") ]]; then
     echo "Please install a compiler like g++"
     exit 1
 fi
@@ -40,20 +38,20 @@ fi
 ##################################
 # test program
 
-echo "Compiling test program with $CXX"
+echo "Compiling test program with ${CXX}"
 
 rm -rf pem_test.exe &>/dev/null
 
 CXXFLAGS="-DDEBUG -g3 -O0 -Wall"
 
 # Build crypto++ library if out of date.
-if ! CXX="$CXX" CXXFLAGS="$CXXFLAGS" make -j 4; then
+if ! CXX="${CXX}" CXXFLAGS="${CXXFLAGS}" make -j 4; then
     echo "Failed to build libcryptopp.a"
     exit 1
 fi
 
 # Build the test program
-if ! $CXX $CXXFLAGS pem_test.cxx ./libcryptopp.a -o pem_test.exe; then
+if ! ${CXX} ${CXXFLAGS} pem_test.cxx ./libcryptopp.a -o pem_test.exe; then
     echo "Failed to build pem_test.exe"
     exit 1
 fi
@@ -61,7 +59,7 @@ fi
 # Build the reproducer program in case test program crashes
 # The reproducer loads badcert.der.
 if [[ -e badcert.cxx ]]; then
-    if ! $CXX $CXXFLAGS badcert.cxx ./libcryptopp.a -o badcert.exe; then
+    if ! ${CXX} ${CXXFLAGS} badcert.cxx ./libcryptopp.a -o badcert.exe; then
         echo "Failed to build badcert.exe"
         exit 1
     fi
