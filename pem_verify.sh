@@ -147,3 +147,5 @@ if [[ -f ec-enc-priv.cryptopp.pem ]]; then
 fi
 
 echo "Finished testing keys written by Crypto++"
+
+exit 0
