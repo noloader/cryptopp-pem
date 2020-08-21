@@ -6,6 +6,7 @@
 # prerequisites
 
 CXX="${CXX:-c++}"
+MAKEJOBS="${MAKEJOBS:-2}"
 
 if [[ -z $(command -v "${CXX}") ]]; then
     echo "Please install a compiler like g++"
@@ -45,7 +46,7 @@ rm -rf pem_test.exe &>/dev/null
 CXXFLAGS="-DDEBUG -g3 -O0 -Wall"
 
 # Build crypto++ library if out of date.
-if ! CXX="${CXX}" CXXFLAGS="${CXXFLAGS}" make -j 4; then
+if ! CXX="${CXX}" CXXFLAGS="${CXXFLAGS}" make -j ${MAKEJOBS}; then
     echo "Failed to build libcryptopp.a"
     exit 1
 fi
