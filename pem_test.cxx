@@ -3,6 +3,7 @@
 
 #include <string>
 #include <iostream>
+#include <cstdlib>
 
 #include "cryptlib.h"
 #include "integer.h"
@@ -16,7 +17,6 @@
 int main(int argc, char* argv[])
 {
     using namespace CryptoPP;
-    bool fail = false;
 
     try
     {
@@ -140,7 +140,7 @@ int main(int argc, char* argv[])
     catch(const Exception& ex)
     {
         std::cout << "Caught exception: " << ex.what() << std::endl;
-        fail = true;
+        std::exit(1);
     }
 
     // Load malformed, missing final CRLF, should be OK
@@ -155,7 +155,7 @@ int main(int argc, char* argv[])
     catch(const Exception& ex)
     {
         std::cout << "  - Failed" << std::endl;
-        fail = true;
+        std::exit(1);
     }
 
     // Load malformed, tampered encapsulation boundary
@@ -166,7 +166,7 @@ int main(int argc, char* argv[])
         FileSource fs2("rsa-trunc-2.pem", true);
         PEM_Load(fs2, k2);
         std::cout << "  - Failed" << std::endl;
-        fail = true;
+        std::exit(1);
     }
     catch(const Exception& ex)
     {
@@ -185,7 +185,7 @@ int main(int argc, char* argv[])
     catch(const Exception& ex)
     {
         std::cout << "  - Failed" << std::endl;
-        fail = true;
+        std::exit(1);
     }
 
     // Load malformed, only -----BEGIN RSA KEY-----
@@ -196,7 +196,7 @@ int main(int argc, char* argv[])
         FileSource fs4("rsa-short.pem", true);
         PEM_Load(fs4, k4);
         std::cout << "  - Failed" << std::endl;
-        fail = true;
+        std::exit(1);
     }
     catch(const Exception& ex)
     {
@@ -215,7 +215,7 @@ int main(int argc, char* argv[])
     catch(const Exception& ex)
     {
         std::cout << "  - Failed" << std::endl;
-        fail = true;
+        std::exit(1);
     }
 
     // Load malformed, EOL is LF, should be OK
@@ -230,7 +230,7 @@ int main(int argc, char* argv[])
     catch(const Exception& ex)
     {
         std::cout << "  - Failed" << std::endl;
-        fail = true;
+        std::exit(1);
     }
 
     // Load malformed, no EOL, should be OK
@@ -245,7 +245,7 @@ int main(int argc, char* argv[])
     catch(const Exception& ex)
     {
         std::cout << "  - Failed" << std::endl;
-        fail = true;
+        std::exit(1);
     }
 
     // Load malformed, -----BEGIN FOO----- and -----END BAR-----
@@ -256,7 +256,7 @@ int main(int argc, char* argv[])
         FileSource fs8("foobar.pem", true);
         PEM_Load(fs8, k8);
         std::cout << "  - Failed" << std::endl;
-        fail = true;
+        std::exit(1);
     }
     catch(const Exception& ex)
     {
@@ -282,7 +282,7 @@ int main(int argc, char* argv[])
         }
         catch(const Exception& ex) {
             std::cout << "Caught exception: " << ex.what() << std::endl;
-            fail = true;
+            std::exit(1);
         }
     }
 
@@ -305,7 +305,7 @@ int main(int argc, char* argv[])
         }
         catch(const Exception& ex) {
             std::cout << "Caught exception: " << ex.what() << std::endl;
-            fail = true;
+            std::exit(1);
         }
     }
 
@@ -321,7 +321,7 @@ int main(int argc, char* argv[])
         ArraySource source(pem, true);
         PEM_Load(source, cert);
         std::cout << "  - Failed" << std::endl;
-        fail = true;
+        std::exit(1);
     }
     catch(const Exception& ex)
     {
@@ -378,18 +378,19 @@ int main(int argc, char* argv[])
             }
         }
 
-        if (count >= 120)
+        if (count >= 120) {
             std::cout << "  - OK (" << count << " certificates)" << std::endl;
+        }
         else {
             std::cout << "  - Failed (died at certificate " << count << ")" << std::endl;
-            fail = true;
+            std::exit(1);
         }
     }
     catch(const Exception& ex)
     {
         std::cout << "  - Exception: " << ex.what() << std::endl;
-        fail = true;
+        std::exit(1);
     }
 
-    return fail ? 1 : 0;
+    return 0;
 }
