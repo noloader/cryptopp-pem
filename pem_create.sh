@@ -107,13 +107,13 @@ cat rsa-trunc-1.pem > rsa-concat.pem
 cat rsa-pub.pem >> rsa-concat.pem
 
 # Uses only CR (remove LF)
-sed 's/\n//g' rsa-pub.pem > rsa-eol-cr.pem
+perl -pe 's/\n//g;' rsa-pub.pem > rsa-eol-cr.pem
 
 # Uses only LF (remove CR)
-sed 's/\r//g' rsa-pub.pem > rsa-eol-lf.pem
+perl -pe 's/\r//g;' rsa-pub.pem > rsa-eol-lf.pem
 
 # No EOL (remove CR and LF)
-sed 's/\r//g; s/\n//g' rsa-pub.pem > rsa-eol-none.pem
+perl -pe 's/\r//g;' -pe 's/\n//g;' rsa-pub.pem > rsa-eol-none.pem
 
 echo "-----BEGIN FOO-----" > foobar.pem
 head -c 180 /dev/urandom | base64 | fold -w 64 >> foobar.pem
