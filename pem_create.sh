@@ -108,11 +108,11 @@ unix2dos dh-params.pem
 # Only the '-----BEGIN PUBLIC KEY-----'
 echo "-----BEGIN PUBLIC KEY-----" > rsa-short.pem
 
-# Removes last CR or LF (or CRLF)
-perl -pe 'chomp if eof' rsa-pub.pem > rsa-trunc-1.pem
+# Remove the last CRLF
+perl -pe 'chop' < rsa-pub.pem | perl -pe 'chop' > rsa-trunc-1.pem
 
-# This gets the last CR or LF and one of the dashes (should throw)
-perl -pe 'chop if eof' rsa-trunc-1.pem > rsa-trunc-2.pem
+# Remove the last dash from encapsulation boundary (should throw)
+perl -pe 'chop' < rsa-trunc-1.pem > rsa-trunc-2.pem
 
 # Two keys in one file; missing CRLF between them
 cat rsa-trunc-1.pem > rsa-concat.pem
