@@ -28,11 +28,6 @@ if [[ -z $(command -v curl) ]]; then
     exit 1
 fi
 
-if [[ -z $(command -v unix2dos) ]]; then
-    echo "Please install dos2unix package"
-    exit 1
-fi
-
 # We need OpenSSL 1.0.2 or above
 MODERN_OPENSSL=$(openssl version | grep -c -v -E '(OpenSSL 0.[0-9]|OpenSSL 1.0.0|OpenSSL 1.0.1)')
 
@@ -58,6 +53,12 @@ fi
 
 # Build the test program
 if ! ${CXX} ${CXXFLAGS} pem_test.cxx ./libcryptopp.a -o pem_test.exe; then
+    echo "Failed to build pem_test.exe"
+    exit 1
+fi
+
+# Build the RFC1421 EOL converter. OpenSSL no longer outputs well formed PEM.
+if ! ${CXX} ${CXXFLAGS} rfc1421_eol.cxx -o rfc1421_eol.exe; then
     echo "Failed to build pem_test.exe"
     exit 1
 fi
@@ -96,11 +97,11 @@ openssl ec -in ec-priv.pem -out ec-enc-priv.pem -aes128 -passout pass:abcdefghij
 # Diffie-Hellman parameters
 openssl dhparam -out dh-params.pem 512
 
-# Make line endings CRLF per RFC 1421
-unix2dos rsa-priv.pem rsa-pub.pem rsa-enc-priv.pem
-unix2dos dsa-params.pem dsa-priv.pem dsa-pub.pem dsa-enc-priv.pem
-unix2dos ec-params.pem ec-priv.pem ec-pub.pem ec-enc-priv.pem
-unix2dos dh-params.pem
+# Make line endings CRLF per RFC 1421. OpenSSL no longer outputs well formed PEM.
+./rfc1421_eol.exe rsa-priv.pem rsa-pub.pem rsa-enc-priv.pem
+./rfc1421_eol.exe dsa-params.pem dsa-priv.pem dsa-pub.pem dsa-enc-priv.pem
+./rfc1421_eol.exe ec-params.pem ec-priv.pem ec-pub.pem ec-enc-priv.pem
+./rfc1421_eol.exe dh-params.pem
 
 ##################################
 # malformed

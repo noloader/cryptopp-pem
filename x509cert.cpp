@@ -1008,7 +1008,7 @@ const SecByteBlock& X509Certificate::GetToBeSigned() const
           len += 1 /*SEQ*/ + DERLengthEncode(TheBitBucket(), len);
 
           toBeSigned.New(len);
-          cert.Get(BytePtr(toBeSigned), BytePtrSize(toBeSigned));          
+          cert.Get(BytePtr(toBeSigned), BytePtrSize(toBeSigned));
           cert.SkipAll();  // Remaining octets are not needed.
         cert.MessageEnd();
     }
