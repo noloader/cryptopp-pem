@@ -197,10 +197,21 @@ openssl x509 -in example-com.cert.pem -inform PEM -out example-com.cert.der -out
 # View DER cert with 'dumpasn1 example-com.cert.der'
 
 ##################################
-# cacert.pem
+# Mozilla cacert.pem
 
 if [ ! -e "cacert.pem" ]; then
-    curl -o cacert.pem --silent --insecure https://curl.haxx.se/ca/cacert.pem
+    curl -L -o cacert.pem --silent https://curl.haxx.se/ca/cacert.pem
 fi
+
+##################################
+# Google roots.pem
+
+if [ ! -e "roots.pem" ]; then
+    # curl -L -o roots.pem --silent https://pki.google.com/roots.pem
+    curl -L -o roots.pem --silent https://pki.goog/roots.pem
+fi
+
+##################################
+# Crypto++ website
 
 echo -e "GET / HTTP/1.1\r\nHost: www.cryptopp.com\r\n\r\n" | openssl s_client -showcerts -servername www.cryptopp.com -connect www.cryptopp.com:443 2>/dev/null | openssl x509 > www-cryptopp-com.cert.pem

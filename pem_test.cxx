@@ -233,19 +233,20 @@ int main(int argc, char* argv[])
         std::exit(1);
     }
 
-    // Load malformed, no EOL, should be OK
+    // Load malformed, no EOL, should fail due
+    // to no EOL on encapsulation boundaries
     try
     {
         RSA::PublicKey k7;
         std::cout << "Load malformed key 7" << std::endl;
         FileSource fs7("rsa-eol-none.pem", true);
         PEM_Load(fs7, k7);
-        std::cout << "  - OK" << std::endl;
+        std::cout << "  - Failed" << std::endl;
+        std::exit(1);
     }
     catch(const Exception& ex)
     {
-        std::cout << "  - Failed" << std::endl;
-        std::exit(1);
+        std::cout << "  - OK" << std::endl;
     }
 
     // Load malformed, -----BEGIN FOO----- and -----END BAR-----
@@ -328,10 +329,11 @@ int main(int argc, char* argv[])
         std::cout << "  - OK" << std::endl;
     }
 
-    // Test cacert.pem. There should be ~130 to ~150 certs in it.
+    // Test cacert.pem from Mozilla.
+    // There should be ~130 to ~150 certs in it.
     try
     {
-        std::cout << "\nLoad certificates from cacert.pem" << std::endl;
+        std::cout << "\nLoad root certificates from Mozilla" << std::endl;
 
         FileSource fs("./cacert.pem", true);
         ByteQueue t;
@@ -379,6 +381,71 @@ int main(int argc, char* argv[])
         }
 
         if (count >= 120) {
+            std::cout << "  - OK (" << count << " certificates)" << std::endl;
+        }
+        else {
+            std::cout << "  - Failed (died at certificate " << count << ")" << std::endl;
+            std::exit(1);
+        }
+    }
+    catch(const Exception& ex)
+    {
+        std::cout << "  - Exception: " << ex.what() << std::endl;
+        std::exit(1);
+    }
+
+    // Test roots.pem from Google.
+    // There should be ~35 to ~40 certs in it.
+    try
+    {
+        std::cout << "\nLoad root certificates from Google" << std::endl;
+
+        FileSource fs("./roots.pem", true);
+        ByteQueue t;
+        size_t count=0;
+
+        while (PEM_NextObject(fs, t))
+        {
+            count++;  // 1-based
+
+            X509Certificate cert;
+            std::ostringstream oss;
+
+            try {
+                PEM_Load(t, cert);
+                oss << cert << std::endl;
+            }
+            catch (const Exception&) {
+                std::cerr << "Failed to parse certificate " << count << std::endl;
+
+                std::cerr << "\nWriting certificate badcert.der" << std::endl;
+                FileSink x("badcert.der");
+                cert.WriteCertificateBytes(x);
+
+                std::cerr << "\nDumping certificate" << std::endl;
+                std::cerr << oss.str() << std::endl;
+                throw;
+            }
+
+            AutoSeededRandomPool prng;
+            if (cert.Validate(prng, 2) == false)
+            {
+                std::ostringstream message;
+                message << "Failed to validate public key for " << cert.GetSubjectDistinguishedName();
+                std::cerr << message.str() << std::endl;;
+
+                std::cerr << "\nWriting certificate badcert.der" << std::endl;
+                FileSink x("badcert.der");
+                cert.WriteCertificateBytes(x);
+
+                std::cerr << "\nDumping certificate" << std::endl;
+                std::cerr << oss.str() << std::endl;
+
+                throw Exception(Exception::OTHER_ERROR, message.str());
+            }
+        }
+
+        if (count >= 30) {
             std::cout << "  - OK (" << count << " certificates)" << std::endl;
         }
         else {
