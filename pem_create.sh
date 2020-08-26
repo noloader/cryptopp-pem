@@ -41,7 +41,7 @@ fi
 
 echo "Compiling test program with ${CXX}"
 
-rm -rf pem_test.exe &>/dev/null
+rm -rf pem_test.exe pem_eol.exe
 
 CXXFLAGS="-DDEBUG -g3 -O0 -Wall"
 
