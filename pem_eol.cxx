@@ -1,15 +1,16 @@
 // This piece of goodness performs EOL conversions from CR or LF to CRLF.
 // It basically performs the work of unix2dos and mac2dos. It is needed
-// because our OpenSSL keys are no longer conform to RFC 1421. I don't
-// know when that happened.
+// because our OpenSSL keys no longer conform to RFC 1421. I don't know
+// when that happened.
 //
 // We don't use unix2dos and mac2dos on Travis because it means we have
-// to install it using Apt or Brew. It is easier to build this toy program.
+// to install it using Apt or Brew. This toy program will do, instead.
 
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <exception>
 
 void ConvertEOL(const char* arg);
 
@@ -25,15 +26,20 @@ int main(int argc, char* argv[])
     catch(const std::exception& ex)
     {
         std::cerr << ex.what() << std::endl;
-        std::exit(1);
+        return 1;
     }
 
-    std::exit(0);
+    return 0;
 }
 
 void ConvertEOL(const char* arg)
 {
     std::string pem;
+
+    // Avoid some reallocations during conversion
+    const size_t pem_line_break = 64;
+    const size_t res_size = (pem_line_break+2)*15;
+    pem.reserve(res_size);
 
     // Process existing file
     {
