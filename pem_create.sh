@@ -58,7 +58,7 @@ if ! ${CXX} ${CXXFLAGS} pem_test.cxx ./libcryptopp.a -o pem_test.exe; then
 fi
 
 # Build the RFC1421 EOL converter. OpenSSL no longer outputs well formed PEM.
-if ! ${CXX} ${CXXFLAGS} rfc1421_eol.cxx -o rfc1421_eol.exe; then
+if ! ${CXX} ${CXXFLAGS} pem_eol.cxx -o pem_eol.exe; then
     echo "Failed to build pem_test.exe"
     exit 1
 fi
@@ -98,10 +98,10 @@ openssl ec -in ec-priv.pem -out ec-enc-priv.pem -aes128 -passout pass:abcdefghij
 openssl dhparam -out dh-params.pem 512
 
 # Make line endings CRLF per RFC 1421. OpenSSL no longer outputs well formed PEM.
-./rfc1421_eol.exe rsa-priv.pem rsa-pub.pem rsa-enc-priv.pem
-./rfc1421_eol.exe dsa-params.pem dsa-priv.pem dsa-pub.pem dsa-enc-priv.pem
-./rfc1421_eol.exe ec-params.pem ec-priv.pem ec-pub.pem ec-enc-priv.pem
-./rfc1421_eol.exe dh-params.pem
+./pem_eol.exe rsa-priv.pem rsa-pub.pem rsa-enc-priv.pem
+./pem_eol.exe dsa-params.pem dsa-priv.pem dsa-pub.pem dsa-enc-priv.pem
+./pem_eol.exe ec-params.pem ec-priv.pem ec-pub.pem ec-enc-priv.pem
+./pem_eol.exe dh-params.pem
 
 ##################################
 # malformed
