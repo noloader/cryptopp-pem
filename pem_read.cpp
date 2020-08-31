@@ -660,18 +660,11 @@ void PEM_ParseIV(const secure_string& dekinfo, secure_string& iv)
 size_t PEM_ReadLine(BufferedTransformation& source, secure_string& line)
 {
     line.clear();
-    if (!source.AnyRetrievable()) {
-        return 0;
-    }
-
     line.reserve(PEM_LINE_BREAK+2);
-    while (source.AnyRetrievable())
-    {
-        byte b;
-        if (!source.Get(b)) {
-            break;
-        }
 
+    byte b;
+    while (source.Get(b))
+    {
         // LF ?
         if (b == '\n') {
             break;
