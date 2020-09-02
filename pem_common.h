@@ -180,6 +180,7 @@ extern const secure_string PROC_TYPE_ENC;
 extern const secure_string ENCRYPTED;
 extern const secure_string DEK_INFO;
 extern const secure_string CONTENT_DOMAIN;
+extern const secure_string COMMENT;
 
 NAMESPACE_END  // PEM
 NAMESPACE_END  // CryptoPP

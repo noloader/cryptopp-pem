@@ -92,6 +92,7 @@ const secure_string PROC_TYPE_ENC("Proc-Type: 4,ENCRYPTED");
 const secure_string ENCRYPTED("ENCRYPTED");
 const secure_string DEK_INFO("DEK-Info");
 const secure_string CONTENT_DOMAIN("Content-Domain");
+const secure_string COMMENT("Comment");
 
 void PEM_WriteLine(BufferedTransformation& bt, const SecByteBlock& line)
 {

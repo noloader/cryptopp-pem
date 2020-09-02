@@ -54,7 +54,7 @@ struct EncapsulatedHeader
 // GCC 9 compile error using overload PEM_GetType
 PEM_Type PEM_GetTypeFromString(const secure_string& str);
 
-size_t PEM_ReadLine(BufferedTransformation& source, secure_string& line);
+bool PEM_ReadLine(BufferedTransformation& source, secure_string& line);
 
 void PEM_StripEncapsulatedBoundary(BufferedTransformation& src, BufferedTransformation& dest,
                                    const secure_string& pre, const secure_string& post);
@@ -478,11 +478,9 @@ void PEM_StripEncapsulatedBoundary(BufferedTransformation& src, BufferedTransfor
     secure_string::const_iterator it;
     int n = 1, prePos = -1, postPos = -1;
 
-    while (src.AnyRetrievable() && n++)
+    secure_string line;
+    while (PEM_ReadLine(src, line) && n++)
     {
-        secure_string line;
-        PEM_ReadLine(src, line);
-
         // The write associated with an empty line must occur. Otherwise, we
         // loose the CR or LF in an ecrypted private key between the control
         // fields and the encapsulated text.
@@ -529,12 +527,10 @@ void PEM_StripEncapsulatedHeader(BufferedTransformation& src, BufferedTransforma
         return;
 
     secure_string line, ending;
-    size_t size = 0;
 
     // The first line *must* be Proc-Type. Ensure we read it before dropping
     // into the loop.
-    size = PEM_ReadLine(src, line);
-    if (size == 0 || line.empty())
+    if (! PEM_ReadLine(src, line) || line.empty())
         throw InvalidDataFormat("PEM_StripEncapsulatedHeader: failed to locate Proc-Type");
 
     secure_string field = GetControlField(line);
@@ -557,12 +553,8 @@ void PEM_StripEncapsulatedHeader(BufferedTransformation& src, BufferedTransforma
                              + header.m_operation.c_str() + " not supported");
 
     // Next, we have to read until the first empty line
-    while (true)
+    while (PEM_ReadLine(src, line))
     {
-        if (!src.AnyRetrievable()) break; // End Of Buffer
-
-        size = PEM_ReadLine(src, line);
-        if (size == 0) break;        // End Of Buffer
         if (line.size() == 0) break; // size is non-zero; empty line
 
         field = GetControlField(line);
@@ -580,6 +572,13 @@ void PEM_StripEncapsulatedHeader(BufferedTransformation& src, BufferedTransforma
         {
             // Silently ignore
             // Content-Domain: RFC822
+            continue;
+        }
+
+        if (0 == CompareNoCase(field, COMMENT))
+        {
+            // Silently ignore
+            // SSH key: Comment field
             continue;
         }
 
@@ -657,9 +656,20 @@ void PEM_ParseIV(const secure_string& dekinfo, secure_string& iv)
     std::transform(iv.begin(), iv.end(), iv.begin(), (int(*)(int))std::toupper);
 }
 
-size_t PEM_ReadLine(BufferedTransformation& source, secure_string& line)
+// Read a line of text, until an EOL is encountered. The EOL can be
+// CRLF, CR or LF. The last line does not need an EOL. An empty line
+// with just EOL still counts as a line for PEM_ReadLine. The function
+// returns true if a line was read, false otherwise.
+bool PEM_ReadLine(BufferedTransformation& source, secure_string& line)
 {
+    // In case of early out
     line.clear();
+
+    if (!source.AnyRetrievable()) {
+        return false;
+    }
+
+    // Assume standard PEM line size, with CRLF
     line.reserve(PEM_LINE_BREAK+2);
 
     byte b;
@@ -684,7 +694,7 @@ size_t PEM_ReadLine(BufferedTransformation& source, secure_string& line)
         line += b;
     }
 
-    return line.size();
+    return true;
 }
 
 inline void PEM_TrimLeadingWhitespace(BufferedTransformation& source)
