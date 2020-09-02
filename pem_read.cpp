@@ -474,15 +474,15 @@ void PEM_Decrypt(BufferedTransformation& src, BufferedTransformation& dest,
 void PEM_StripEncapsulatedBoundary(BufferedTransformation& src, BufferedTransformation& dest,
                                    const secure_string& pre, const secure_string& post)
 {
-    ByteQueue temp;
-    secure_string::const_iterator it;
     int n = 1, prePos = -1, postPos = -1;
 
-    secure_string line;
-    while (PEM_ReadLine(src, line) && n++)
+    secure_string line, accum;
+    while (PEM_ReadLine(src, line))
     {
+        secure_string::const_iterator it;
+
         // The write associated with an empty line must occur. Otherwise, we
-        // loose the CR or LF in an ecrypted private key between the control
+        // loose the EOL in an ecrypted private key between the control
         // fields and the encapsulated text.
         //if (line.empty())
         //    continue;
@@ -500,7 +500,8 @@ void PEM_StripEncapsulatedBoundary(BufferedTransformation& src, BufferedTransfor
             continue;
         }
 
-        PEM_WriteLine(temp, line);
+        accum += line + EOL;
+        n++;
     }
 
     if (prePos == -1)
@@ -518,7 +519,7 @@ void PEM_StripEncapsulatedBoundary(BufferedTransformation& src, BufferedTransfor
     if (prePos > postPos)
         throw InvalidDataFormat("PEM_StripEncapsulatedBoundary: header boundary follows footer boundary");
 
-    temp.TransferTo(dest);
+    dest.Put(byte_ptr(accum), accum.size());
 }
 
 void PEM_StripEncapsulatedHeader(BufferedTransformation& src, BufferedTransformation& dest, EncapsulatedHeader& header)
@@ -555,7 +556,7 @@ void PEM_StripEncapsulatedHeader(BufferedTransformation& src, BufferedTransforma
     // Next, we have to read until the first empty line
     while (PEM_ReadLine(src, line))
     {
-        if (line.size() == 0) break; // size is non-zero; empty line
+        if (line.size() == 0) break; // size is zero; empty line
 
         field = GetControlField(line);
         if (0 == CompareNoCase(field, DEK_INFO))
