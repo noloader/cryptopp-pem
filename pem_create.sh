@@ -201,7 +201,7 @@ openssl x509 -in example-com.cert.pem -inform PEM -out example-com.cert.der -out
 # Mozilla cacert.pem
 
 if [ ! -e "cacert.pem" ]; then
-    curl -L -o cacert.pem --silent https://curl.haxx.se/ca/cacert.pem
+    curl -L -o cacert.pem --silent https://curl.se/ca/cacert.pem
 fi
 
 ##################################
