@@ -8,23 +8,23 @@
 CXX="${CXX:-c++}"
 MAKEJOBS="${MAKEJOBS:-2}"
 
-if [[ -z $(command -v "${CXX}") ]]; then
+if ! command -v "${CXX}" 2>/dev/null; then
     echo "Please install a compiler like g++"
     exit 1
 fi
 
-if [[ -z $(command -v openssl) ]]; then
+if ! command -v openssl 2>/dev/null; then
     echo "Please install openssl package"
     exit 1
 fi
 
-if [[ -z $(command -v perl) ]]; then
-    echo "Please install perl package"
+if ! command -v curl 2>/dev/null; then
+    echo "Please install curl package"
     exit 1
 fi
 
-if [[ -z $(command -v curl) ]]; then
-    echo "Please install curl package"
+if ! command -v perl 2>/dev/null; then
+    echo "Please install perl package"
     exit 1
 fi
 
@@ -174,7 +174,7 @@ subjectAltName          = @alternate_names
 nsComment               = "OpenSSL Generated Certificate"
 
 # A real server cert should not have email addresses
-# The CA/B forbids IP addresses
+# The CA/B BR forbids IP addresses
 [ alternate_names ]
 DNS.1  = example.com
 DNS.2  = www.example.com
@@ -201,15 +201,14 @@ openssl x509 -in example-com.cert.pem -inform PEM -out example-com.cert.der -out
 # Mozilla cacert.pem
 
 if [ ! -e "cacert.pem" ]; then
-    curl -L -o cacert.pem --silent https://curl.se/ca/cacert.pem
+    curl -L -s -o cacert.pem https://curl.se/ca/cacert.pem
 fi
 
 ##################################
 # Google roots.pem
 
 if [ ! -e "roots.pem" ]; then
-    # curl -L -o roots.pem --silent https://pki.google.com/roots.pem
-    curl -L -o roots.pem --silent https://pki.goog/roots.pem
+    curl -L -s -o roots.pem https://pki.goog/roots.pem
 fi
 
 ##################################
