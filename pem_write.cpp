@@ -317,7 +317,7 @@ void PEM_CipherForAlgorithm(RandomNumberGenerator& rng, std::string algorithm,
     unsigned int ksize=0, vsize=0;
     stream.release();
 
-    secure_string alg = ToUpper(secure_string(algorithm));
+    secure_string alg = ToUpper(secure_string(algorithm.begin(), algorithm.end()));
 
     if (alg.empty())
         goto verify;  // verify throws
