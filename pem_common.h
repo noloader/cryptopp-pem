@@ -84,6 +84,12 @@ secure_string GetControlFieldData(const secure_string& line);
 // Returns 0 if a match, non-0 otherwise
 int CompareNoCase(const secure_string& first, const secure_string& second);
 
+// Returns a string converted to upper-case
+secure_string ToLower(const secure_string& str);
+
+// Returns a string converted to lower-case
+secure_string ToUpper(const secure_string& str);
+
 // Base64 Encode
 void PEM_Base64Encode(BufferedTransformation& source, BufferedTransformation& dest);
 

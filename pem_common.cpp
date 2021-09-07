@@ -150,11 +150,35 @@ secure_string GetControlFieldData(const secure_string& line)
     return secure_string();
 }
 
-struct ByteToLower {
-    byte operator() (byte val) {
-        return (byte)std::tolower((int)(word32)val);
+secure_string ToLower(const secure_string& str)
+{
+    secure_string::const_iterator first = str.begin();
+    secure_string::const_iterator last = str.end();
+
+    secure_string lower;
+
+    while (first != last) {
+        lower.push_back(static_cast<char>(std::tolower(*first)));
+        first++;
     }
-};
+
+    return lower;
+}
+
+secure_string ToUpper(const secure_string& str)
+{
+    secure_string::const_iterator first = str.begin();
+    secure_string::const_iterator last = str.end();
+
+    secure_string upper;
+
+    while (first != last) {
+        upper.push_back(static_cast<char>(std::toupper(*first)));
+        first++;
+    }
+
+    return upper;
+}
 
 // Returns 0 if a match, non-0 otherwise
 int CompareNoCase(const secure_string& first, const secure_string& second)

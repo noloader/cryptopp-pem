@@ -315,9 +315,7 @@ void PEM_CipherForAlgorithm(const EncapsulatedHeader& header,
     unsigned int ksize=0, vsize=0;
     stream.release();
 
-    secure_string alg; alg.reserve(header.m_algorithm.size());
-    std::transform(header.m_algorithm.begin(), header.m_algorithm.end(),
-                   std::back_inserter(alg), (int(*)(int))std::toupper);
+    secure_string alg = ToUpper(header.m_algorithm);
 
     if (alg.empty())
         goto verify;  // verify throws
@@ -623,8 +621,7 @@ void PEM_ParseOperation(const secure_string& proctype, secure_string& operation)
     pos1++;
     while (pos1 < proctype.size() && std::isspace(proctype[pos1])) pos1++;
 
-    operation = proctype.substr(pos1, secure_string::npos);
-    std::transform(operation.begin(), operation.end(), operation.begin(), (int(*)(int))std::toupper);
+    operation = ToUpper(proctype.substr(pos1, secure_string::npos));
 }
 
 // The string will be similar to " AES-128-CBC, XXXXXXXXXXXXXXXX"
@@ -639,8 +636,7 @@ void PEM_ParseAlgorithm(const secure_string& dekinfo, secure_string& algorithm)
 
     while (pos2 > pos1 && std::isspace(dekinfo[pos2])) pos2--;
 
-    algorithm = dekinfo.substr(pos1, pos2 - pos1);
-    std::transform(algorithm.begin(), algorithm.end(), algorithm.begin(),  (int(*)(int))std::toupper);
+    algorithm = ToUpper(dekinfo.substr(pos1, pos2 - pos1));
 }
 
 // The string will be similar to " AES-128-CBC, XXXXXXXXXXXXXXXX"
@@ -653,8 +649,7 @@ void PEM_ParseIV(const secure_string& dekinfo, secure_string& iv)
     pos1++;
     while (pos1 < dekinfo.size() && std::isspace(dekinfo[pos1])) pos1++;
 
-    iv = dekinfo.substr(pos1, secure_string::npos);
-    std::transform(iv.begin(), iv.end(), iv.begin(), (int(*)(int))std::toupper);
+    iv = ToUpper(dekinfo.substr(pos1, secure_string::npos));
 }
 
 // Read a line of text, until an EOL is encountered. The EOL can be
