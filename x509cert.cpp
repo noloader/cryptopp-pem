@@ -588,8 +588,9 @@ std::string IdentityValue::EncodeValue() const
             if (m_value.size() == 4)  // ipv4
             {
                 std::ostringstream oss;
-                for (size_t i=0; i<3; ++i)
-                    oss << (unsigned int)m_value[i] << ".";
+                oss << (unsigned int)m_value[0] << ".";
+                oss << (unsigned int)m_value[1] << ".";
+                oss << (unsigned int)m_value[2] << ".";
                 oss << (unsigned int)m_value[3];
                 val = oss.str();
             }
@@ -620,7 +621,7 @@ std::string IdentityValue::EncodeValue() const
     return val;
 }
 
-// Micosoft PKI can include a User Principal Name in the otherName
+// Microsoft PKI can include a User Principal Name in the otherName
 // https://security.stackexchange.com/q/62746/29925. For the ASN.1
 // see https://tools.ietf.org/html/rfc4556, Appendix A, Appendix C,
 // and id-ms-san-sc-logon-upn.
