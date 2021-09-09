@@ -424,7 +424,6 @@ std::string ExtensionValue::EncodeValue() const
 {
     // TODO: Implement this function
     throw NotImplemented("ExtensionValue::EncodeValue");
-    return "";
 }
 
 void KeyIdentifierValue::BERDecode(BufferedTransformation &bt)
