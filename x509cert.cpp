@@ -8,6 +8,7 @@
 //   http://www.cryptopp.com/wiki/PEM_Pack
 ///////////////////////////////////////////////////////////////////////////
 
+#include "pch.h"
 #include "cryptlib.h"
 #include "secblock.h"
 #include "x509cert.h"

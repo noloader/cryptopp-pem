@@ -6,11 +6,7 @@
 //   http://www.cryptopp.com/wiki/PEM_Pack
 ///////////////////////////////////////////////////////////////////////////
 
-#include <string>
-#include <algorithm>
-#include <cctype>
-#include <iterator>
-
+#include "pch.h"
 #include "cryptlib.h"
 #include "secblock.h"
 #include "camellia.h"
@@ -32,6 +28,11 @@
 #define CRYPTOPP_ENABLE_NAMESPACE_WEAK 1
 #include "des.h"
 #include "md5.h"
+
+#include <string>
+#include <algorithm>
+#include <cctype>
+#include <iterator>
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
