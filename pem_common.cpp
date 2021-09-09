@@ -159,7 +159,7 @@ secure_string ToLower(const secure_string& str)
     secure_string lower;
     while (first != last) {
         lower.push_back(static_cast<char>(std::tolower(*first)));
-        first++;
+        ++first;
     }
 
     return lower;
@@ -173,7 +173,7 @@ secure_string ToUpper(const secure_string& str)
     secure_string upper;
     while (first != last) {
         upper.push_back(static_cast<char>(std::toupper(*first)));
-        first++;
+        ++first;
     }
 
     return upper;
