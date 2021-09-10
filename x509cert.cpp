@@ -515,7 +515,7 @@ std::string KeyIdentifierValue::EncodeValue() const
     }
     else if (m_type == DnAndSn)
     {
-        val += "name and serno: ";
+        val += "name:serno: ";
 
         // TODO: finish this once we have a cert
         // val += "XXX, NNN";
