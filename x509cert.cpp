@@ -1398,6 +1398,16 @@ PK_Verifier* X509Certificate::GetPK_VerifierObject(const OID &algorithm, const X
     {
         verifier.reset(new ed25519::Verifier(key));
     }
+    // PKIX uses this OID but calls it curve25519.
+    // See https://datatracker.ietf.org/doc/html/draft-josefsson-pkix-newcurves
+    // OpenPGP and GNU use the OID to indicate Ed25519 signing.
+    // See https://www.gnupg.org/oids.html,
+    // https://www.gnu.org/prep/standards/html_node/OID-Allocations.html
+    // https://datatracker.ietf.org/doc/html/draft-ietf-openpgp-rfc4880bis
+    else if (algorithm == OID(1)+3+6+1+4+1+11591+15+1)
+    {
+        verifier.reset(new ed25519::Verifier(key));
+    }
     else
     {
         CRYPTOPP_ASSERT(0);
