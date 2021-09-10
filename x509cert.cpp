@@ -1394,6 +1394,10 @@ PK_Verifier* X509Certificate::GetPK_VerifierObject(const OID &algorithm, const X
     {
         verifier.reset(new ECDSA<ECP, SHA512>::Verifier(key));
     }
+    else if (algorithm == ASN1::Ed25519())
+    {
+        verifier.reset(new ed25519::Verifier(key));
+    }
     else
     {
         CRYPTOPP_ASSERT(0);
