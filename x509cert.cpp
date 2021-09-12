@@ -191,7 +191,7 @@ OidToNameArray GetOidToNameTable()
     table.push_back(OidToName(id_commonName,  "CN"));     // Common name
     table.push_back(OidToName(OID(2)+5+4+ 4,  "SN"));     // Surname
     table.push_back(OidToName(OID(2)+5+4+ 5,  "SERIALNUMBER"));  // Serial number
-    table.push_back(OidToName(OID(2)+5+4+ 6,  "C"));      // Country
+    table.push_back(OidToName(OID(2)+5+4+ 6,  "C"));      // Country, ISO 3166-1 alpha-2
     table.push_back(OidToName(OID(2)+5+4+ 7,  "L"));      // Locality
     table.push_back(OidToName(OID(2)+5+4+ 8,  "ST"));     // State or province
     table.push_back(OidToName(OID(2)+5+4+ 9,  "STREET")); // Street address
@@ -224,10 +224,13 @@ OidToNameArray GetOidToNameTable()
     table.push_back(OidToName(OID(2)+5+4+51,  "HOUSE"));       // House identifier
     table.push_back(OidToName(OID(2)+5+4+65,  "PSEUDONYM"));   // Pseudonym
     table.push_back(OidToName(OID(2)+5+4+78,  "OID"));         // Object identifier
-    table.push_back(OidToName(OID(2)+5+4+83,  "URI"));         // Uniform Resource Identifier
+    table.push_back(OidToName(OID(2)+5+4+83,  "URI"));         // Uniform Resource Identifier, RFC 3986
     table.push_back(OidToName(OID(2)+5+4+85,  "USERPWD"));     // URI user password
-    table.push_back(OidToName(OID(2)+5+4+86,  "URN"));         // Uniform Resource Name
+    table.push_back(OidToName(OID(2)+5+4+86,  "URN"));         // Uniform Resource Name, RFC 3406
     table.push_back(OidToName(OID(2)+5+4+87,  "URL"));         // Uniform Resource Locator
+    table.push_back(OidToName(OID(2)+5+4+98,  "C3"));          // 3-letter Country, ISO 3166-1 alpha-3
+
+    table.push_back(OidToName(OID(2)+5+4+100, "DOMAINNAME"));  // Domain name, RFC 5890
 
     table.push_back(OidToName(id_subjectPublicKeyIdentifier, "SPKI")); // Subject public key identifier
     table.push_back(OidToName(id_keyUsage, "KU"));                     // Key use
