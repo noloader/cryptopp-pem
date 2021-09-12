@@ -19,6 +19,7 @@
 
 #include "rsa.h"
 #include "dsa.h"
+#include "pssr.h"
 #include "eccrypto.h"
 #include "xed25519.h"
 
@@ -83,8 +84,9 @@ bool HasOptionalAttribute(const BufferedTransformation &bt, byte tag)
 
 inline bool IsRSAAlgorithm(const OID& alg)
 {
-    return alg == ASN1::rsaEncryption() ||  // rsaEncryption is most popular in spki
-        (alg >= ASN1::rsaEncryption() && alg <= ASN1::sha512_256WithRSAEncryption());
+    return alg == ASN1::rsaEncryption() ||    // rsaEncryption is most popular in spki
+         alg == OID(1)+2+840+113549+1+1+10 || // RSA-PSS
+        (alg >= ASN1::rsaEncryption() && alg <= ASN1::sha512_256WithRSAEncryption()));
 }
 
 inline bool IsDSAAlgorithm(const OID& alg)
@@ -1393,6 +1395,14 @@ PK_Verifier* X509Certificate::GetPK_VerifierObject(const OID &algorithm, const X
     else if (algorithm == id_sha512WithRSAEncryption)
     {
         verifier.reset(new RSASS<PKCS1v15, SHA512>::Verifier(key));
+    }
+    // This OID only specifies RSA/PSS. The ASN.1 needs to be parsed
+    // further to determine the hash and other parameters. However,
+    // SHA-1 was deprecated by the CA/B Baseline Requirements in 2016.
+    // We should only encounter SHA-256 nowadays.
+    else if (algorithm == OID(1)+2+840+113549+1+1+10)
+    {
+        verifier.reset(new RSASS<PSS, SHA256>::Verifier(key));
     }
     else if (algorithm == id_ecdsaWithSHA1)
     {
