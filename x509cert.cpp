@@ -152,7 +152,8 @@ typedef std::vector<OidToName> OidToNameArray;
 OidToNameArray GetOidToNameTable()
 {
     // The names are mostly standard. Also see the various RFCs, and
-    // X.520, Section 6, for a partial list of LDAP Names, and
+    // X.520, Section 6, for a partial list of LDAP Names,
+    // https://www.itu.int/rec/T-REC-X.520, and
     // https://www.iana.org/assignments/smi-numbers/smi-numbers.xhtml
     OidToNameArray table;
     table.reserve(96);
@@ -203,18 +204,23 @@ OidToNameArray GetOidToNameTable()
     table.push_back(OidToName(OID(2)+5+4+18,  "POSTOFFICEBOX"));  // Postal office box
     table.push_back(OidToName(OID(2)+5+4+20,  "TEL"));    // Phone number
     table.push_back(OidToName(OID(2)+5+4+23,  "FAX"));    // Fax number
+    table.push_back(OidToName(OID(2)+5+4+31,  "MEMBER")); // Member, names associated with object
+    table.push_back(OidToName(OID(2)+5+4+32,  "OWNER"));  // Owner/responsibility
     table.push_back(OidToName(OID(2)+5+4+35,   "USERPASSWORD"));        // User password
     table.push_back(OidToName(OID(2)+5+4+35+2, "ENCUSERPASSWORD"));     // Encrypted user password
     table.push_back(OidToName(OID(2)+5+4+36,   "USERCERTIFICATE"));     // User certificate
     table.push_back(OidToName(OID(2)+5+4+36+2, "ENCUSERCERTIFICATE"));  // Encrypted user certificate
     table.push_back(OidToName(OID(2)+5+4+37,   "CACERTIFICATE"));       // CA certificate
     table.push_back(OidToName(OID(2)+5+4+37+2, "ENCCACERTIFICATE"));    // Encrypted CA certificate
-    table.push_back(OidToName(OID(2)+5+4+41,  "NAME"));   // Name
-    table.push_back(OidToName(OID(2)+5+4+42,  "GN"));     // Given name
-    table.push_back(OidToName(OID(2)+5+4+43,  "I"));      // Initials
+    table.push_back(OidToName(OID(2)+5+4+41,  "NAME"));      // Name
+    table.push_back(OidToName(OID(2)+5+4+42,  "GIVENNAME")); // Given name
+    table.push_back(OidToName(OID(2)+5+4+43,  "INITIALS"));  // Initials
     table.push_back(OidToName(OID(2)+5+4+44,  "GENERATION"));  // Generation qualifier+ Jr.+ Sr.+ etc
     table.push_back(OidToName(id_uniqueIdentifier, "UID"));    // X.500 Unique identifier
+    table.push_back(OidToName(OID(2)+5+4+46,  "DNQUALIFIER")); // Distinguished name qualifier
+    table.push_back(OidToName(OID(2)+5+4+48,  "PROTOCOL"));    // Protocol information
     table.push_back(OidToName(OID(2)+5+4+49,  "DN"));          // Distinguished name
+    table.push_back(OidToName(OID(2)+5+4+50,  "UNIQUEMEMBER"));// Unique member
     table.push_back(OidToName(OID(2)+5+4+51,  "HOUSE"));       // House identifier
     table.push_back(OidToName(OID(2)+5+4+65,  "PSEUDONYM"));   // Pseudonym
     table.push_back(OidToName(OID(2)+5+4+78,  "OID"));         // Object identifier
