@@ -229,6 +229,7 @@ OidToNameArray GetOidToNameTable()
     table.push_back(OidToName(OID(2)+5+4+86,  "URN"));         // Uniform Resource Name, RFC 3406
     table.push_back(OidToName(OID(2)+5+4+87,  "URL"));         // Uniform Resource Locator
     table.push_back(OidToName(OID(2)+5+4+98,  "C3"));          // 3-letter Country, ISO 3166-1 alpha-3
+    table.push_back(OidToName(OID(2)+5+4+99,  "N3"));          // 3-digit Country, ISO 3166-1 numeric-3
 
     table.push_back(OidToName(OID(2)+5+4+100, "DOMAINNAME"));  // Domain name, RFC 5890
 
