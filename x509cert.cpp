@@ -86,7 +86,7 @@ inline bool IsRSAAlgorithm(const OID& alg)
 {
     return alg == ASN1::rsaEncryption() ||    // rsaEncryption is most popular in spki
          alg == OID(1)+2+840+113549+1+1+10 || // RSA-PSS
-        (alg >= ASN1::rsaEncryption() && alg <= ASN1::sha512_256WithRSAEncryption()));
+        (alg >= ASN1::rsaEncryption() && alg <= ASN1::sha512_256WithRSAEncryption());
 }
 
 inline bool IsDSAAlgorithm(const OID& alg)
