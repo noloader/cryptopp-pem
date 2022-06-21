@@ -1870,6 +1870,7 @@ const KeyUsageValueArray& X509Certificate::GetSubjectKeyUsage() const
 
             mask >>= unused;
 
+            // RFC 5280, Section 4.2.1.3
             const KeyUsageValue::KeyUsageEnum usageEnum[] = {
                 KeyUsageValue::digitalSignature,    // pos 0
                 KeyUsageValue::nonRepudiation,
