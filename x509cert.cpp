@@ -1847,12 +1847,28 @@ const KeyUsageValueArray& X509Certificate::GetSubjectKeyUsage() const
             ArraySource store(ConstBytePtr(ext.m_value), BytePtrSize(ext.m_value), true);
 
             SecByteBlock values;
-            word32 unused;
+            word32 mask = 0, unused;
             BERDecodeBitString(store, values, unused);
 
             // The bit string is one octet, with the bit mask blocked-left.
-            CRYPTOPP_ASSERT(values.size() == 1);
-            word32 mask = (values[0] >> unused);
+            // CRYPTOPP_ASSERT(values.size() == 1);
+            // word32 mask = (values[0] >> unused);
+
+            // New code due to Truswave certificates, https://github.com/noloader/cryptopp-pem/issues/15 and
+            // https://groups.google.com/a/mozilla.org/g/dev-security-policy/c/EKAIB01lvlo/m/OJ10fvGMAwAJ
+            CRYPTOPP_ASSERT(values.size() == 1 || values.size() == 2);
+            CRYPTOPP_ASSERT(unused >= 0 && unused <= 7);
+
+            if (values.size() > 0) {
+                CRYPTOPP_ASSERT(values[0] != 0);
+                mask <<= 8; mask = (word32)values[0];
+            }
+            if (values.size() > 1) {
+                CRYPTOPP_ASSERT(values[1] != 0);
+                mask <<= 8; mask = (word32)values[1];
+            }
+
+            mask >>= unused;
 
             const KeyUsageValue::KeyUsageEnum usageEnum[] = {
                 KeyUsageValue::digitalSignature,    // pos 0
