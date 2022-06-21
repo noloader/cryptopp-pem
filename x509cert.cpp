@@ -1850,6 +1850,7 @@ const KeyUsageValueArray& X509Certificate::GetSubjectKeyUsage() const
             word32 mask = 0, unused;
             BERDecodeBitString(store, values, unused);
 
+            // Old code
             // The bit string is one octet, with the bit mask blocked-left.
             // CRYPTOPP_ASSERT(values.size() == 1);
             // word32 mask = (values[0] >> unused);
@@ -1859,6 +1860,7 @@ const KeyUsageValueArray& X509Certificate::GetSubjectKeyUsage() const
             CRYPTOPP_ASSERT(values.size() == 1 || values.size() == 2);
             CRYPTOPP_ASSERT(unused >= 0 && unused <= 7);
 
+            // New code. The values array will be at most 2 octets due to 9 keyUsage bits
             if (values.size() > 0) {
                 CRYPTOPP_ASSERT(values[0] != 0);
                 mask <<= 8; mask = (word32)values[0];
@@ -1868,6 +1870,7 @@ const KeyUsageValueArray& X509Certificate::GetSubjectKeyUsage() const
                 mask <<= 8; mask = (word32)values[1];
             }
 
+            // New code
             mask >>= unused;
 
             // RFC 5280, Section 4.2.1.3
