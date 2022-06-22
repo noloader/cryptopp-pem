@@ -1888,7 +1888,7 @@ const KeyUsageValueArray& X509Certificate::GetSubjectKeyUsage() const
 
             for (size_t i=0; i<COUNTOF(usageEnum); ++i)
             {
-                if ((1 << i) & mask)
+                if ((1 << (COUNTOF(usageEnum) - i - 1)) & mask)
                 {
                     KeyUsageValue ku(id_keyUsage, usageEnum[i]);
                     keyUsages.push_back(ku);
