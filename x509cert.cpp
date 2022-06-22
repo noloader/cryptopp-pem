@@ -1860,6 +1860,13 @@ const KeyUsageValueArray& X509Certificate::GetSubjectKeyUsage() const
             CRYPTOPP_ASSERT(values.size() == 1 || values.size() == 2);
             CRYPTOPP_ASSERT(unused >= 0 && unused <= 7);
 
+#if 0
+			std::cout << std::endl;
+			std::cout << "  Octet 0: " << (int) values[0] << std::endl;
+			std::cout << "  Octet 1: " << (int) values[1] << std::endl;
+			std::cout << "   Unused: " << (int) unused << std::endl;
+#endif
+
             // New code. The values array will be at most 2 octets due to 9 keyUsage bits
             if (values.size() > 0) {
                 CRYPTOPP_ASSERT(values[0] != 0);
@@ -1867,7 +1874,8 @@ const KeyUsageValueArray& X509Certificate::GetSubjectKeyUsage() const
             }
             if (values.size() > 1) {
                 CRYPTOPP_ASSERT(values[1] != 0);
-                mask <<= 8; mask |= (word32)values[1];
+                mask <<= 8;
+                mask |= (word32)values[1];
             }
 
             // New code
