@@ -1863,11 +1863,11 @@ const KeyUsageValueArray& X509Certificate::GetSubjectKeyUsage() const
             // New code. The values array will be at most 2 octets due to 9 keyUsage bits
             if (values.size() > 0) {
                 CRYPTOPP_ASSERT(values[0] != 0);
-                mask <<= 8; mask = (word32)values[0];
+                mask = (word32)values[0];
             }
             if (values.size() > 1) {
                 CRYPTOPP_ASSERT(values[1] != 0);
-                mask <<= 8; mask = (word32)values[1];
+                mask <<= 8; mask |= (word32)values[1];
             }
 
             // New code
