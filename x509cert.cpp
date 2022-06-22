@@ -1847,43 +1847,35 @@ const KeyUsageValueArray& X509Certificate::GetSubjectKeyUsage() const
             ArraySource store(ConstBytePtr(ext.m_value), BytePtrSize(ext.m_value), true);
 
             SecByteBlock values;
-            word32 mask = 0, unused;
+            word32 mask = 0, used, unused, shift;
             BERDecodeBitString(store, values, unused);
 
-            // Old code
-            // The bit string is one octet, with the bit mask blocked-left.
-            // CRYPTOPP_ASSERT(values.size() == 1);
-            // word32 mask = (values[0] >> unused);
-
-            // New code due to Truswave certificates, https://github.com/noloader/cryptopp-pem/issues/15 and
+            // BER decoding due to Truswave certificates, https://github.com/noloader/cryptopp-pem/issues/15
             // https://groups.google.com/a/mozilla.org/g/dev-security-policy/c/EKAIB01lvlo/m/OJ10fvGMAwAJ
             CRYPTOPP_ASSERT(values.size() == 1 || values.size() == 2);
             CRYPTOPP_ASSERT(unused >= 0 && unused <= 7);
 
-#if 0
-			std::cout << std::endl;
-			std::cout << "  Octet 0: " << (int) values[0] << std::endl;
-			std::cout << "  Octet 1: " << (int) values[1] << std::endl;
-			std::cout << "   Unused: " << (int) unused << std::endl;
-#endif
-
-            // New code. The values array will be at most 2 octets due to 9 keyUsage bits
-            if (values.size() > 0) {
+            if (values.size() == 1) {
                 CRYPTOPP_ASSERT(values[0] != 0);
-                mask = (word32)values[0];
+                mask = (word32)values[0] >> unused;
+                used = 8u - unused;
+                shift = 9u - used;
+                mask <<= shift;
             }
-            if (values.size() > 1) {
+            else if (values.size() == 2) {
                 CRYPTOPP_ASSERT(values[1] != 0);
-                mask <<= 8;
-                mask |= (word32)values[1];
+                mask = (((word32)values[0] << 8u) | (word32)values[1]) >> unused;
+                used = 16u - unused;
+                shift = 9u - used;
+                mask <<= shift;
             }
-
-            // New code
-            mask >>= unused;
+            else {
+                BERDecodeError();
+            }
 
             // RFC 5280, Section 4.2.1.3
             const KeyUsageValue::KeyUsageEnum usageEnum[] = {
-                KeyUsageValue::digitalSignature,    // pos 0
+                KeyUsageValue::digitalSignature,    // MSB, pos 0
                 KeyUsageValue::nonRepudiation,
                 KeyUsageValue::keyEncipherment,
                 KeyUsageValue::dataEncipherment,
@@ -1891,13 +1883,13 @@ const KeyUsageValueArray& X509Certificate::GetSubjectKeyUsage() const
                 KeyUsageValue::keyCertSign,
                 KeyUsageValue::cRLSign,
                 KeyUsageValue::encipherOnly,
-                KeyUsageValue::decipherOnly
+                KeyUsageValue::decipherOnly    // LSB, pos 8
             };
 
-            for (size_t i=0; i<COUNTOF(usageEnum); ++i)
+            const size_t count = COUNTOF(usageEnum);
+            for (size_t i=0; i<count; ++i)
             {
-                // if ((1 << (COUNTOF(usageEnum) - i - 1)) & mask)
-                if ((1 << i) & mask)
+                if ((1 << (count - i - 1)) & mask)
                 {
                     KeyUsageValue ku(id_keyUsage, usageEnum[i]);
                     keyUsages.push_back(ku);
