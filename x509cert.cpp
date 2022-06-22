@@ -1847,7 +1847,7 @@ const KeyUsageValueArray& X509Certificate::GetSubjectKeyUsage() const
             ArraySource store(ConstBytePtr(ext.m_value), BytePtrSize(ext.m_value), true);
 
             SecByteBlock values;
-            word32 mask = 0, used, unused, shift;
+            word32 mask = 0, unused;
             BERDecodeBitString(store, values, unused);
 
             // BER decoding due to Truswave certificates, https://github.com/noloader/cryptopp-pem/issues/15
@@ -1857,17 +1857,13 @@ const KeyUsageValueArray& X509Certificate::GetSubjectKeyUsage() const
 
             if (values.size() == 1) {
                 CRYPTOPP_ASSERT(values[0] != 0);
-                mask = (word32)values[0] >> unused;
-                used = 8u - unused;
-                shift = 9u - used;
-                mask <<= shift;
+                mask = (word32)values[0];
+                mask = (mask >> unused) << (unused + 1);
             }
             else if (values.size() == 2) {
                 CRYPTOPP_ASSERT(values[1] != 0);
-                mask = (((word32)values[0] << 8u) | (word32)values[1]) >> unused;
-                used = 16u - unused;
-                shift = 9u - used;
-                mask <<= shift;
+                mask = ((word32)values[0] << 8) | (word32)values[1];
+                mask = (mask >> unused) << (unused - 7);
             }
             else {
                 BERDecodeError();
