@@ -291,6 +291,83 @@ std::string OidToNameLookup(const OID& oid, const char *defaultName)
     return oss.str();
 }
 
+// Forward declaration
+struct KeyUsageValue;
+
+struct OidToKeyUsageValue
+{
+    virtual ~OidToKeyUsageValue() {};
+    OidToKeyUsageValue (const OID& o, const KeyUsageValue::KeyUsageEnum& v) : oid(o), ku(v) {}
+
+    OID oid;
+    KeyUsageValue::KeyUsageEnum ku;
+};
+
+struct OidToKeyUsageCompare
+{
+    bool operator() (const OidToKeyUsageValue& first, const OidToKeyUsageValue& second)
+        { return (first.oid < second.oid); }
+};
+
+typedef std::vector<OidToKeyUsageValue> OidToKeyUsageValueArray;
+
+OidToKeyUsageValueArray GetOidToKeyUsageValueTable()
+{
+    OidToKeyUsageValueArray table;
+    table.reserve(24);
+
+    table.push_back(OidToKeyUsageValue(OID(1)+3+6+1+5+5+7+3+1, KeyUsageValue::serverAuth));
+    table.push_back(OidToKeyUsageValue(OID(1)+3+6+1+5+5+7+3+2, KeyUsageValue::clientAuth));
+    table.push_back(OidToKeyUsageValue(OID(1)+3+6+1+5+5+7+3+3, KeyUsageValue::codeSigning));
+    table.push_back(OidToKeyUsageValue(OID(1)+3+6+1+5+5+7+3+4, KeyUsageValue::emailProtection));
+    table.push_back(OidToKeyUsageValue(OID(1)+3+6+1+5+5+7+3+5, KeyUsageValue::ipsecEndSystem));
+    table.push_back(OidToKeyUsageValue(OID(1)+3+6+1+5+5+7+3+6, KeyUsageValue::ipsecTunnel));
+    table.push_back(OidToKeyUsageValue(OID(1)+3+6+1+5+5+7+3+7, KeyUsageValue::ipsecUser));
+    table.push_back(OidToKeyUsageValue(OID(1)+3+6+1+5+5+7+3+8, KeyUsageValue::timeStamping));
+    table.push_back(OidToKeyUsageValue(OID(1)+3+6+1+5+5+7+3+9, KeyUsageValue::OCSPSigning));
+    table.push_back(OidToKeyUsageValue(OID(1)+3+6+1+5+5+7+3+10, KeyUsageValue::dvcs));
+    table.push_back(OidToKeyUsageValue(OID(1)+3+6+1+5+5+7+3+13, KeyUsageValue::eapOverPPP));
+    table.push_back(OidToKeyUsageValue(OID(1)+3+6+1+5+5+7+3+14, KeyUsageValue::eapOverLAN));
+    table.push_back(OidToKeyUsageValue(OID(1)+3+6+1+5+5+7+3+17, KeyUsageValue::ipsecIKE));
+    table.push_back(OidToKeyUsageValue(OID(1)+3+6+1+5+5+7+3+20, KeyUsageValue::sipDomain));
+    table.push_back(OidToKeyUsageValue(OID(1)+3+6+1+5+5+7+3+21, KeyUsageValue::secureShellClient));
+    table.push_back(OidToKeyUsageValue(OID(1)+3+6+1+5+5+7+3+22, KeyUsageValue::secureShellServer));
+    table.push_back(OidToKeyUsageValue(OID(1)+3+6+1+5+5+7+3+27, KeyUsageValue::cmcCA));
+    table.push_back(OidToKeyUsageValue(OID(1)+3+6+1+5+5+7+3+28, KeyUsageValue::cmcRA));
+    table.push_back(OidToKeyUsageValue(OID(1)+3+6+1+5+5+7+3+29, KeyUsageValue::cmcArchive));
+
+    return table;
+}
+
+KeyUsageValue::KeyUsageEnum OidToKeyUsageValueLookup(const OID& oid, KeyUsageValue::KeyUsageEnum defaultValue)
+{
+    static const OidToKeyUsageValueArray table = GetOidToKeyUsageValueTable();
+
+    // Binary search
+    size_t first  = 0;
+    size_t last   = table.size() - 1;
+    size_t middle = (first+last)/2;
+
+    while (first <= last)
+    {
+        if (table[middle].oid < oid)
+        {
+            first = middle + 1;
+        }
+        else if (table[middle].oid == oid)
+        {
+            return table[middle].ku;
+        }
+        else
+            last = middle - 1;
+
+        middle = (first + last)/2;
+    }
+
+    // Not found, return defaultValue
+    return defaultValue;
+}
+
 void RdnValue::BERDecode(BufferedTransformation &bt)
 {
     BERSequenceDecoder seq(bt);
@@ -679,44 +756,7 @@ void IdentityValue::ConvertOtherName()
 KeyUsageValue::KeyUsageValue(const OID& oid)
     : m_oid(oid), m_usage(InvalidKeyUsage)
 {
-    if (oid == OID(1)+3+6+1+5+5+7+3+1)
-        { m_usage = KeyUsageValue::serverAuth; }
-    else if (oid == OID(1)+3+6+1+5+5+7+3+2)
-        { m_usage = KeyUsageValue::clientAuth; }
-    else if (oid == OID(1)+3+6+1+5+5+7+3+3)
-        { m_usage = KeyUsageValue::codeSigning; }
-    else if (oid == OID(1)+3+6+1+5+5+7+3+4)
-        { m_usage = KeyUsageValue::emailProtection; }
-    else if (oid == OID(1)+3+6+1+5+5+7+3+5)
-        { m_usage = KeyUsageValue::ipsecEndSystem; }
-    else if (oid == OID(1)+3+6+1+5+5+7+3+6)
-        { m_usage = KeyUsageValue::ipsecTunnel; }
-    else if (oid == OID(1)+3+6+1+5+5+7+3+7)
-        { m_usage = KeyUsageValue::ipsecUser; }
-    else if (oid == OID(1)+3+6+1+5+5+7+3+8)
-        { m_usage = KeyUsageValue::timeStamping; }
-    else if (oid == OID(1)+3+6+1+5+5+7+3+9)
-        { m_usage = KeyUsageValue::OCSPSigning; }
-    else if (oid == OID(1)+3+6+1+5+5+7+3+10)
-        { m_usage = KeyUsageValue::dvcs; }
-    else if (oid == OID(1)+3+6+1+5+5+7+3+13)
-        { m_usage = KeyUsageValue::eapOverPPP; }
-    else if (oid == OID(1)+3+6+1+5+5+7+3+14)
-        { m_usage = KeyUsageValue::eapOverLAN; }
-    else if (oid == OID(1)+3+6+1+5+5+7+3+17)
-        { m_usage = KeyUsageValue::ipsecIKE; }
-    else if (oid == OID(1)+3+6+1+5+5+7+3+20)
-        { m_usage = KeyUsageValue::sipDomain; }
-    else if (oid == OID(1)+3+6+1+5+5+7+3+21)
-        { m_usage = KeyUsageValue::secureShellClient; }
-    else if (oid == OID(1)+3+6+1+5+5+7+3+22)
-        { m_usage = KeyUsageValue::secureShellServer; }
-    else if (oid == OID(1)+3+6+1+5+5+7+3+27)
-        { m_usage = KeyUsageValue::cmcCA; }
-    else if (oid == OID(1)+3+6+1+5+5+7+3+28)
-        { m_usage = KeyUsageValue::cmcRA; }
-    else if (oid == OID(1)+3+6+1+5+5+7+3+29)
-        { m_usage = KeyUsageValue::cmcArchive; }
+    m_usage = OidToKeyUsageValueLookup(oid, InvalidKeyUsage);
 }
 
 KeyUsageValue::KeyUsageValue(const OID& oid, KeyUsageEnum usage)
