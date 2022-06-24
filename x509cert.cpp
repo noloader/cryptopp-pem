@@ -1895,6 +1895,10 @@ const KeyUsageValueArray& X509Certificate::GetSubjectKeyUsage() const
             CRYPTOPP_ASSERT(values.size() == 1 || values.size() == 2);
             CRYPTOPP_ASSERT(unused >= 0 && unused <= 7);
 
+            // The shift right followed by shift left accomplishes two goals.
+            // First, ensure the lower unused bits are actually 0. Second,
+            // the mask is 9 bits long regardless of 1 or 2 octets, or number
+            // of unused bits.
             if (values.size() == 1) {
                 CRYPTOPP_ASSERT(values[0] != 0);
                 mask = (word32)values[0];
