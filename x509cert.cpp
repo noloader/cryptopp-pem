@@ -262,9 +262,9 @@ std::string OidToNameLookup(const OID& oid, const char *defaultName)
     static const OidToNameArray table = GetOidToNameTable();
 
     // Binary search
-    size_t first  = 0;
-    size_t last   = table.size() - 1;
-    size_t middle = (first+last)/2;
+    int first  = 0;
+    int last   = table.size() - 1;
+    int middle = (first+last)/2;
 
     while (first <= last)
     {
@@ -344,9 +344,9 @@ KeyUsageValue::KeyUsageEnum OidToKeyUsageValueLookup(const OID& oid, KeyUsageVal
     static const OidToKeyUsageValueArray table = GetOidToKeyUsageValueTable();
 
     // Binary search
-    size_t first  = 0;
-    size_t last   = table.size() - 1;
-    size_t middle = (first+last)/2;
+    int first  = 0;
+    int last   = table.size() - 1;
+    int middle = (first+last)/2;
 
     while (first <= last)
     {
