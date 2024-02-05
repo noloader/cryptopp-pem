@@ -137,8 +137,8 @@ NAMESPACE_BEGIN(CryptoPP)
 
 struct OidToName
 {
-    virtual ~OidToName() {};
-    OidToName() {}
+    virtual ~OidToName () {};
+    OidToName () {}
     OidToName (const OID& o, const std::string& n) : oid(o), name(n) {}
 
     OID oid;
@@ -282,8 +282,8 @@ struct KeyUsageValue;
 
 struct OidToKeyUsageValue
 {
-    virtual ~OidToKeyUsageValue() {};
-    OidToKeyUsageValue() {}
+    virtual ~OidToKeyUsageValue () {};
+    OidToKeyUsageValue () {}
     OidToKeyUsageValue (const OID& o, const KeyUsageValue::KeyUsageEnum& v) : oid(o), ku(v) {}
 
     OID oid;
