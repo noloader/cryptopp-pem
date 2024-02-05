@@ -115,6 +115,11 @@ PEM_Type PEM_GetTypeFromString(const secure_string& str)
     if (it != str.end())
         return PEM_PRIVATE_KEY;
 
+    // Uses an OID to identify the private key type
+    it = Search(str, ENC_PRIVATE_BEGIN);
+    if (it != str.end())
+        return PEM_ENC_PRIVATE_KEY;
+
     // RSA key types
     it = Search(str, RSA_PUBLIC_BEGIN);
     if (it != str.end())

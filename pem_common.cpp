@@ -43,6 +43,9 @@ const secure_string PUBLIC_END("-----END PUBLIC KEY-----");
 const secure_string PRIVATE_BEGIN("-----BEGIN PRIVATE KEY-----");
 const secure_string PRIVATE_END("-----END PRIVATE KEY-----");
 
+const secure_string ENC_PRIVATE_BEGIN("-----BEGIN ENCRYPTED PRIVATE KEY-----");
+const secure_string ENC_PRIVATE_END("-----END ENCRYPTED PRIVATE KEY-----");
+
 const secure_string RSA_PUBLIC_BEGIN("-----BEGIN RSA PUBLIC KEY-----");
 const secure_string RSA_PUBLIC_END("-----END RSA PUBLIC KEY-----");
 

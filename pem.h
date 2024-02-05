@@ -57,6 +57,9 @@ enum PEM_Type {
     /// \brief Private key
     /// \details non-specific private key
     PEM_PRIVATE_KEY,
+    /// \brief Encrypted private key
+    /// \details Encrypted non-specific private key
+    PEM_ENC_PRIVATE_KEY,
     /// \brief RSA public key
     PEM_RSA_PUBLIC_KEY,
     /// \brief RSA private key
