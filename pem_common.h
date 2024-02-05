@@ -136,6 +136,9 @@ extern const secure_string PUBLIC_END;
 extern const secure_string PRIVATE_BEGIN;
 extern const secure_string PRIVATE_END;
 
+extern const secure_string ENC_PRIVATE_BEGIN;
+extern const secure_string ENC_PRIVATE_END;
+
 extern const secure_string RSA_PUBLIC_BEGIN;
 extern const secure_string RSA_PUBLIC_END;
 
