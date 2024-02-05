@@ -2,6 +2,8 @@
 
 # Script to create the test keys used pem_test.cxx
 
+set -e
+
 ##################################
 # prerequisites
 
@@ -78,12 +80,12 @@ fi
 echo "Generating OpenSSL keys"
 
 # RSA private key, public key, and encrypted private key
-openssl genrsa -out rsa-priv.pem 1024
+openssl genrsa -out rsa-priv.pem 2048
 openssl rsa -in rsa-priv.pem -out rsa-pub.pem -pubout
 openssl rsa -in rsa-priv.pem -out rsa-enc-priv.pem -aes128 -passout pass:abcdefghijklmnopqrstuvwxyz
 
 # DSA private key, public key, and encrypted private key
-openssl dsaparam -out dsa-params.pem 1024
+openssl dsaparam -out dsa-params.pem 2048
 openssl gendsa -out dsa-priv.pem dsa-params.pem
 openssl dsa -in dsa-priv.pem -out dsa-pub.pem -pubout
 openssl dsa -in dsa-priv.pem -out dsa-enc-priv.pem -aes128 -passout pass:abcdefghijklmnopqrstuvwxyz
@@ -95,7 +97,7 @@ openssl ec -in ec-priv.pem -out ec-pub.pem -pubout
 openssl ec -in ec-priv.pem -out ec-enc-priv.pem -aes128 -passout pass:abcdefghijklmnopqrstuvwxyz
 
 # Diffie-Hellman parameters
-openssl dhparam -out dh-params.pem 512
+openssl dhparam -out dh-params.pem 2048
 
 # Make line endings CRLF per RFC 1421. OpenSSL no longer outputs well formed PEM.
 ./pem_eol.exe rsa-priv.pem rsa-pub.pem rsa-enc-priv.pem
