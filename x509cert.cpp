@@ -35,6 +35,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 // Make these defines to avoid global objects
 #define id_basicConstraints            (OID(2)+5+29+19)
@@ -137,6 +138,7 @@ NAMESPACE_BEGIN(CryptoPP)
 struct OidToName
 {
     virtual ~OidToName() {};
+    OidToName() {}
     OidToName (const OID& o, const std::string& n) : oid(o), name(n) {}
 
     OID oid;
@@ -261,30 +263,14 @@ std::string OidToNameLookup(const OID& oid, const char *defaultName)
 {
     static const OidToNameArray table = GetOidToNameTable();
 
-    // Binary search
-    size_t first  = 0;
-    size_t last   = table.size() - 1;
-    size_t middle = (first+last)/2;
-
-    while (first <= last)
-    {
-        if (table[middle].oid < oid)
-        {
-            first = middle + 1;
-        }
-        else if (table[middle].oid == oid)
-        {
-            return table[middle].name;
-        }
-        else
-            last = middle - 1;
-
-        middle = (first + last)/2;
-    }
+    // std::binary_search due to https://github.com/noloader/cryptopp-pem/pull/16
+    OidToName result;
+    if (std::binary_search(table.begin(), table.end(), result, OidToNameCompare()))
+        return result.name;
 
     // Not found, return defaultName.
     if (defaultName != NULLPTR)
-        return defaultName;
+        return std::string(defaultName);
 
     std::ostringstream oss;
     oss << oid;
@@ -297,6 +283,7 @@ struct KeyUsageValue;
 struct OidToKeyUsageValue
 {
     virtual ~OidToKeyUsageValue() {};
+    OidToKeyUsageValue() {}
     OidToKeyUsageValue (const OID& o, const KeyUsageValue::KeyUsageEnum& v) : oid(o), ku(v) {}
 
     OID oid;
@@ -343,26 +330,10 @@ KeyUsageValue::KeyUsageEnum OidToKeyUsageValueLookup(const OID& oid, KeyUsageVal
 {
     static const OidToKeyUsageValueArray table = GetOidToKeyUsageValueTable();
 
-    // Binary search
-    size_t first  = 0;
-    size_t last   = table.size() - 1;
-    size_t middle = (first+last)/2;
-
-    while (first <= last)
-    {
-        if (table[middle].oid < oid)
-        {
-            first = middle + 1;
-        }
-        else if (table[middle].oid == oid)
-        {
-            return table[middle].ku;
-        }
-        else
-            last = middle - 1;
-
-        middle = (first + last)/2;
-    }
+    // std::binary_search due to https://github.com/noloader/cryptopp-pem/pull/16
+    OidToKeyUsageValue result;
+    if (std::binary_search(table.begin(), table.end(), result, OidToKeyUsageCompare()))
+        return result.ku;
 
     // Not found, return defaultValue
     return defaultValue;
