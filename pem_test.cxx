@@ -18,6 +18,8 @@ int main(int argc, char* argv[])
 {
     using namespace CryptoPP;
 
+    std::string filename;
+
     try
     {
         RSA::PublicKey k1;
@@ -32,51 +34,61 @@ int main(int argc, char* argv[])
         // Read from OpenSSL generated key
         {
             std::cout << "Load RSA public key" << std::endl;
+            filename = "rsa-pub.pem";
             FileSource fs1("rsa-pub.pem", true);
             PEM_Load(fs1, k1);
             std::cout << "  - OK" << std::endl;
 
             std::cout << "Load RSA private key" << std::endl;
+            filename = "rsa-priv.pem";
             FileSource fs2("rsa-priv.pem", true);
             PEM_Load(fs2, k2);
             std::cout << "  - OK" << std::endl;
 
             std::cout << "Load encrypted RSA private key" << std::endl;
+            filename = "rsa-enc-priv.pem";
             FileSource fs3("rsa-enc-priv.pem", true);
             PEM_Load(fs3, k3, "abcdefghijklmnopqrstuvwxyz", 26);
             std::cout << "  - OK" << std::endl;
 
             std::cout << "Load DSA public key" << std::endl;
+            filename = "dsa-pub.pem";
             FileSource fs4("dsa-pub.pem", true);
             PEM_Load(fs4, k4);
             std::cout << "  - OK" << std::endl;
 
             std::cout << "Load DSA private key" << std::endl;
+            filename = "dsa-priv.pem";
             FileSource fs5("dsa-priv.pem", true);
             PEM_Load(fs5, k5);
             std::cout << "  - OK" << std::endl;
 
             std::cout << "Load encrypted DSA private key" << std::endl;
+            filename = "dsa-enc-priv.pem";
             FileSource fs6("dsa-enc-priv.pem", true);
             PEM_Load(fs6, k6, "abcdefghijklmnopqrstuvwxyz", 26);
             std::cout << "  - OK" << std::endl;
 
             std::cout << "Load ECP parameters" << std::endl;
+            filename = "ec-params.pem";
             FileSource fs7("ec-params.pem", true);
             PEM_Load(fs7, p7);
             std::cout << "  - OK" << std::endl;
 
             std::cout << "Load ECP public key" << std::endl;
+            filename = "ec-pub.pem";
             FileSource fs8("ec-pub.pem", true);
             PEM_Load(fs8, k8);
             std::cout << "  - OK" << std::endl;
 
             std::cout << "Load ECP private key" << std::endl;
+            filename = "ec-priv.pem";
             FileSource fs9("ec-priv.pem", true);
             PEM_Load(fs9, k9);
             std::cout << "  - OK" << std::endl;
 
             std::cout << "Load encrypted ECP private key" << std::endl;
+            filename = "ec-enc-priv.pem";
             FileSource fs10("ec-enc-priv.pem", true);
             PEM_Load(fs10, k10, "abcdefghijklmnopqrstuvwxyz", 26);
             std::cout << "  - OK" << std::endl;
@@ -87,51 +99,61 @@ int main(int argc, char* argv[])
             AutoSeededRandomPool prng;
 
             std::cout << "Save RSA public key" << std::endl;
+            filename = "rsa-pub.cryptopp.pem";
             FileSink fs1("rsa-pub.cryptopp.pem");
             PEM_Save(fs1, k1);
             std::cout << "  - OK" << std::endl;
 
             std::cout << "Save RSA private key" << std::endl;
+            filename = "rsa-priv.cryptopp.pem";
             FileSink fs2("rsa-priv.cryptopp.pem");
             PEM_Save(fs2, k2);
             std::cout << "  - OK" << std::endl;
 
             std::cout << "Save encrypted RSA private key" << std::endl;
+            filename = "rsa-enc-priv.cryptopp.pem";
             FileSink fs3("rsa-enc-priv.cryptopp.pem");
             PEM_Save(fs3, k3, prng, "AES-128-CBC", "abcdefghijklmnopqrstuvwxyz", 26);
             std::cout << "  - OK" << std::endl;
 
             std::cout << "Save DSA public key" << std::endl;
+            filename = "dsa-pub.cryptopp.pem";
             FileSink fs4("dsa-pub.cryptopp.pem");
             PEM_Save(fs4, k4);
             std::cout << "  - OK" << std::endl;
 
             std::cout << "Save DSA private key" << std::endl;
+            filename = "dsa-priv.cryptopp.pem";
             FileSink fs5("dsa-priv.cryptopp.pem");
             PEM_Save(fs5, k5);
             std::cout << "  - OK" << std::endl;
 
             std::cout << "Save encrypted DSA private key" << std::endl;
+            filename = "dsa-enc-priv.cryptopp.pem";
             FileSink fs6("dsa-enc-priv.cryptopp.pem");
             PEM_Save(fs6, k6, prng, "AES-128-CBC", "abcdefghijklmnopqrstuvwxyz", 26);
             std::cout << "  - OK" << std::endl;
 
             std::cout << "Save ECP parameters" << std::endl;
+            filename = "ec-params.cryptopp.pem";
             FileSink fs7("ec-params.cryptopp.pem", true);
             PEM_Save(fs7, p7);
             std::cout << "  - OK" << std::endl;
 
             std::cout << "Save ECP public key" << std::endl;
+            filename = "ec-pub.cryptopp.pem";
             FileSink fs8("ec-pub.cryptopp.pem", true);
             PEM_Save(fs8, k8);
             std::cout << "  - OK" << std::endl;
 
             std::cout << "Save ECP private key" << std::endl;
+            filename = "ec-priv.cryptopp.pem";
             FileSink fs9("ec-priv.cryptopp.pem", true);
             PEM_Save(fs9, k9);
             std::cout << "  - OK" << std::endl;
 
             std::cout << "Save encrypted ECP private key" << std::endl;
+            filename = "ec-enc-priv.cryptopp.pem";
             FileSink fs10("ec-enc-priv.cryptopp.pem", true);
             PEM_Save(fs10, k10, prng, "AES-128-CBC", "abcdefghijklmnopqrstuvwxyz", 26);
             std::cout << "  - OK" << std::endl;
@@ -139,7 +161,7 @@ int main(int argc, char* argv[])
     }
     catch(const Exception& ex)
     {
-        std::cout << "Caught exception: " << ex.what() << std::endl;
+        std::cout << "Caught exception: " << ex.what() << " while processing " << filename << std::endl;
         std::exit(1);
     }
 
