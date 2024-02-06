@@ -621,7 +621,12 @@ public:
     /// \brief Subject public key algorithm
     /// \returns Subject public key algorithm
     /// \sa GetSubjectPublicKey
-    const OID& GetSubjectPublicKeyAlgorithm() const
+    OID GetSubjectPublicKeyAlgorithm() const
+        { return m_subjectPublicKey->GetAlgorithmID(); }
+
+    /// \brief Subject signature algorithm
+    /// \returns Subject signature algorithm
+    const OID& GetSubjectSignatureAlgorithm() const
         { return m_subjectSignatureAlgortihm; }
 
     /// \brief Subject public key
