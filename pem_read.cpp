@@ -930,6 +930,8 @@ void PEM_Load(BufferedTransformation& bt, RSA::PrivateKey& rsa, const char* pass
         PEM_StripEncapsulatedBoundary(t1, t2, RSA_PRIVATE_BEGIN, RSA_PRIVATE_END);
     else if (type == PEM_RSA_ENC_PRIVATE_KEY && password == NULL)
         throw InvalidArgument("PEM_Load: RSA private key is encrypted");
+    else if (type == PEM_ENC_PRIVATE_KEY)
+        throw InvalidDataFormat("PEM_Load: PKCS#8 encryption not supported");
     else
         throw InvalidDataFormat("PEM_Load: not a RSA private key");
 
@@ -977,6 +979,8 @@ void PEM_Load(BufferedTransformation& bt, DSA::PrivateKey& dsa, const char* pass
         PEM_StripEncapsulatedBoundary(t1, t2, DSA_PRIVATE_BEGIN, DSA_PRIVATE_END);
     else if (type == PEM_DSA_ENC_PRIVATE_KEY && password == NULL)
         throw InvalidArgument("PEM_Load: DSA private key is encrypted");
+    else if (type == PEM_ENC_PRIVATE_KEY)
+        throw InvalidDataFormat("PEM_Load: PKCS#8 encryption not supported");
     else
         throw InvalidDataFormat("PEM_Load: not a DSA private key");
 
@@ -1024,6 +1028,8 @@ void PEM_Load(BufferedTransformation& bt, ElGamalKeys::PrivateKey& key, const ch
         PEM_StripEncapsulatedBoundary(t1, t2, ELGAMAL_PRIVATE_BEGIN, ELGAMAL_PRIVATE_END);
     else if (type == PEM_ELGAMAL_ENC_PRIVATE_KEY && password == NULL)
         throw InvalidArgument("PEM_Load: ElGamal private key is encrypted");
+    else if (type == PEM_ENC_PRIVATE_KEY)
+        throw InvalidDataFormat("PEM_Load: PKCS#8 encryption not supported");
     else
         throw InvalidDataFormat("PEM_Load: not a ElGamal private key");
 
@@ -1081,6 +1087,8 @@ void PEM_Load(BufferedTransformation& bt, DL_PrivateKey_EC<ECP>& ec, const char*
         PEM_StripEncapsulatedBoundary(t1, t2, EC_PRIVATE_BEGIN, EC_PRIVATE_END);
     else if (type == PEM_EC_ENC_PRIVATE_KEY && password == NULL)
         throw InvalidArgument("PEM_Load: EC private key is encrypted");
+    else if (type == PEM_ENC_PRIVATE_KEY)
+        throw InvalidDataFormat("PEM_Load: PKCS#8 encryption not supported");
     else
         throw InvalidDataFormat("PEM_Load: not a private EC key");
 
@@ -1128,6 +1136,8 @@ void PEM_Load(BufferedTransformation& bt, DL_PrivateKey_EC<EC2N>& ec, const char
         PEM_StripEncapsulatedBoundary(t1, t2, EC_PRIVATE_BEGIN, EC_PRIVATE_END);
     else if (type == PEM_EC_ENC_PRIVATE_KEY && password == NULL)
         throw InvalidArgument("PEM_Load: EC private key is encrypted");
+    else if (type == PEM_ENC_PRIVATE_KEY)
+        throw InvalidDataFormat("PEM_Load: PKCS#8 encryption not supported");
     else
         throw InvalidDataFormat("PEM_Load: not a private EC key");
 
