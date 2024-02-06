@@ -2,8 +2,6 @@
 
 # Script to create the test keys used pem_test.cxx
 
-set -e
-
 ##################################
 # prerequisites
 
@@ -86,8 +84,6 @@ fi
 # test keys
 
 echo "Generating OpenSSL keys"
-
-set -x
 
 # RSA private key, public key, and encrypted private key
 openssl genrsa -out rsa-priv.pem 2048
