@@ -14,6 +14,12 @@
 #include "dsa.h"
 #include "pem.h"
 
+// Define this to 1 to enable the DSA private key tests. OpenSSL 3.0 changed the on-disk
+// format from Traditional to PKCS#8, and there does not seem to be a way to get it back.
+// Also see <https://github.com/openssl/openssl/issues/23497>.
+
+#define ENABLE_DSA_PRIVATE_KEY_TESTS 0
+
 int main(int argc, char* argv[])
 {
     using namespace CryptoPP;
@@ -24,8 +30,11 @@ int main(int argc, char* argv[])
     {
         RSA::PublicKey k1;
         RSA::PrivateKey k2, k3;
+
         DSA::PublicKey k4;
+#if ENABLE_DSA_PRIVATE_KEY_TESTS
         DSA::PrivateKey k5, k6;
+#endif
 
         DL_GroupParameters_EC<ECP> p7;
         DL_PublicKey_EC<ECP> k8;
@@ -57,6 +66,7 @@ int main(int argc, char* argv[])
             PEM_Load(fs4, k4);
             std::cout << "  - OK" << std::endl;
 
+#if ENABLE_DSA_PRIVATE_KEY_TESTS
             std::cout << "Load DSA private key" << std::endl;
             filename = "dsa-priv.pem";
             FileSource fs5("dsa-priv.pem", true);
@@ -68,6 +78,13 @@ int main(int argc, char* argv[])
             FileSource fs6("dsa-enc-priv.pem", true);
             PEM_Load(fs6, k6, "abcdefghijklmnopqrstuvwxyz", 26);
             std::cout << "  - OK" << std::endl;
+#else
+            std::cout << "Load DSA private key" << std::endl;
+            std::cout << "  - Skipped due to OpenSSL 3.0" << std::endl;
+
+            std::cout << "Load encrypted DSA private key" << std::endl;
+            std::cout << "  - Skipped due to OpenSSL 3.0" << std::endl;
+#endif
 
             std::cout << "Load ECP parameters" << std::endl;
             filename = "ec-params.pem";
@@ -122,6 +139,7 @@ int main(int argc, char* argv[])
             PEM_Save(fs4, k4);
             std::cout << "  - OK" << std::endl;
 
+#if ENABLE_DSA_PRIVATE_KEY_TESTS
             std::cout << "Save DSA private key" << std::endl;
             filename = "dsa-priv.cryptopp.pem";
             FileSink fs5("dsa-priv.cryptopp.pem");
@@ -133,6 +151,13 @@ int main(int argc, char* argv[])
             FileSink fs6("dsa-enc-priv.cryptopp.pem");
             PEM_Save(fs6, k6, prng, "AES-128-CBC", "abcdefghijklmnopqrstuvwxyz", 26);
             std::cout << "  - OK" << std::endl;
+#else
+            std::cout << "Save DSA private key" << std::endl;
+            std::cout << "  - Skipped due to OpenSSL 3.0" << std::endl;
+
+            std::cout << "Save encrypted DSA private key" << std::endl;
+            std::cout << "  - Skipped due to OpenSSL 3.0" << std::endl;
+#endif
 
             std::cout << "Save ECP parameters" << std::endl;
             filename = "ec-params.cryptopp.pem";
