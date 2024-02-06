@@ -31,11 +31,19 @@ if ! command -v perl 2>/dev/null; then
 fi
 
 # We need OpenSSL 1.0.2 or above
-MODERN_OPENSSL=$(openssl version | grep -c -v -E '(OpenSSL 0.[0-9]|OpenSSL 1.0.0|OpenSSL 1.0.1)')
+OPENSSL_102_OR_ABOVE=$(openssl version | grep -c -v -E '(OpenSSL 0.[0-9]|OpenSSL 1.0.0|OpenSSL 1.0.1)')
 
-if [[ "$MODERN_OPENSSL" -eq 0 ]]; then
+if [[ "${OPENSSL_102_OR_ABOVE}" -eq 0 ]]; then
     echo "Please install OpenSSL 1.0.2 or above"
     exit 1
+fi
+
+# We need -traditional option for OpenSSL 3.0 or above for private keys
+OPENSSL_30_OR_ABOVE=$(openssl version | grep -c -v -E '(OpenSSL 0.[0-9]|OpenSSL 1.[0-9]|OpenSSL 2.[0-9])')
+
+if [[ "${OPENSSL_30_OR_ABOVE}" -ne 0 ]]; then
+    echo "Using OpenSSL -traditional option"
+    OPENSSL_TRADITIONAL="-traditional"
 fi
 
 ##################################
@@ -82,19 +90,19 @@ echo "Generating OpenSSL keys"
 # RSA private key, public key, and encrypted private key
 openssl genrsa -out rsa-priv.pem 2048
 openssl rsa -in rsa-priv.pem -out rsa-pub.pem -pubout
-openssl rsa -in rsa-priv.pem -out rsa-enc-priv.pem -aes128 -passout pass:abcdefghijklmnopqrstuvwxyz
+openssl rsa -in rsa-priv.pem -out rsa-enc-priv.pem ${OPENSSL_TRADITIONAL} -aes128 -passout pass:abcdefghijklmnopqrstuvwxyz
 
 # DSA private key, public key, and encrypted private key
 openssl dsaparam -out dsa-params.pem 2048
 openssl gendsa -out dsa-priv.pem dsa-params.pem
 openssl dsa -in dsa-priv.pem -out dsa-pub.pem -pubout
-openssl dsa -in dsa-priv.pem -out dsa-enc-priv.pem -aes128 -passout pass:abcdefghijklmnopqrstuvwxyz
+openssl dsa -in dsa-priv.pem -out dsa-enc-priv.pem ${OPENSSL_TRADITIONAL} -aes128 -passout pass:abcdefghijklmnopqrstuvwxyz
 
 # EC private key, public key, and encrypted private key
 openssl ecparam -out ec-params.pem -name secp256k1 -genkey
 openssl ec -in ec-params.pem -out ec-priv.pem
 openssl ec -in ec-priv.pem -out ec-pub.pem -pubout
-openssl ec -in ec-priv.pem -out ec-enc-priv.pem -aes128 -passout pass:abcdefghijklmnopqrstuvwxyz
+openssl ec -in ec-priv.pem -out ec-enc-priv.pem ${OPENSSL_TRADITIONAL} -aes128 -passout pass:abcdefghijklmnopqrstuvwxyz
 
 # Diffie-Hellman parameters
 openssl dhparam -out dh-params.pem 2048
