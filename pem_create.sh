@@ -87,10 +87,18 @@ fi
 
 echo "Generating OpenSSL keys"
 
+set -x
+
 # RSA private key, public key, and encrypted private key
 openssl genrsa -out rsa-priv.pem 2048
-openssl rsa -in rsa-priv.pem -out rsa-pub.pem -pubout
+openssl rsa -in rsa-priv.pem -out rsa-pub.pem ${OPENSSL_TRADITIONAL} -pubout
 openssl rsa -in rsa-priv.pem -out rsa-enc-priv.pem ${OPENSSL_TRADITIONAL} -aes128 -passout pass:abcdefghijklmnopqrstuvwxyz
+
+# Fix the private key, if needed
+if [[ -n "${OPENSSL_TRADITIONAL}" ]]; then
+    openssl rsa -in rsa-priv.pem -inform PEM -out rsa-priv.pem.fixed -outform PEM ${OPENSSL_TRADITIONAL}
+    mv rsa-priv.pem.fixed rsa-priv.pem
+fi
 
 # DSA private key, public key, and encrypted private key
 openssl dsaparam -out dsa-params.pem 2048
@@ -98,11 +106,23 @@ openssl gendsa -out dsa-priv.pem dsa-params.pem
 openssl dsa -in dsa-priv.pem -out dsa-pub.pem -pubout
 openssl dsa -in dsa-priv.pem -out dsa-enc-priv.pem ${OPENSSL_TRADITIONAL} -aes128 -passout pass:abcdefghijklmnopqrstuvwxyz
 
+# Fix the private key, if needed
+if [[ -n "${OPENSSL_TRADITIONAL}" ]]; then
+    openssl dsa -in dsa-priv.pem -inform PEM -out dsa-priv.pem.fixed -outform PEM
+    mv dsa-priv.pem.fixed dsa-priv.pem
+fi
+
 # EC private key, public key, and encrypted private key
 openssl ecparam -out ec-params.pem -name secp256k1 -genkey
 openssl ec -in ec-params.pem -out ec-priv.pem
 openssl ec -in ec-priv.pem -out ec-pub.pem -pubout
 openssl ec -in ec-priv.pem -out ec-enc-priv.pem ${OPENSSL_TRADITIONAL} -aes128 -passout pass:abcdefghijklmnopqrstuvwxyz
+
+# Fix the private key, if needed
+if [[ -n "${OPENSSL_TRADITIONAL}" ]]; then
+    openssl ec -in ec-priv.pem -inform PEM -out ec-priv.pem.fixed -outform PEM
+    mv ec-priv.pem.fixed ec-priv.pem
+fi
 
 # Diffie-Hellman parameters
 openssl dhparam -out dh-params.pem 2048
