@@ -138,7 +138,7 @@ NAMESPACE_BEGIN(CryptoPP)
 struct OidToName
 {
     virtual ~OidToName () {};
-    OidToName () : name("INVALID") {}
+    OidToName (const OID& o) : oid(o), name("INVALID") {}
     OidToName (const OID& o, const std::string& n) : oid(o), name(n) {}
 
     OID oid;
@@ -263,40 +263,15 @@ std::string OidToNameLookup(const OID& oid, const char *defaultName)
 {
     static const OidToNameArray table = GetOidToNameTable();
 
-    // Does not work... Most lookups seem to fail, and OIDs are returned.
-    // OidToName result;
-    // if (std::binary_search(table.begin(), table.end(), result, OidToNameCompareLessThan()))
-    //    return result.name;
+    // Cut-over to std::equal_range due to GH #16. This how to perform a
+    // binary search on a sorted STL container in logarithmic time. We
+    // can't use std::binary_search because it only returns true|false,
+    // and not an iterator to the item found.
+    std::pair<OidToNameArray::const_iterator, OidToNameArray::const_iterator> result =
+        std::equal_range(table.begin(), table.end(), OidToName(oid), OidToNameCompareLessThan());
 
-    // Binary search
-    size_t first  = 0;
-    size_t last   = table.size() - 1;
-    size_t middle = (first+last)/2;
-
-    // Range test due to https://github.com/noloader/cryptopp-pem/pull/16
-    if (oid < table[first].oid || oid > table[last].oid)
-        goto done;
-
-    while (first <= last)
-    {
-        if (table[middle].oid < oid)
-        {
-            first = middle + 1;
-        }
-        else if (table[middle].oid == oid)
-        {
-            return table[middle].name;
-        }
-        else
-        {
-            CRYPTOPP_ASSERT(middle != 0);
-            last = middle - 1;
-        }
-
-        middle = (first + last)/2;
-    }
-
-done:
+    if (result.first != result.second)
+        return result.first->name;
 
     // Not found, return defaultName.
     if (defaultName != NULLPTR)
@@ -313,7 +288,7 @@ struct KeyUsageValue;
 struct OidToKeyUsageValue
 {
     virtual ~OidToKeyUsageValue () {};
-    OidToKeyUsageValue () : ku(KeyUsageValue::InvalidKeyUsage) {}
+    OidToKeyUsageValue (const OID& o) : oid(o), ku(KeyUsageValue::InvalidKeyUsage) {}
     OidToKeyUsageValue (const OID& o, const KeyUsageValue::KeyUsageEnum& v) : oid(o), ku(v) {}
 
     OID oid;
@@ -363,40 +338,15 @@ KeyUsageValue::KeyUsageEnum OidToKeyUsageValueLookup(const OID& oid, KeyUsageVal
 {
     static const OidToKeyUsageValueArray table = GetOidToKeyUsageValueTable();
 
-    // Does not work... Most lookups seem to fail, and OIDs are returned.
-    // OidToKeyUsageValue result;
-    // if (std::binary_search(table.begin(), table.end(), result, OidToKeyUsageCompareLessThan()))
-    //    return result.ku;
+    // Cut-over to std::equal_range due to GH #16. This how to perform a
+    // binary search on a sorted STL container in logarithmic time. We
+    // can't use std::binary_search because it only returns true|false,
+    // and not an iterator to the item found.
+    std::pair<OidToKeyUsageValueArray::const_iterator, OidToKeyUsageValueArray::const_iterator> result =
+        std::equal_range(table.begin(), table.end(), OidToKeyUsageValue(oid), OidToKeyUsageCompareLessThan());
 
-    // Binary search
-    size_t first  = 0;
-    size_t last   = table.size() - 1;
-    size_t middle = (first+last)/2;
-
-    // Range test due to https://github.com/noloader/cryptopp-pem/pull/16
-    if (oid < table[first].oid || oid > table[last].oid)
-        goto done;
-
-    while (first <= last)
-    {
-        if (table[middle].oid < oid)
-        {
-            first = middle + 1;
-        }
-        else if (table[middle].oid == oid)
-        {
-            return table[middle].ku;
-        }
-        else
-        {
-            CRYPTOPP_ASSERT(middle != 0);
-            last = middle - 1;
-        }
-
-        middle = (first + last)/2;
-    }
-
-done:
+    if (result.first != result.second)
+        return result.first->ku;
 
     // Not found, return defaultValue
     return defaultValue;
