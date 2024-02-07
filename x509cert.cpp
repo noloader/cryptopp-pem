@@ -138,17 +138,17 @@ NAMESPACE_BEGIN(CryptoPP)
 struct OidToName
 {
     virtual ~OidToName () {};
-    OidToName () {}
+    OidToName () : name("INVALID") {}
     OidToName (const OID& o, const std::string& n) : oid(o), name(n) {}
 
     OID oid;
     std::string name;
 };
 
-struct OidToNameCompare
+struct OidToNameCompareLessThan
 {
     bool operator() (const OidToName& first, const OidToName& second)
-        { return (first.oid < second.oid); }
+        { return first.oid < second.oid; }
 };
 
 typedef std::vector<OidToName> OidToNameArray;
@@ -254,7 +254,7 @@ OidToNameArray GetOidToNameTable()
     table.push_back(OidToName(id_msUserPrincipalName, "UPN"));  // Microsoft User Principal Name (UPN)
                                                                 // Found in the SAN as [1] otherName
 
-    std::sort(table.begin(), table.end(), OidToNameCompare());
+    std::sort(table.begin(), table.end(), OidToNameCompareLessThan());
 
     return table;
 }
@@ -265,7 +265,7 @@ std::string OidToNameLookup(const OID& oid, const char *defaultName)
 
     // std::binary_search due to https://github.com/noloader/cryptopp-pem/pull/16
     OidToName result;
-    if (std::binary_search(table.begin(), table.end(), result, OidToNameCompare()))
+    if (std::binary_search(table.begin(), table.end(), result, OidToNameCompareLessThan()))
         return result.name;
 
     // Not found, return defaultName.
@@ -283,17 +283,17 @@ struct KeyUsageValue;
 struct OidToKeyUsageValue
 {
     virtual ~OidToKeyUsageValue () {};
-    OidToKeyUsageValue () {}
+    OidToKeyUsageValue () : ku(KeyUsageValue::InvalidKeyUsage) {}
     OidToKeyUsageValue (const OID& o, const KeyUsageValue::KeyUsageEnum& v) : oid(o), ku(v) {}
 
     OID oid;
     KeyUsageValue::KeyUsageEnum ku;
 };
 
-struct OidToKeyUsageCompare
+struct OidToKeyUsageCompareLessThan
 {
     bool operator() (const OidToKeyUsageValue& first, const OidToKeyUsageValue& second)
-        { return (first.oid < second.oid); }
+        { return first.oid < second.oid; }
 };
 
 typedef std::vector<OidToKeyUsageValue> OidToKeyUsageValueArray;
@@ -323,6 +323,9 @@ OidToKeyUsageValueArray GetOidToKeyUsageValueTable()
     table.push_back(OidToKeyUsageValue(OID(1)+3+6+1+5+5+7+3+28, KeyUsageValue::cmcRA));
     table.push_back(OidToKeyUsageValue(OID(1)+3+6+1+5+5+7+3+29, KeyUsageValue::cmcArchive));
 
+    // Table is sorted
+    std::sort(table.begin(), table.end(), OidToKeyUsageCompareLessThan());
+
     return table;
 }
 
@@ -332,7 +335,7 @@ KeyUsageValue::KeyUsageEnum OidToKeyUsageValueLookup(const OID& oid, KeyUsageVal
 
     // std::binary_search due to https://github.com/noloader/cryptopp-pem/pull/16
     OidToKeyUsageValue result;
-    if (std::binary_search(table.begin(), table.end(), result, OidToKeyUsageCompare()))
+    if (std::binary_search(table.begin(), table.end(), result, OidToKeyUsageCompareLessThan()))
         return result.ku;
 
     // Not found, return defaultValue
