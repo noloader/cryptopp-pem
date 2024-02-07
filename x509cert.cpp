@@ -263,11 +263,17 @@ std::string OidToNameLookup(const OID& oid, const char *defaultName)
 {
     static const OidToNameArray table = GetOidToNameTable();
 
+    // Does not work... Most lookups seem to fail, and OIDs are returned.
+    // OidToName result;
+    // if (std::binary_search(table.begin(), table.end(), result, OidToNameCompareLessThan()))
+    //    return result.name;
+
     // Binary search
     size_t first  = 0;
     size_t last   = table.size() - 1;
     size_t middle = (first+last)/2;
 
+    // Range test due to https://github.com/noloader/cryptopp-pem/pull/16
     if (oid < table[first].oid || oid > table[last].oid)
         goto done;
 
@@ -357,11 +363,17 @@ KeyUsageValue::KeyUsageEnum OidToKeyUsageValueLookup(const OID& oid, KeyUsageVal
 {
     static const OidToKeyUsageValueArray table = GetOidToKeyUsageValueTable();
 
+    // Does not work... Most lookups seem to fail, and OIDs are returned.
+    // OidToKeyUsageValue result;
+    // if (std::binary_search(table.begin(), table.end(), result, OidToKeyUsageCompareLessThan()))
+    //    return result.name;
+
     // Binary search
     size_t first  = 0;
     size_t last   = table.size() - 1;
     size_t middle = (first+last)/2;
 
+    // Range test due to https://github.com/noloader/cryptopp-pem/pull/16
     if (oid < table[first].oid || oid > table[last].oid)
         goto done;
 
