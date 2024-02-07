@@ -254,6 +254,7 @@ OidToNameArray GetOidToNameTable()
     table.push_back(OidToName(id_msUserPrincipalName, "UPN"));  // Microsoft User Principal Name (UPN)
                                                                 // Found in the SAN as [1] otherName
 
+    // This table is not sorted
     std::sort(table.begin(), table.end(), OidToNameCompareLessThan());
 
     return table;
@@ -329,8 +330,8 @@ OidToKeyUsageValueArray GetOidToKeyUsageValueTable()
     table.push_back(OidToKeyUsageValue(OID(1)+3+6+1+5+5+7+3+28, KeyUsageValue::cmcRA));
     table.push_back(OidToKeyUsageValue(OID(1)+3+6+1+5+5+7+3+29, KeyUsageValue::cmcArchive));
 
-    // Table is sorted
-    std::sort(table.begin(), table.end(), OidToKeyUsageCompareLessThan());
+    // This table is sorted
+    // std::sort(table.begin(), table.end(), OidToKeyUsageCompareLessThan());
 
     return table;
 }
