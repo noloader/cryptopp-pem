@@ -155,8 +155,8 @@ typedef std::vector<OidToName> OidToNameArray;
 
 OidToNameArray GetOidToNameTable()
 {
-    // The names are mostly standard. Also see the various RFCs, and
-    // X.520, Section 6, for a partial list of LDAP Names,
+    // The LDAP names are mostly standard. Also see the various RFCs,
+    // and X.520, Section 6, for a partial list of LDAP Names,
     // https://www.itu.int/rec/T-REC-X.520, and
     // https://www.iana.org/assignments/smi-numbers/smi-numbers.xhtml
     OidToNameArray table;
@@ -263,15 +263,16 @@ std::string OidToNameLookup(const OID& oid, const char *defaultName)
 {
     static const OidToNameArray table = GetOidToNameTable();
 
-    // Cut-over to std::equal_range due to GH #16. This how to perform a
+    // Cut-over to std::lower_bound due to GH #16. This how to perform a
     // binary search on a sorted STL container in logarithmic time. We
     // can't use std::binary_search because it only returns true|false,
-    // and not an iterator to the item found.
-    std::pair<OidToNameArray::const_iterator, OidToNameArray::const_iterator> result =
-        std::equal_range(table.begin(), table.end(), OidToName(oid), OidToNameCompareLessThan());
+    // and not an iterator to the item found. Also see
+    // <https://stackoverflow.com/q/18994602>.
+    OidToNameArray::const_iterator result =
+        std::lower_bound(table.begin(), table.end(), OidToName(oid), OidToNameCompareLessThan());
 
-    if (result.first != result.second)
-        return result.first->name;
+    if (result->oid == oid)
+        return result->name;
 
     // Not found, return defaultName.
     if (defaultName != NULLPTR)
@@ -338,15 +339,16 @@ KeyUsageValue::KeyUsageEnum OidToKeyUsageValueLookup(const OID& oid, KeyUsageVal
 {
     static const OidToKeyUsageValueArray table = GetOidToKeyUsageValueTable();
 
-    // Cut-over to std::equal_range due to GH #16. This how to perform a
+    // Cut-over to std::lower_bound due to GH #16. This how to perform a
     // binary search on a sorted STL container in logarithmic time. We
     // can't use std::binary_search because it only returns true|false,
-    // and not an iterator to the item found.
-    std::pair<OidToKeyUsageValueArray::const_iterator, OidToKeyUsageValueArray::const_iterator> result =
-        std::equal_range(table.begin(), table.end(), OidToKeyUsageValue(oid), OidToKeyUsageCompareLessThan());
+    // and not an iterator to the item found. Also see
+    // <https://stackoverflow.com/q/18994602>.
+    OidToKeyUsageValueArray::const_iterator result =
+        std::lower_bound(table.begin(), table.end(), OidToKeyUsageValue(oid), OidToKeyUsageCompareLessThan());
 
-    if (result.first != result.second)
-        return result.first->ku;
+    if (result->oid == oid)
+        return result->ku;
 
     // Not found, return defaultValue
     return defaultValue;
