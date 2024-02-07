@@ -263,10 +263,34 @@ std::string OidToNameLookup(const OID& oid, const char *defaultName)
 {
     static const OidToNameArray table = GetOidToNameTable();
 
-    // std::binary_search due to https://github.com/noloader/cryptopp-pem/pull/16
-    OidToName result;
-    if (std::binary_search(table.begin(), table.end(), result, OidToNameCompareLessThan()))
-        return result.name;
+    // Binary search
+    size_t first  = 0;
+    size_t last   = table.size() - 1;
+    size_t middle = (first+last)/2;
+
+    if (oid < table[first].oid || oid > table[last].oid)
+        goto done;
+
+    while (first <= last)
+    {
+        if (table[middle].oid < oid)
+        {
+            first = middle + 1;
+        }
+        else if (table[middle].oid == oid)
+        {
+            return table[middle].name;
+        }
+        else
+        {
+            CRYPTOPP_ASSERT(middle != 0);
+            last = middle - 1;
+        }
+
+        middle = (first + last)/2;
+    }
+
+done:
 
     // Not found, return defaultName.
     if (defaultName != NULLPTR)
@@ -333,10 +357,34 @@ KeyUsageValue::KeyUsageEnum OidToKeyUsageValueLookup(const OID& oid, KeyUsageVal
 {
     static const OidToKeyUsageValueArray table = GetOidToKeyUsageValueTable();
 
-    // std::binary_search due to https://github.com/noloader/cryptopp-pem/pull/16
-    OidToKeyUsageValue result;
-    if (std::binary_search(table.begin(), table.end(), result, OidToKeyUsageCompareLessThan()))
-        return result.ku;
+    // Binary search
+    size_t first  = 0;
+    size_t last   = table.size() - 1;
+    size_t middle = (first+last)/2;
+
+    if (oid < table[first].oid || oid > table[last].oid)
+        goto done;
+
+    while (first <= last)
+    {
+        if (table[middle].oid < oid)
+        {
+            first = middle + 1;
+        }
+        else if (table[middle].oid == oid)
+        {
+            return table[middle].ku;
+        }
+        else
+        {
+            CRYPTOPP_ASSERT(middle != 0);
+            last = middle - 1;
+        }
+
+        middle = (first + last)/2;
+    }
+
+done:
 
     // Not found, return defaultValue
     return defaultValue;
