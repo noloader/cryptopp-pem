@@ -366,7 +366,7 @@ KeyUsageValue::KeyUsageEnum OidToKeyUsageValueLookup(const OID& oid, KeyUsageVal
     // Does not work... Most lookups seem to fail, and OIDs are returned.
     // OidToKeyUsageValue result;
     // if (std::binary_search(table.begin(), table.end(), result, OidToKeyUsageCompareLessThan()))
-    //    return result.name;
+    //    return result.ku;
 
     // Binary search
     size_t first  = 0;
