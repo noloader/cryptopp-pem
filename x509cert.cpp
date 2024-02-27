@@ -1278,8 +1278,20 @@ void X509Certificate::GetSubjectPublicKeyInfoOids(const BufferedTransformation &
           BERSequenceDecoder seq2(seq1);
             algorithm.BERDecode(seq2);
             // EC Public Keys specify a field, also
-            if (algorithm == ASN1::id_ecPublicKey())
-                { field.BERDecode(seq2); }
+            if (algorithm == ASN1::id_ecPublicKey()) { 
+		byte tag;
+		seq2.Peek(tag);
+		if (tag == OBJECT_IDENTIFIER) {
+			field.BERDecode(seq2);
+		}
+		else {
+			BERGeneralDecoder seq3(seq2, tag);
+			Integer integer;
+			integer.BERDecode(seq3);
+			BERSequenceDecoder seq4(seq3);
+			field.BERDecode(seq4);
+		}
+	    }
             seq2.SkipAll();
           seq2.MessageEnd();
           seq1.SkipAll();
